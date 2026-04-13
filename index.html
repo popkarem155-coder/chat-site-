@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شات نار</title>
+  <style>
+    :root{
+      --bg:#0b0910;
+      --bg2:#130e18;
+      --panel:#171320;
+      --panel2:#1d1628;
+      --line:#3a2742;
+      --accent:#ff4f9a;
+      --accent2:#c32773;
+      --accent-soft:rgba(255,79,154,.12);
+      --text:#f8f1ff;
+      --muted:#b6a9c3;
+      --danger:#ff6b85;
+      --success:#4ad47f;
+      --shadow:0 16px 40px rgba(0,0,0,.42);
+      --radius:18px;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:"Tahoma","Segoe UI",sans-serif;
+    }
+
+    body{
+      background:
+        radial-gradient(circle at top right, rgba(255,79,154,.12), transparent 24%),
+        linear-gradient(180deg, #120d18 0%, #09070d 100%);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    button,input{
+      font:inherit;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .top-alert{
+      height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:0 16px;
+      font-size:15px;
+      color:#ffe6f1;
+      background:linear-gradient(90deg, rgba(255,79,154,.18), rgba(255,79,154,.05));
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .top-alert .close-small{
+      position:absolute;
+      right:12px;
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      border:none;
+      background:rgba(255,255,255,.08);
+      color:white;
+      cursor:pointer;
+    }
+
+    .app{
+      min-height:calc(100vh - 44px);
+      position:relative;
+    }
+
+    .sidebar{
+      position:fixed;
+      top:44px;
+      right:0;
+      width:min(88vw, 330px);
+      height:calc(100vh - 44px);
+      background:linear-gradient(180deg, #181320 0%, #100c15 100%);
+      border-left:1px solid rgba(255,255,255,.06);
+      transform:translateX(100%);
+      transition:.28s ease;
+      z-index:40;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .sidebar.open{
+      transform:translateX(0);
+    }
+
+    .sidebar-header{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(90deg, rgba(255,79,154,.14), rgba(255,79,154,.04));
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:48px;
+      height:48px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:white;
+      font-size:24px;
+      box-shadow:0 10px 24px rgba(255,79,154,.22);
+    }
+
+    .brand h1{
+      font-size:28px;
+      line-height:1;
+      margin-bottom:4px;
+    }
+
+    .brand p{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .icon-btn{
+      width:42px;
+      height:42px;
+      border:none;
+      border-radius:14px;
+      background:rgba(255,255,255,.05);
+      color:white;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .icon-btn:hover{
+      background:rgba(255,255,255,.1);
+    }
+
+    .sidebar-body{
+      height:calc(100% - 78px);
+      overflow:auto;
+      padding-bottom:90px;
+    }
+
+    .auth-mini{
+      margin:14px 14px 10px;
+      background:rgba(255,79,154,.08);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .auth-mini p{
+      color:#f9dbe9;
+      font-size:13px;
+      line-height:1.7;
+      margin-bottom:12px;
+    }
+
+    .auth-mini .mini-actions{
+      display:flex;
+      gap:10px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      cursor:pointer;
+      transition:.2s ease;
+      font-weight:700;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      box-shadow:0 10px 20px rgba(255,79,154,.2);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.06);
+    }
+
+    .menu{
+      margin-top:10px;
+    }
+
+    .menu-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      min-height:62px;
+      padding:0 18px;
+      border-top:1px solid rgba(255,255,255,.03);
+      border-bottom:1px solid rgba(255,255,255,.03);
+      background:linear-gradient(90deg, rgba(255,79,154,.05), transparent 60%);
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .menu-item:hover,
+    .menu-item.active{
+      background:linear-gradient(90deg, rgba(255,79,154,.16), rgba(255,79,154,.05));
+    }
+
+    .menu-item .label{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:18px;
+    }
+
+    .menu-item .meta{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .layout{
+      display:flex;
+      min-height:calc(100vh - 44px);
+    }
+
+    .mini-rail{
+      width:84px;
+      background:linear-gradient(180deg, #130f1a 0%, #0e0b12 100%);
+      border-left:1px solid rgba(255,255,255,.05);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:16px;
+      padding:18px 0;
+      position:sticky;
+      top:44px;
+      height:calc(100vh - 44px);
+    }
+
+    .rail-btn{
+      width:52px;
+      height:52px;
+      border:none;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      cursor:pointer;
+      transition:.2s ease;
+      font-size:20px;
+    }
+
+    .rail-btn:hover{
+      background:rgba(255,255,255,.09);
+      transform:translateY(-1px);
+    }
+
+    .rail-spacer{
+      flex:1;
+    }
+
+    .content{
+      flex:1;
+      min-width:0;
+    }
+
+    .header{
+      height:76px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:0 22px;
+      background:rgba(13,10,18,.84);
+      backdrop-filter:blur(8px);
+      position:sticky;
+      top:44px;
+      z-index:10;
+    }
+
+    .header-right,
+    .header-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .search{
+      width:min(520px, 50vw);
+      height:46px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:0 14px;
+      color:var(--muted);
+    }
+
+    .search input{
+      flex:1;
+      border:none;
+      background:transparent;
+      color:white;
+      outline:none;
+    }
+
+    .page{
+      padding:24px;
+    }
+
+    .hero{
+      background:linear-gradient(180deg, rgba(31,22,40,.95), rgba(21,16,29,.95));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+      margin-bottom:20px;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      left:-40px;
+      bottom:-80px;
+      width:260px;
+      height:260px;
+      background:radial-gradient(circle, rgba(255,79,154,.16), transparent 70%);
+      pointer-events:none;
+    }
+
+    .hero-inner{
+      padding:28px;
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .hero h2{
+      font-size:34px;
+      margin-bottom:10px;
+    }
+
+    .hero p{
+      color:var(--muted);
+      line-height:1.9;
+      max-width:760px;
+    }
+
+    .hero-actions{
+      margin-top:18px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .hero-side{
+      display:grid;
+      gap:12px;
+    }
+
+    .small-card{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:20px;
+      padding:16px;
+    }
+
+    .small-card h3{
+      font-size:17px;
+      margin-bottom:6px;
+    }
+
+    .small-card p{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+
+    .panel{
+      background:linear-gradient(180deg, rgba(30,23,39,.96), rgba(19,15,27,.96));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .panel-head h3{
+      font-size:22px;
+    }
+
+    .badge{
+      background:rgba(255,79,154,.12);
+      color:#ffd6e7;
+      padding:7px 12px;
+      border-radius:999px;
+      font-size:12px;
+    }
+
+    .room-list,
+    .online-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .room,
+    .online-user,
+    .empty{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:18px;
+      padding:15px 16px;
+    }
+
+    .room{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .room h4{
+      font-size:17px;
+      margin-bottom:5px;
+    }
+
+    .room p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+    }
+
+    .status{
+      white-space:nowrap;
+      font-size:12px;
+      border-radius:999px;
+      padding:7px 11px;
+      background:rgba(255,255,255,.06);
+      color:#ffe0ec;
+    }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      line-height:1.9;
+      padding:24px 16px;
+    }
+
+    .online-user{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .user-info{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .avatar{
+      width:46px;
+      height:46px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#ff91c2,#8338ec);
+      font-weight:700;
+      flex-shrink:0;
+    }
+
+    .user-text{
+      min-width:0;
+    }
+
+    .user-text h4{
+      font-size:15px;
+      margin-bottom:4px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .user-text p{
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--success);
+      box-shadow:0 0 0 4px rgba(74,212,127,.1);
+      flex-shrink:0;
+    }
+
+    .side-pill{
+      position:fixed;
+      left:18px;
+      top:50%;
+      transform:translateY(-50%);
+      writing-mode:vertical-rl;
+      border:none;
+      border-radius:18px;
+      background:linear-gradient(180deg, var(--accent), var(--accent2));
+      color:#fff;
+      padding:14px 10px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      z-index:25;
+    }
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      opacity:0;
+      visibility:hidden;
+      transition:.2s ease;
+      z-index:30;
+    }
+
+    .overlay.show{
+      opacity:1;
+      visibility:visible;
+    }
+
+    .auth-modal{
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%) scale(.96);
+      width:min(92vw, 430px);
+      background:linear-gradient(180deg,#1b1424,#120d19);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      z-index:50;
+      opacity:0;
+      visibility:hidden;
+      transition:.22s ease;
+      overflow:hidden;
+    }
+
+    .auth-modal.show{
+      opacity:1;
+      visibility:visible;
+      transform:translate(-50%,-50%) scale(1);
+    }
+
+    .auth-top{
+      padding:18px 18px 12px;
+      background:linear-gradient(90deg, rgba(255,79,154,.18), rgba(255,79,154,.04));
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .auth-top h3{
+      font-size:24px;
+    }
+
+    .auth-top p{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding:16px 18px 0;
+    }
+
+    .tab{
+      flex:1;
+      border:none;
+      border-radius:14px;
+      padding:12px;
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .tab.active{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+    }
+
+    .auth-body{
+      padding:18px;
+    }
+
+    .form{
+      display:none;
+      gap:12px;
+      flex-direction:column;
+    }
+
+    .form.active{
+      display:flex;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .field label{
+      color:#eadff4;
+      font-size:14px;
+    }
+
+    .field input{
+      height:48px;
+      border:none;
+      outline:none;
+      border-radius:14px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.06);
+      color:#fff;
+      padding:0 14px;
+    }
+
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.8;
+    }
+
+    .footer-note{
+      text-align:center;
+      margin-top:20px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    @media (max-width: 920px){
+      .hero-inner,
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .mini-rail{
+        width:72px;
+      }
+
+      .search{
+        width:100%;
+        max-width:360px;
+      }
+    }
+
+    @media (max-width: 700px){
+      .mini-rail{
+        display:none;
+      }
+
+      .header{
+        padding:0 14px;
+      }
+
+      .search{
+        display:none;
+      }
+
+      .page{
+        padding:16px;
+      }
+
+      .hero-inner{
+        padding:20px;
+      }
+
+      .hero h2{
+        font-size:28px;
+      }
+
+      .side-pill{
+        left:10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-alert" id="topAlert">
+    <button class="close-small" onclick="document.getElementById('topAlert').style.display='none'">×</button>
+    <span>🔔</span>
+    <span>سجّل حسابك ليتم تفعيل المميزات الكاملة</span>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="logo">🔥</div>
+        <div>
+          <h1>شات نار</h1>
+          <p>واجهة عربية داكنة وعصرية</p>
+        </div>
+      </div>
+      <button class="icon-btn" onclick="toggleSidebar(false)">✕</button>
+    </div>
+
+    <div class="sidebar-body">
+      <div class="auth-mini">
+        <p>سجّل دخولك أو أنشئ حساب جديد لبدء المراسلة والانضمام للغرف وحفظ نشاطك.</p>
+        <div class="mini-actions">
+          <button class="btn btn-primary" onclick="openAuth('login')">دخول</button>
+          <button class="btn btn-secondary" onclick="openAuth('register')">حساب جديد</button>
+        </div>
+      </div>
+
+      <div class="menu">
+        <div class="menu-item active" onclick="setSection('important',this)">
+          <span class="meta">هام</span>
+          <div class="label"><span>⭐</span><span>مهم جدًا</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('badges',this)">
+          <span class="meta">شرح</span>
+          <div class="label"><span>🔖</span><span>الشارات</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('download',this)">
+          <span class="meta">app</span>
+          <div class="label"><span>📱</span><span>حمّل التطبيق</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('notifications',this)">
+          <span class="meta">تنبيهات</span>
+          <div class="label"><span>🔔</span><span>إشعارات</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('categories',this)">
+          <span class="meta">أقسام</span>
+          <div class="label"><span>▦</span><span>التصنيفات</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('rooms',this)">
+          <span class="meta">شات</span>
+          <div class="label"><span>💬</span><span>غرف دردشة</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('messages',this)">
+          <span class="meta">خاص</span>
+          <div class="label"><span>✉️</span><span>رسائل</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('online',this)">
+          <span class="meta">الآن</span>
+          <div class="label"><span>🟢</span><span>متصل الآن</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('friends',this)">
+          <span class="meta">قائمة</span>
+          <div class="label"><span>👥</span><span>الأصدقاء</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('games',this)">
+          <span class="meta">fun</span>
+          <div class="label"><span>🎮</span><span>ألعاب</span></div>
+        </div>
+
+        <div class="menu-item" onclick="setSection('wallet',this)">
+          <span class="meta">رصيد</span>
+          <div class="label"><span>💳</span><span>المحفظة</span></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="auth-modal" id="authModal">
+    <div class="auth-top">
+      <div>
+        <h3>شات نار</h3>
+        <p>دخول سريع بنفس الإحساس الداكن الأنيق</p>
+      </div>
+      <button class="icon-btn" onclick="closeAuth()">✕</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="loginTab" onclick="switchTab('login')">تسجيل الدخول</button>
+      <button class="tab" id="registerTab" onclick="switchTab('register')">إنشاء حساب</button>
+    </div>
+
+    <div class="auth-body">
+      <form class="form active" id="loginForm">
+        <div class="field">
+          <label>اسم المستخدم أو البريد</label>
+          <input type="text" placeholder="اكتب اسم المستخدم" />
+        </div>
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input type="password" placeholder="••••••••" />
+        </div>
+        <button type="button" class="btn btn-primary">دخول</button>
+        <p class="hint">لن يظهر أي أعضاء متصلين أو زوار داخل القالب إلا بعد ربطه بقاعدة بيانات حقيقية ونظام جلسات.</p>
+      </form>
+
+      <form class="form" id="registerForm">
+        <div class="field">
+          <label>الاسم المعروض</label>
+          <input type="text" placeholder="اسمك داخل الموقع" />
+        </div>
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <input type="email" placeholder="name@email.com" />
+        </div>
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input type="password" placeholder="اختَر كلمة مرور قوية" />
+        </div>
+        <button type="button" class="btn btn-primary">إنشاء الحساب</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="layout">
+      <div class="mini-rail">
+        <button class="rail-btn" onclick="toggleSidebar(true)">☰</button>
+        <button class="rail-btn" onclick="openAuth('login')">👤</button>
+        <button class="rail-btn">🔔</button>
+        <button class="rail-btn">💬</button>
+        <div class="rail-spacer"></div>
+        <button class="rail-btn">＋</button>
+      </div>
+
+      <main class="content">
+        <header class="header">
+          <div class="header-right">
+            <button class="icon-btn" onclick="toggleSidebar(true)">☰</button>
+            <div class="search">
+              <span>🔎</span>
+              <input type="text" placeholder="ابحث عن غرفة أو عضو..." />
+            </div>
+          </div>
+
+          <div class="header-left">
+            <button class="btn btn-secondary" onclick="openAuth('login')">دخول</button>
+            <button class="btn btn-primary" onclick="openAuth('register')">حساب جديد</button>
+          </div>
+        </header>
+
+        <section class="page">
+          <section class="hero">
+            <div class="hero-inner">
+              <div>
+      </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>
