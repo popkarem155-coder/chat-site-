@@ -429,4 +429,303 @@ a{color:inherit;text-decoration:none;}
             <div class="empty">يمكنك وضع شارات العضوية أو التمييز هنا لاحقًا.</div>
           </div>
           <div class="panel">
-            
+            <div class="panel-head"><h3>التصنيفات</h3><span class="badge">منظم</span></div>
+            <div class="room-list">
+              <div class="room"><div><h4>عام</h4><p>غرف عامة للنقاش المفتوح.</p></div><span class="status">متاح</span></div>
+              <div class="room"><div><h4>خاص</h4><p>محادثات بين شخصين فقط.</p></div><span class="status">متاح</span></div>
+              <div class="room"><div><h4>مجموعات</h4><p>غرف جماعية ينشئها الضيوف.</p></div><span class="status">متاح</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="section-download">
+        <div class="panel">
+          <div class="panel-head"><h3>تحميل التطبيق</h3><span class="badge">APK / PWA</span></div>
+          <div class="empty">هنا يمكنك لاحقًا وضع رابط التحميل أو جعل الموقع يُثبّت كتطبيق.</div>
+        </div>
+      </section>
+
+      <section class="section" id="section-notifications">
+        <div class="panel">
+          <div class="panel-head"><h3>الإشعارات</h3><span class="badge">تنبيهات</span></div>
+          <div class="empty">الإشعارات تحتاج ربطًا حقيقيًا بالسيرفر أو Firebase.</div>
+        </div>
+      </section>
+
+      <section class="section" id="section-categories">
+        <div class="grid">
+          <div class="panel">
+            <div class="panel-head"><h3>أقسام سريعة</h3><span class="badge">مباشر</span></div>
+            <div class="room-list">
+              <div class="room"><div><h4>غرف دردشة</h4><p>ادخل الغرف العامة أو الخاصة.</p></div><button class="btn btn-secondary" onclick="setSection('rooms')">فتح</button></div>
+              <div class="room"><div><h4>رسائل خاصة</h4><p>تواصل بين الضيوف مباشرة.</p></div><button class="btn btn-secondary" onclick="setSection('messages')">فتح</button></div>
+              <div class="room"><div><h4>المجموعات</h4><p>أنشئ مجموعتك الخاصة.</p></div><button class="btn btn-secondary" onclick="setSection('messages')">فتح</button></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>ملاحظة</h3><span class="badge">مهم</span></div>
+            <div class="empty">هذه نسخة واجهة. لو تريدها تعمل بين أكثر من جهاز، تحتاج backend حقيقي.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="section-rooms">
+        <div class="grid">
+          <div class="panel">
+            <div class="panel-head"><h3>غرف الدردشة</h3><span class="badge">الآن</span></div>
+            <div class="room-list">
+              <div class="room"><div><h4>غرفة الزوار</h4><p>غرفة مفتوحة للجميع.</p></div><span class="status">12 متصل</span></div>
+              <div class="room"><div><h4>غرفة الليل</h4><p>نقاشات هادئة وتصميم داكن.</p></div><span class="status">7 متصل</span></div>
+              <div class="room"><div><h4>غرفة الخاص</h4><p>ابحث عن شخص وابدأ محادثة.</p></div><span class="status">خاص</span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>أعضاء متصلون</h3><span class="badge">Live</span></div>
+            <div class="online-list">
+              <div class="online-user"><div class="user-info"><div class="avatar">A</div><div class="user-text"><h4>ضيف 1</h4><p>في غرفة الزوار</p></div></div><span class="dot"></span></div>
+              <div class="online-user"><div class="user-info"><div class="avatar">B</div><div class="user-text"><h4>ضيف 2</h4><p>يستخدم الرسائل الخاصة</p></div></div><span class="dot"></span></div>
+              <div class="online-user"><div class="user-info"><div class="avatar">C</div><div class="user-text"><h4>ضيف 3</h4><p>داخل مجموعة</p></div></div><span class="dot"></span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="section-messages">
+        <div class="messages-layout">
+          <div class="panel">
+            <div class="panel-head"><h3>الرسائل</h3><span class="badge">خاص / مجموعات</span></div>
+            <div class="group-tools">
+              <div class="tool-row">
+                <input id="newGroupName" type="text" placeholder="اسم مجموعة جديدة" />
+                <button class="btn btn-primary" onclick="createGroup()">إنشاء</button>
+              </div>
+              <div class="field">
+                <input id="newGroupDesc" type="text" placeholder="وصف قصير للمجموعة" />
+              </div>
+            </div>
+            <div style="height:14px"></div>
+            <div class="group-list" id="groupList"></div>
+          </div>
+
+          <div class="panel chat-box">
+            <div class="chat-head">
+              <div>
+                <h3 id="chatTitle">محادثة خاصة</h3>
+                <p class="hint" id="chatSubtitle">الرسائل هنا تجريبية داخل المتصفح نفسه.</p>
+              </div>
+              <button class="btn btn-secondary" onclick="switchChatMode('private')">خاص</button>
+            </div>
+
+            <div class="chat-window" id="chatWindow"></div>
+
+            <div class="chat-compose">
+              <input id="messageInput" type="text" placeholder="اكتب رسالة..." />
+              <button class="btn btn-primary" onclick="sendMessage()">إرسال</button>
+            </div>
+            <div class="footer-note">الضيوف يمكنهم إنشاء مجموعات والدردشة الخاصة من نفس الصفحة، لكن هذا حفظ محلي فقط الآن.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="section-online">
+        <div class="panel">
+          <div class="panel-head"><h3>المتصلون الآن</h3><span class="badge">مباشر</span></div>
+          <div class="online-list">
+            <div class="online-user"><div class="user-info"><div class="avatar">K</div><div class="user-text"><h4>كيمو</h4><p>متصل الآن</p></div></div><span class="dot"></span></div>
+            <div class="online-user"><div class="user-info"><div class="avatar">N</div><div class="user-text"><h4>ضيف نشيط</h4><p>يكتب رسالة خاصة</p></div></div><span class="dot"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="section-friends">
+        <div class="panel">
+          <div class="panel-head"><h3>الأصدقاء</h3><span class="badge">قائمة</span></div>
+          <div class="empty">تقدر تضيف قائمة أصدقاء لاحقًا مع نظام حفظ حقيقي.</div>
+        </div>
+      </section>
+
+      <section class="section" id="section-games">
+        <div class="panel">
+          <div class="panel-head"><h3>الألعاب</h3><span class="badge">Fun</span></div>
+          <div class="empty">مكان مناسب لإضافة ألعاب خفيفة داخل الشات.</div>
+        </div>
+      </section>
+
+      <section class="section" id="section-wallet">
+        <div class="panel">
+          <div class="panel-head"><h3>المحفظة</h3><span class="badge">رصيد</span></div>
+          <div class="empty">لو أردت نظام رصيد أو هدايا، يلزم ربطه بقاعدة بيانات وخدمة دفع.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+  </div><button class="side-pill" onclick="toggleSidebar(true)">القائمة</button>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const authModal = document.getElementById('authModal');
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const sections = ['important','badges','download','notifications','categories','rooms','messages','online','friends','games','wallet'];
+    const menuItems = [...document.querySelectorAll('.menu-item')];
+
+    let currentChatMode = 'private';
+    let activeGroupId = null;
+    let groups = JSON.parse(localStorage.getItem('shatNarGroups') || '[]');
+    let privateMessages = JSON.parse(localStorage.getItem('shatNarPrivateMessages') || '[]');
+
+    function toggleSidebar(open){
+      sidebar.classList.toggle('open', open);
+      overlay.classList.toggle('show', open || authModal.classList.contains('show'));
+    }
+
+    function openAuth(tab='login'){
+      authModal.classList.add('show');
+      overlay.classList.add('show');
+      switchTab(tab);
+      sidebar.classList.remove('open');
+    }
+
+    function closeAuth(){
+      authModal.classList.remove('show');
+      if(!sidebar.classList.contains('open')) overlay.classList.remove('show');
+    }
+
+    function closeAllPanels(){
+      sidebar.classList.remove('open');
+      authModal.classList.remove('show');
+      overlay.classList.remove('show');
+    }
+
+    function switchTab(tab){
+      const loginActive = tab === 'login';
+      loginTab.classList.toggle('active', loginActive);
+      registerTab.classList.toggle('active', !loginActive);
+      loginForm.classList.toggle('active', loginActive);
+      registerForm.classList.toggle('active', !loginActive);
+    }
+
+    function setSection(name, el){
+      menuItems.forEach(item => item.classList.remove('active'));
+      if(el) el.classList.add('active');
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      const target = document.getElementById('section-' + name);
+      if(target) target.classList.add('active');
+      closeAllPanels();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function renderGroups(){
+      const list = document.getElementById('groupList');
+      if(!groups.length){
+        list.innerHTML = '<div class="empty">لا توجد مجموعات بعد. أنشئ أول مجموعة من الأعلى.</div>';
+        return;
+      }
+      list.innerHTML = groups.map(g => `
+        <div class="group-card">
+          <div>
+            <h4>${escapeHtml(g.name)}</h4>
+            <p>${escapeHtml(g.desc || 'مجموعة بدون وصف')}</p>
+          </div>
+          <button class="btn btn-secondary" onclick="joinGroup('${g.id}')">دخول</button>
+        </div>
+      `).join('');
+    }
+
+    function saveGroups(){ localStorage.setItem('shatNarGroups', JSON.stringify(groups)); }
+    function savePrivateMessages(){ localStorage.setItem('shatNarPrivateMessages', JSON.stringify(privateMessages)); }
+
+    function createGroup(){
+      const name = document.getElementById('newGroupName').value.trim();
+      const desc = document.getElementById('newGroupDesc').value.trim();
+      if(!name) return alert('اكتب اسم المجموعة أولًا');
+      const group = { id: crypto.randomUUID(), name, desc };
+      groups.unshift(group);
+      saveGroups();
+      document.getElementById('newGroupName').value = '';
+      document.getElementById('newGroupDesc').value = '';
+      renderGroups();
+      switchChatMode('group', group.id);
+    }
+
+    function joinGroup(id){
+      const group = groups.find(g => g.id === id);
+      if(!group) return;
+      switchChatMode('group', id);
+    }
+
+    function switchChatMode(mode, groupId=null){
+      currentChatMode = mode;
+      activeGroupId = groupId;
+      const title = document.getElementById('chatTitle');
+      const sub = document.getElementById('chatSubtitle');
+      if(mode === 'group'){
+        const group = groups.find(g => g.id === groupId);
+        title.textContent = group ? `مجموعة: ${group.name}` : 'مجموعة';
+        sub.textContent = group ? (group.desc || 'دردشة مجموعة') : 'دردشة مجموعة';
+      } else {
+        title.textContent = 'محادثة خاصة';
+        sub.textContent = 'الرسائل هنا تجريبية داخل المتصفح نفسه.';
+      }
+      renderMessages();
+    }
+
+    function renderMessages(){
+      const win = document.getElementById('chatWindow');
+      const items = currentChatMode === 'group'
+        ? privateMessages.filter(m => m.type === 'group' && m.groupId === activeGroupId)
+        : privateMessages.filter(m => m.type === 'private');
+
+      if(!items.length){
+        win.innerHTML = '<div class="empty">ابدأ بكتابة أول رسالة هنا.</div>';
+        return;
+      }
+      win.innerHTML = items.map(m => `
+        <div class="bubble ${m.me ? 'me' : 'them'}">
+          ${escapeHtml(m.text)}
+          <small>${escapeHtml(m.time)}</small>
+        </div>
+      `).join('');
+      win.scrollTop = win.scrollHeight;
+    }
+
+    function sendMessage(){
+      const input = document.getElementById('messageInput');
+      const text = input.value.trim();
+      if(!text) return;
+      privateMessages.push({
+        text,
+        time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}),
+        me: true,
+        type: currentChatMode === 'group' ? 'group' : 'private',
+        groupId: currentChatMode === 'group' ? activeGroupId : null
+      });
+      savePrivateMessages();
+      input.value = '';
+      renderMessages();
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
+    }
+
+    document.getElementById('messageInput').addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') sendMessage();
+    });
+
+    renderGroups();
+    renderMessages();
+    switchChatMode('private');
+  </script></body>
+</html>
