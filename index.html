@@ -6,7 +6,7 @@
   <style>
     :root{
       --bg:#0b0910;
-      --bg2:#130e18;
+      --bg2:#120d18;
       --panel:#171320;
       --panel2:#1d1628;
       --line:#3a2742;
@@ -20,81 +20,134 @@
       --shadow:0 16px 40px rgba(0,0,0,.42);
       --radius:18px;
     }*{margin:0;padding:0;box-sizing:border-box;font-family:"Tahoma","Segoe UI",sans-serif;}
+html{scroll-behavior:smooth;}
 body{
   background:
     radial-gradient(circle at top right, rgba(255,79,154,.12), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(195,39,115,.10), transparent 26%),
     linear-gradient(180deg, #120d18 0%, #09070d 100%);
   color:var(--text);
   min-height:100vh;
   overflow-x:hidden;
 }
-button,input{font:inherit;}
+button,input,textarea{font:inherit;}
 a{color:inherit;text-decoration:none;}
+::selection{background:rgba(255,79,154,.35);}
 
 .top-alert{
-  height:44px; display:flex; align-items:center; justify-content:center; gap:10px;
-  padding:0 16px; font-size:15px; color:#ffe6f1;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:0 16px;
+  font-size:15px;
+  color:#ffe6f1;
   background:linear-gradient(90deg, rgba(255,79,154,.18), rgba(255,79,154,.05));
-  border-bottom:1px solid rgba(255,255,255,.06); position:relative;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  position:sticky;
+  top:0;
+  z-index:60;
+  backdrop-filter:blur(10px);
 }
 .top-alert .close-small{
-  position:absolute; right:12px; width:28px; height:28px; border-radius:50%; border:none;
-  background:rgba(255,255,255,.08); color:white; cursor:pointer;
+  position:absolute;
+  right:12px;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:none;
+  background:rgba(255,255,255,.08);
+  color:white;
+  cursor:pointer;
 }
 
 .app{min-height:calc(100vh - 44px); position:relative;}
+.overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.52);
+  opacity:0; visibility:hidden; transition:.2s ease; z-index:30;
+}
+.overlay.show{opacity:1; visibility:visible;}
 
 .sidebar{
-  position:fixed; top:44px; right:0; width:min(88vw, 330px); height:calc(100vh - 44px);
+  position:fixed; top:44px; right:0; width:min(88vw, 340px); height:calc(100vh - 44px);
   background:linear-gradient(180deg, #181320 0%, #100c15 100%);
-  border-left:1px solid rgba(255,255,255,.06); transform:translateX(100%); transition:.28s ease;
+  border-left:1px solid rgba(255,255,255,.06);
+  transform:translateX(100%); transition:.28s ease;
   z-index:40; box-shadow:var(--shadow); overflow:hidden;
 }
 .sidebar.open{transform:translateX(0);}
 
 .sidebar-header{
-  padding:14px 16px; border-bottom:1px solid var(--line);
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
   background:linear-gradient(90deg, rgba(255,79,154,.14), rgba(255,79,154,.04));
   display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
 .brand{display:flex; align-items:center; gap:12px;}
 .logo{
-  width:48px; height:48px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+  width:50px; height:50px; border-radius:18px; display:flex; align-items:center; justify-content:center;
   background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; font-size:24px;
-  box-shadow:0 10px 24px rgba(255,79,154,.22);
+  box-shadow:0 12px 24px rgba(255,79,154,.22);
 }
-.brand h1{font-size:28px; line-height:1; margin-bottom:4px;}
+.brand h1{font-size:26px; line-height:1; margin-bottom:4px;}
 .brand p{color:var(--muted); font-size:12px;}
 
 .icon-btn{
   width:42px; height:42px; border:none; border-radius:14px; background:rgba(255,255,255,.05);
-  color:white; cursor:pointer; transition:.2s ease;
+  color:white; cursor:pointer; transition:.2s ease; display:grid; place-items:center;
 }
-.icon-btn:hover{background:rgba(255,255,255,.1);}
+.icon-btn:hover{background:rgba(255,255,255,.1); transform:translateY(-1px);}
 
 .sidebar-body{height:calc(100% - 78px); overflow:auto; padding-bottom:90px;}
 .auth-mini{
-  margin:14px 14px 10px; background:rgba(255,79,154,.08);
-  border:1px solid rgba(255,255,255,.06); border-radius:18px; padding:14px;
+  margin:14px 14px 10px;
+  background:rgba(255,79,154,.08);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:18px;
+  padding:14px;
 }
 .auth-mini p{color:#f9dbe9; font-size:13px; line-height:1.7; margin-bottom:12px;}
-.auth-mini .mini-actions{display:flex; gap:10px;}
+.auth-mini .mini-actions{display:flex; gap:10px; flex-wrap:wrap;}
 
 .btn{
-  border:none; border-radius:14px; padding:12px 14px; cursor:pointer; transition:.2s ease; font-weight:700;
+  border:none;
+  border-radius:14px;
+  padding:12px 14px;
+  cursor:pointer;
+  transition:.2s ease;
+  font-weight:700;
 }
+.btn:hover{transform:translateY(-1px);}
 .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; box-shadow:0 10px 20px rgba(255,79,154,.2);}
 .btn-secondary{background:rgba(255,255,255,.05); color:#fff; border:1px solid rgba(255,255,255,.06);}
+.btn-ghost{background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.08);}
+
+.social-btn{
+  width:100%;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  border-radius:14px; padding:12px 14px; font-weight:700; color:#fff; border:none; cursor:pointer;
+  transition:.2s ease;
+}
+.social-btn:hover{transform:translateY(-1px);}
+.social-btn.google{background:#2a2a2f; border:1px solid rgba(255,255,255,.08);}
+.social-btn.facebook{background:#1877f2;}
+.social-btn svg{width:18px; height:18px; flex:0 0 auto;}
 
 .menu{margin-top:10px;}
 .menu-item{
   display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:62px;
-  padding:0 18px; border-top:1px solid rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.03);
+  padding:0 16px 0 18px; border-top:1px solid rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.03);
   background:linear-gradient(90deg, rgba(255,79,154,.05), transparent 60%); cursor:pointer; transition:.2s ease;
 }
 .menu-item:hover,.menu-item.active{background:linear-gradient(90deg, rgba(255,79,154,.16), rgba(255,79,154,.05));}
-.menu-item .label{display:flex; align-items:center; gap:12px; font-size:18px;}
+.menu-item .label{display:flex; align-items:center; gap:12px; font-size:17px;}
 .menu-item .meta{color:var(--muted); font-size:12px;}
+.menu-icon{
+  width:34px; height:34px; border-radius:12px; display:grid; place-items:center;
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.04);
+  flex:0 0 auto;
+}
 
 .layout{display:flex; min-height:calc(100vh - 44px);} 
 .mini-rail{
@@ -127,7 +180,7 @@ a{color:inherit;text-decoration:none;}
   border:1px solid rgba(255,255,255,.06); border-radius:28px; box-shadow:var(--shadow); overflow:hidden; position:relative; margin-bottom:20px;
 }
 .hero::after{content:""; position:absolute; left:-40px; bottom:-80px; width:260px; height:260px; background:radial-gradient(circle, rgba(255,79,154,.16), transparent 70%); pointer-events:none;}
-.hero-inner{padding:28px; display:grid; grid-template-columns:1.2fr .8fr; gap:18px; align-items:start;}
+.hero-inner{padding:28px; display:grid; grid-template-columns:1.15fr .85fr; gap:18px; align-items:start;}
 .hero h2{font-size:34px; margin-bottom:10px;}
 .hero p{color:var(--muted); line-height:1.9; max-width:760px;}
 .hero-actions{margin-top:18px; display:flex; flex-wrap:wrap; gap:10px;}
@@ -162,11 +215,9 @@ a{color:inherit;text-decoration:none;}
   border-radius:18px; background:linear-gradient(180deg, var(--accent), var(--accent2)); color:#fff;
   padding:14px 10px; font-weight:700; cursor:pointer; box-shadow:var(--shadow); z-index:25;
 }
-.overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); opacity:0; visibility:hidden; transition:.2s ease; z-index:30;}
-.overlay.show{opacity:1; visibility:visible;}
 
 .auth-modal{
-  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.96); width:min(92vw, 430px);
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.96); width:min(92vw, 460px);
   background:linear-gradient(180deg,#1b1424,#120d19); border:1px solid rgba(255,255,255,.07); border-radius:26px;
   box-shadow:var(--shadow); z-index:50; opacity:0; visibility:hidden; transition:.22s ease; overflow:hidden;
 }
@@ -183,9 +234,9 @@ a{color:inherit;text-decoration:none;}
 .field{display:flex; flex-direction:column; gap:8px;}
 .field label{color:#eadff4; font-size:14px;}
 .field input, .field textarea{
-  height:48px; border:none; outline:none; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.06); color:#fff; padding:0 14px;
+  min-height:48px; border:none; outline:none; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.06); color:#fff; padding:12px 14px;
 }
-.field textarea{height:auto; min-height:110px; padding:12px 14px; resize:vertical;}
+.field textarea{min-height:110px; resize:vertical;}
 .hint{font-size:12px; color:var(--muted); line-height:1.8;}
 .footer-note{text-align:center; margin-top:20px; color:var(--muted); font-size:13px;}
 
@@ -197,15 +248,8 @@ a{color:inherit;text-decoration:none;}
   grid-template-columns:300px 1fr;
   gap:18px;
 }
-.chat-box{
-  min-height:520px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.chat-head{
-  display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:4px;
-}
+.chat-box{min-height:520px; display:flex; flex-direction:column; gap:12px;}
+.chat-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:4px;}
 .chat-head h3{font-size:22px;}
 .chat-window{
   flex:1; min-height:360px; max-height:540px; overflow:auto; padding:16px; border-radius:20px;
@@ -238,6 +282,29 @@ a{color:inherit;text-decoration:none;}
 .group-card h4{font-size:15px; margin-bottom:4px;}
 .group-card p{font-size:12px; color:var(--muted); line-height:1.6;}
 
+.public-strip{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;
+  padding:14px 16px; border-radius:18px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.05);
+}
+.public-strip strong{font-size:15px;}
+.public-strip span{font-size:12px; color:var(--muted);}
+
+.msg-item{
+  display:flex; gap:12px; align-items:flex-start;
+}
+.msg-item .avatar{width:40px; height:40px; border-radius:14px; font-size:14px;}
+.msg-item .meta-line{display:flex; gap:10px; align-items:center; margin-bottom:6px;}
+.msg-item .meta-line strong{font-size:14px;}
+.msg-item .meta-line small{color:var(--muted); font-size:11px;}
+.msg-item p{color:#f6ebff; line-height:1.8; font-size:14px;}
+
+.auth-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:6px;
+}
+
 @media (max-width: 980px){
   .hero-inner,.grid,.messages-layout{grid-template-columns:1fr;}
   .mini-rail{width:72px;}
@@ -252,6 +319,7 @@ a{color:inherit;text-decoration:none;}
   .hero h2{font-size:28px;}
   .side-pill{left:10px;}
   .messages-layout{grid-template-columns:1fr;}
+  .auth-actions{grid-template-columns:1fr;}
 }
 
   </style>
@@ -270,10 +338,10 @@ a{color:inherit;text-decoration:none;}
           <p>واجهة عربية داكنة وعصرية</p>
         </div>
       </div>
-      <button class="icon-btn" onclick="toggleSidebar(false)">✕</button>
+      <button class="icon-btn" onclick="toggleSidebar(false)" aria-label="إغلاق القائمة">✕</button>
     </div><div class="sidebar-body">
   <div class="auth-mini">
-    <p>سجّل دخولك أو أنشئ حساب جديد لبدء المراسلة والانضمام للغرف وحفظ نشاطك.</p>
+    <p>تسجيل الدخول هنا بشكل احترافي عبر البريد أو Google أو Facebook. الأزرار جاهزة شكليًا، والربط الحقيقي يحتاج مفاتيح OAuth.</p>
     <div class="mini-actions">
       <button class="btn btn-primary" onclick="openAuth('login')">دخول</button>
       <button class="btn btn-secondary" onclick="openAuth('register')">حساب جديد</button>
@@ -283,47 +351,39 @@ a{color:inherit;text-decoration:none;}
   <div class="menu">
     <div class="menu-item active" onclick="setSection('important',this)">
       <span class="meta">هام</span>
-      <div class="label"><span>⭐</span><span>مهم جدًا</span></div>
+      <div class="label"><span class="menu-icon">⭐</span><span>الرئيسية</span></div>
     </div>
-    <div class="menu-item" onclick="setSection('badges',this)">
-      <span class="meta">شرح</span>
-      <div class="label"><span>🔖</span><span>الشارات</span></div>
-    </div>
-    <div class="menu-item" onclick="setSection('download',this)">
-      <span class="meta">app</span>
-      <div class="label"><span>📱</span><span>حمّل التطبيق</span></div>
-    </div>
-    <div class="menu-item" onclick="setSection('notifications',this)">
-      <span class="meta">تنبيهات</span>
-      <div class="label"><span>🔔</span><span>إشعارات</span></div>
-    </div>
-    <div class="menu-item" onclick="setSection('categories',this)">
-      <span class="meta">أقسام</span>
-      <div class="label"><span>▦</span><span>التصنيفات</span></div>
+    <div class="menu-item" onclick="setSection('messages',this)">
+      <span class="meta">الأول</span>
+      <div class="label"><span class="menu-icon">✉️</span><span>الرسائل العامة</span></div>
     </div>
     <div class="menu-item" onclick="setSection('rooms',this)">
       <span class="meta">شات</span>
-      <div class="label"><span>💬</span><span>غرف دردشة</span></div>
+      <div class="label"><span class="menu-icon">💬</span><span>غرف دردشة</span></div>
     </div>
-    <div class="menu-item" onclick="setSection('messages',this)">
-      <span class="meta">خاص</span>
-      <div class="label"><span>✉️</span><span>الرسائل الخاصة</span></div>
+    <div class="menu-item" onclick="setSection('notifications',this)">
+      <span class="meta">تنبيهات</span>
+      <div class="label"><span class="menu-icon">🔔</span><span>إشعارات</span></div>
+    </div>
+    <div class="menu-item" onclick="setSection('categories',this)">
+      <span class="meta">أقسام</span>
+      <div class="label"><span class="menu-icon">▦</span><span>التصنيفات</span></div>
     </div>
     <div class="menu-item" onclick="setSection('online',this)">
       <span class="meta">الآن</span>
-      <div class="label"><span>🟢</span><span>متصل الآن</span></div>
+      <div class="label"><span class="menu-icon">🟢</span><span>متصل الآن</span></div>
     </div>
     <div class="menu-item" onclick="setSection('friends',this)">
       <span class="meta">قائمة</span>
-      <div class="label"><span>👥</span><span>الأصدقاء</span></div>
+      <div class="label"><span class="menu-icon">👥</span><span>الأصدقاء</span></div>
     </div>
     <div class="menu-item" onclick="setSection('games',this)">
       <span class="meta">fun</span>
-      <div class="label"><span>🎮</span><span>ألعاب</span></div>
+      <div class="label"><span class="menu-icon">🎮</span><span>ألعاب</span></div>
     </div>
     <div class="menu-item" onclick="setSection('wallet',this)">
       <span class="meta">رصيد</span>
-      <div class="label"><span>💳</span><span>المحفظة</span></div>
+      <div class="label"><span class="menu-icon">💳</span><span>المحفظة</span></div>
     </div>
   </div>
 </div>
@@ -332,9 +392,9 @@ a{color:inherit;text-decoration:none;}
     <div class="auth-top">
       <div>
         <h3>شات نار</h3>
-        <p>دخول سريع بنفس الإحساس الداكن الأنيق</p>
+        <p>دخول احترافي يناسب الواجهة</p>
       </div>
-      <button class="icon-btn" onclick="closeAuth()">✕</button>
+      <button class="icon-btn" onclick="closeAuth()" aria-label="إغلاق النافذة">✕</button>
     </div>
     <div class="tabs">
       <button class="tab active" id="loginTab" onclick="switchTab('login')">تسجيل الدخول</button>
@@ -342,6 +402,16 @@ a{color:inherit;text-decoration:none;}
     </div>
     <div class="auth-body">
       <form class="form active" id="loginForm" onsubmit="return false;">
+        <div class="auth-actions">
+          <button type="button" class="social-btn google" onclick="fakeOAuth('google')">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.3 9.3 3.5l6.9-6.9C35.9 2.1 30.4 0 24 0 14.6 0 6.4 5.4 2.4 13.2l8 6.2C12.4 13.8 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.5-.1-2.7-.4-3.9H24v7.5h12.8c-.3 2-1.7 5-4.8 7l7.4 5.7c4.4-4 7.1-9.9 7.1-16.3z"/><path fill="#FBBC05" d="M10.4 28.2c-.5-1.5-.8-3.1-.8-4.7s.3-3.2.8-4.7l-8-6.2C.9 15.6 0 19.3 0 23.5S.9 31.4 2.4 35.2l8-7z"/><path fill="#34A853" d="M24 48c6.4 0 11.8-2.1 15.7-5.7l-7.4-5.7c-2.1 1.4-4.9 2.4-8.3 2.4-6.4 0-11.6-4.3-13.6-10.2l-8 6.2C6.4 42.6 14.6 48 24 48z"/></svg>
+            المتابعة بـ Google
+          </button>
+          <button type="button" class="social-btn facebook" onclick="fakeOAuth('facebook')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="white" d="M13.5 22v-8h2.7l.4-3.1h-3.1V9c0-.9.2-1.4 1.4-1.4h1.8V5.1c-.3 0-1.3-.1-2.4-.1-2.3 0-3.8 1.4-3.8 4v1.9H8v3.1h2.5v8h3z"/></svg>
+            المتابعة بـ Facebook
+          </button>
+        </div>
         <div class="field">
           <label>اسم المستخدم أو البريد</label>
           <input type="text" placeholder="اكتب اسم المستخدم" />
@@ -351,37 +421,47 @@ a{color:inherit;text-decoration:none;}
           <input type="password" placeholder="••••••••" />
         </div>
         <button type="button" class="btn btn-primary">دخول</button>
-        <p class="hint">هذا نموذج واجهة فقط. ربط الدخول الحقيقي يحتاج قاعدة بيانات ونظام جلسات.</p>
-      </form>
-      <form class="form" id="registerForm" onsubmit="return false;">
-        <div class="field">
-          <label>الاسم المعروض</label>
-          <input type="text" placeholder="اسمك داخل الموقع" />
-        </div>
-        <div class="field">
-          <label>البريد الإلكتروني</label>
-          <input type="email" placeholder="name@email.com" />
-        </div>
-        <div class="field">
-          <label>كلمة المرور</label>
-          <input type="password" placeholder="اختَر كلمة مرور قوية" />
-        </div>
-        <button type="button" class="btn btn-primary">إنشاء الحساب</button>
-      </form>
+        <p class="hint">هذا نموذج واجهة فقط. الربط الحقيقي مع Google/Facebook يحتاج إعداد OAuth على السيرفر أو خدمة تسجيل دخول جاهزة.</p>
+      </form><form class="form" id="registerForm" onsubmit="return false;">
+    <div class="auth-actions">
+      <button type="button" class="social-btn google" onclick="fakeOAuth('google')">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.3 9.3 3.5l6.9-6.9C35.9 2.1 30.4 0 24 0 14.6 0 6.4 5.4 2.4 13.2l8 6.2C12.4 13.8 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.5-.1-2.7-.4-3.9H24v7.5h12.8c-.3 2-1.7 5-4.8 7l7.4 5.7c4.4-4 7.1-9.9 7.1-16.3z"/><path fill="#FBBC05" d="M10.4 28.2c-.5-1.5-.8-3.1-.8-4.7s.3-3.2.8-4.7l-8-6.2C.9 15.6 0 19.3 0 23.5S.9 31.4 2.4 35.2l8-7z"/><path fill="#34A853" d="M24 48c6.4 0 11.8-2.1 15.7-5.7l-7.4-5.7c-2.1 1.4-4.9 2.4-8.3 2.4-6.4 0-11.6-4.3-13.6-10.2l-8 6.2C6.4 42.6 14.6 48 24 48z"/></svg>
+        إنشاء بـ Google
+      </button>
+      <button type="button" class="social-btn facebook" onclick="fakeOAuth('facebook')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="white" d="M13.5 22v-8h2.7l.4-3.1h-3.1V9c0-.9.2-1.4 1.4-1.4h1.8V5.1c-.3 0-1.3-.1-2.4-.1-2.3 0-3.8 1.4-3.8 4v1.9H8v3.1h2.5v8h3z"/></svg>
+        إنشاء بـ Facebook
+      </button>
     </div>
+    <div class="field">
+      <label>الاسم المعروض</label>
+      <input type="text" placeholder="اسمك داخل الموقع" />
+    </div>
+    <div class="field">
+      <label>البريد الإلكتروني</label>
+      <input type="email" placeholder="name@email.com" />
+    </div>
+    <div class="field">
+      <label>كلمة المرور</label>
+      <input type="password" placeholder="اختَر كلمة مرور قوية" />
+    </div>
+    <button type="button" class="btn btn-primary">إنشاء الحساب</button>
+  </form>
+</div>
+
   </div>  <div class="app">
     <div class="layout">
       <div class="mini-rail">
-        <button class="rail-btn" onclick="toggleSidebar(true)">☰</button>
-        <button class="rail-btn" onclick="openAuth('login')">👤</button>
-        <button class="rail-btn" onclick="setSection('messages')">✉️</button>
-        <button class="rail-btn" onclick="setSection('rooms')">💬</button>
+        <button class="rail-btn" onclick="toggleSidebar(true)" title="القائمة">☰</button>
+        <button class="rail-btn" onclick="openAuth('login')" title="تسجيل الدخول">👤</button>
+        <button class="rail-btn" onclick="setSection('messages')" title="الرسائل العامة">✉️</button>
+        <button class="rail-btn" onclick="setSection('rooms')" title="الغرف">💬</button>
         <div class="rail-spacer"></div>
-        <button class="rail-btn" onclick="setSection('categories')">＋</button>
+        <button class="rail-btn" onclick="setSection('categories')" title="الأقسام">＋</button>
       </div><main class="content">
     <header class="header">
       <div class="header-right">
-        <button class="icon-btn" onclick="toggleSidebar(true)">☰</button>
+        <button class="icon-btn" onclick="toggleSidebar(true)" aria-label="فتح القائمة">☰</button>
         <div class="search">
           <span>🔎</span>
           <input type="text" placeholder="ابحث عن غرفة أو عضو..." />
@@ -397,76 +477,54 @@ a{color:inherit;text-decoration:none;}
       <section class="hero section active" id="section-important">
         <div class="hero-inner">
           <div>
-            <h2>شات نار — واجهة عربية داكنة وعصرية</h2>
-            <p>تم تعديل القالب مع الحفاظ على نفس الألوان تقريبًا، وتشغيل القائمة الجانبية، وإضافة قسم الرسائل الخاصة، وكذلك مجموعات بسيطة يمكن للضيوف إنشاؤها داخل الواجهة.</p>
+            <h2>شات نار — واجهة احترافية للشات العام</h2>
+            <p>الرسائل العامة أصبحت أول ما يظهر للزائر، مع قائمة جانبية أنظف، وأزرار دخول Google وFacebook، وتخطيط أقرب للبرامج الاحترافية مع الحفاظ على ألوانك الداكنة الوردية.</p>
             <div class="hero-actions">
               <button class="btn btn-primary" onclick="openAuth('register')">ابدأ الآن</button>
-              <button class="btn btn-secondary" onclick="setSection('messages')">اذهب إلى الرسائل</button>
-              <button class="btn btn-secondary" onclick="toggleSidebar(true)">افتح القائمة</button>
+              <button class="btn btn-secondary" onclick="setSection('messages')">الرسائل العامة</button>
+              <button class="btn btn-secondary" onclick="toggleSidebar(true)">فتح القائمة</button>
             </div>
           </div>
           <div class="hero-side">
             <div class="small-card">
-              <h3>الخاص</h3>
-              <p>محادثات خاصة بين الضيوف داخل الواجهة التجريبية.</p>
+              <h3>أول ظهور للزائر</h3>
+              <p>الآن الرسائل العامة تظهر مباشرة قبل أي شيء آخر.</p>
             </div>
             <div class="small-card">
-              <h3>المجموعات</h3>
-              <p>إنشاء مجموعة باسم ووصف والدخول إليها فورًا.</p>
+              <h3>تسجيل احترافي</h3>
+              <p>أزرار Google وFacebook جاهزة بالشكل المناسب.</p>
             </div>
             <div class="small-card">
               <h3>القائمة الجانبية</h3>
-              <p>أزرار جانبية تعمل الآن وتفتح الأقسام المختلفة.</p>
+              <p>أيقونات مرتبة وواضحة بدون شكل تجريبي مبالغ فيه.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section" id="section-badges">
-        <div class="grid">
-          <div class="panel">
-            <div class="panel-head"><h3>الشارات</h3><span class="badge">تجريبي</span></div>
-            <div class="empty">يمكنك وضع شارات العضوية أو التمييز هنا لاحقًا.</div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><h3>التصنيفات</h3><span class="badge">منظم</span></div>
-            <div class="room-list">
-              <div class="room"><div><h4>عام</h4><p>غرف عامة للنقاش المفتوح.</p></div><span class="status">متاح</span></div>
-              <div class="room"><div><h4>خاص</h4><p>محادثات بين شخصين فقط.</p></div><span class="status">متاح</span></div>
-              <div class="room"><div><h4>مجموعات</h4><p>غرف جماعية ينشئها الضيوف.</p></div><span class="status">متاح</span></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="section-download">
+      <section class="section active" id="section-messages">
         <div class="panel">
-          <div class="panel-head"><h3>تحميل التطبيق</h3><span class="badge">APK / PWA</span></div>
-          <div class="empty">هنا يمكنك لاحقًا وضع رابط التحميل أو جعل الموقع يُثبّت كتطبيق.</div>
-        </div>
-      </section>
+          <div class="panel-head">
+            <h3>الرسائل العامة</h3>
+            <span class="badge">أول شيء يراه الزائر</span>
+          </div>
 
-      <section class="section" id="section-notifications">
-        <div class="panel">
-          <div class="panel-head"><h3>الإشعارات</h3><span class="badge">تنبيهات</span></div>
-          <div class="empty">الإشعارات تحتاج ربطًا حقيقيًا بالسيرفر أو Firebase.</div>
-        </div>
-      </section>
-
-      <section class="section" id="section-categories">
-        <div class="grid">
-          <div class="panel">
-            <div class="panel-head"><h3>أقسام سريعة</h3><span class="badge">مباشر</span></div>
-            <div class="room-list">
-              <div class="room"><div><h4>غرف دردشة</h4><p>ادخل الغرف العامة أو الخاصة.</p></div><button class="btn btn-secondary" onclick="setSection('rooms')">فتح</button></div>
-              <div class="room"><div><h4>رسائل خاصة</h4><p>تواصل بين الضيوف مباشرة.</p></div><button class="btn btn-secondary" onclick="setSection('messages')">فتح</button></div>
-              <div class="room"><div><h4>المجموعات</h4><p>أنشئ مجموعتك الخاصة.</p></div><button class="btn btn-secondary" onclick="setSection('messages')">فتح</button></div>
+          <div class="public-strip">
+            <div>
+              <strong>الدخول كضيف متاح</strong>
+              <span>اكتب وشارك فورًا بدون تعقيد</span>
             </div>
+            <button class="btn btn-secondary" onclick="openAuth('login')">حفظ الحساب</button>
           </div>
-          <div class="panel">
-            <div class="panel-head"><h3>ملاحظة</h3><span class="badge">مهم</span></div>
-            <div class="empty">هذه نسخة واجهة. لو تريدها تعمل بين أكثر من جهاز، تحتاج backend حقيقي.</div>
+
+          <div class="chat-window" id="publicChatWindow" style="max-height:520px; min-height:420px;"></div>
+
+          <div style="height:12px"></div>
+          <div class="chat-compose">
+            <input id="publicMessageInput" type="text" placeholder="اكتب رسالة عامة..." />
+            <button class="btn btn-primary" onclick="sendPublicMessage()">إرسال</button>
           </div>
+          <div class="footer-note">هذه الواجهة تحفظ الرسائل محليًا للتجربة. الربط الحقيقي يحتاج قاعدة بيانات وسيرفر.</div>
         </div>
       </section>
 
@@ -491,39 +549,26 @@ a{color:inherit;text-decoration:none;}
         </div>
       </section>
 
-      <section class="section" id="section-messages">
-        <div class="messages-layout">
+      <section class="section" id="section-notifications">
+        <div class="panel">
+          <div class="panel-head"><h3>الإشعارات</h3><span class="badge">تنبيهات</span></div>
+          <div class="empty">الإشعارات تحتاج ربطًا حقيقيًا بالسيرفر أو Firebase.</div>
+        </div>
+      </section>
+
+      <section class="section" id="section-categories">
+        <div class="grid">
           <div class="panel">
-            <div class="panel-head"><h3>الرسائل</h3><span class="badge">خاص / مجموعات</span></div>
-            <div class="group-tools">
-              <div class="tool-row">
-                <input id="newGroupName" type="text" placeholder="اسم مجموعة جديدة" />
-                <button class="btn btn-primary" onclick="createGroup()">إنشاء</button>
-              </div>
-              <div class="field">
-                <input id="newGroupDesc" type="text" placeholder="وصف قصير للمجموعة" />
-              </div>
+            <div class="panel-head"><h3>أقسام سريعة</h3><span class="badge">منظم</span></div>
+            <div class="room-list">
+              <div class="room"><div><h4>غرف الدردشة</h4><p>ادخل الغرف العامة أو الخاصة.</p></div><button class="btn btn-secondary" onclick="setSection('rooms')">فتح</button></div>
+              <div class="room"><div><h4>رسائل عامة</h4><p>أول شاشة يراها الزائر.</p></div><button class="btn btn-secondary" onclick="setSection('messages')">فتح</button></div>
+              <div class="room"><div><h4>المجموعات</h4><p>أنشئ مجموعتك الخاصة.</p></div><button class="btn btn-secondary" onclick="setSection('messages')">فتح</button></div>
             </div>
-            <div style="height:14px"></div>
-            <div class="group-list" id="groupList"></div>
           </div>
-
-          <div class="panel chat-box">
-            <div class="chat-head">
-              <div>
-                <h3 id="chatTitle">محادثة خاصة</h3>
-                <p class="hint" id="chatSubtitle">الرسائل هنا تجريبية داخل المتصفح نفسه.</p>
-              </div>
-              <button class="btn btn-secondary" onclick="switchChatMode('private')">خاص</button>
-            </div>
-
-            <div class="chat-window" id="chatWindow"></div>
-
-            <div class="chat-compose">
-              <input id="messageInput" type="text" placeholder="اكتب رسالة..." />
-              <button class="btn btn-primary" onclick="sendMessage()">إرسال</button>
-            </div>
-            <div class="footer-note">الضيوف يمكنهم إنشاء مجموعات والدردشة الخاصة من نفس الصفحة، لكن هذا حفظ محلي فقط الآن.</div>
+          <div class="panel">
+            <div class="panel-head"><h3>ملاحظة</h3><span class="badge">مهم</span></div>
+            <div class="empty">هذه نسخة واجهة احترافية. لو تريد تسجيل Google/Facebook يعمل فعليًا، اربطه بخدمة OAuth حقيقية.</div>
           </div>
         </div>
       </section>
@@ -572,13 +617,11 @@ a{color:inherit;text-decoration:none;}
     const registerTab = document.getElementById('registerTab');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
-    const sections = ['important','badges','download','notifications','categories','rooms','messages','online','friends','games','wallet'];
     const menuItems = [...document.querySelectorAll('.menu-item')];
+    const publicChatWindow = document.getElementById('publicChatWindow');
+    const publicMessageInput = document.getElementById('publicMessageInput');
 
-    let currentChatMode = 'private';
-    let activeGroupId = null;
-    let groups = JSON.parse(localStorage.getItem('shatNarGroups') || '[]');
-    let privateMessages = JSON.parse(localStorage.getItem('shatNarPrivateMessages') || '[]');
+    let publicMessages = JSON.parse(localStorage.getItem('shatNarPublicMessages') || '[]');
 
     function toggleSidebar(open){
       sidebar.classList.toggle('open', open);
@@ -621,94 +664,49 @@ a{color:inherit;text-decoration:none;}
       window.scrollTo({top:0, behavior:'smooth'});
     }
 
-    function renderGroups(){
-      const list = document.getElementById('groupList');
-      if(!groups.length){
-        list.innerHTML = '<div class="empty">لا توجد مجموعات بعد. أنشئ أول مجموعة من الأعلى.</div>';
+    function fakeOAuth(provider){
+      alert(`زر ${provider === 'google' ? 'Google' : 'Facebook'} جاهز شكليًا. الربط الحقيقي يحتاج إعداد OAuth.`);
+    }
+
+    function savePublicMessages(){
+      localStorage.setItem('shatNarPublicMessages', JSON.stringify(publicMessages));
+    }
+
+    function renderPublicMessages(){
+      if(!publicMessages.length){
+        publicChatWindow.innerHTML = `
+          <div class="empty">لا توجد رسائل بعد. كن أول من يبدأ الحديث في الشات العام.</div>
+        `;
         return;
       }
-      list.innerHTML = groups.map(g => `
-        <div class="group-card">
-          <div>
-            <h4>${escapeHtml(g.name)}</h4>
-            <p>${escapeHtml(g.desc || 'مجموعة بدون وصف')}</p>
+
+      publicChatWindow.innerHTML = publicMessages.map(m => `
+        <div class="msg-item">
+          <div class="avatar">${escapeHtml(m.name.slice(0,1).toUpperCase())}</div>
+          <div style="flex:1; min-width:0;">
+            <div class="meta-line">
+              <strong>${escapeHtml(m.name)}</strong>
+              <small>${escapeHtml(m.time)}</small>
+            </div>
+            <p>${escapeHtml(m.text)}</p>
           </div>
-          <button class="btn btn-secondary" onclick="joinGroup('${g.id}')">دخول</button>
         </div>
       `).join('');
+
+      publicChatWindow.scrollTop = publicChatWindow.scrollHeight;
     }
 
-    function saveGroups(){ localStorage.setItem('shatNarGroups', JSON.stringify(groups)); }
-    function savePrivateMessages(){ localStorage.setItem('shatNarPrivateMessages', JSON.stringify(privateMessages)); }
-
-    function createGroup(){
-      const name = document.getElementById('newGroupName').value.trim();
-      const desc = document.getElementById('newGroupDesc').value.trim();
-      if(!name) return alert('اكتب اسم المجموعة أولًا');
-      const group = { id: crypto.randomUUID(), name, desc };
-      groups.unshift(group);
-      saveGroups();
-      document.getElementById('newGroupName').value = '';
-      document.getElementById('newGroupDesc').value = '';
-      renderGroups();
-      switchChatMode('group', group.id);
-    }
-
-    function joinGroup(id){
-      const group = groups.find(g => g.id === id);
-      if(!group) return;
-      switchChatMode('group', id);
-    }
-
-    function switchChatMode(mode, groupId=null){
-      currentChatMode = mode;
-      activeGroupId = groupId;
-      const title = document.getElementById('chatTitle');
-      const sub = document.getElementById('chatSubtitle');
-      if(mode === 'group'){
-        const group = groups.find(g => g.id === groupId);
-        title.textContent = group ? `مجموعة: ${group.name}` : 'مجموعة';
-        sub.textContent = group ? (group.desc || 'دردشة مجموعة') : 'دردشة مجموعة';
-      } else {
-        title.textContent = 'محادثة خاصة';
-        sub.textContent = 'الرسائل هنا تجريبية داخل المتصفح نفسه.';
-      }
-      renderMessages();
-    }
-
-    function renderMessages(){
-      const win = document.getElementById('chatWindow');
-      const items = currentChatMode === 'group'
-        ? privateMessages.filter(m => m.type === 'group' && m.groupId === activeGroupId)
-        : privateMessages.filter(m => m.type === 'private');
-
-      if(!items.length){
-        win.innerHTML = '<div class="empty">ابدأ بكتابة أول رسالة هنا.</div>';
-        return;
-      }
-      win.innerHTML = items.map(m => `
-        <div class="bubble ${m.me ? 'me' : 'them'}">
-          ${escapeHtml(m.text)}
-          <small>${escapeHtml(m.time)}</small>
-        </div>
-      `).join('');
-      win.scrollTop = win.scrollHeight;
-    }
-
-    function sendMessage(){
-      const input = document.getElementById('messageInput');
-      const text = input.value.trim();
+    function sendPublicMessage(){
+      const text = publicMessageInput.value.trim();
       if(!text) return;
-      privateMessages.push({
+      publicMessages.push({
+        name: 'ضيف',
         text,
-        time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}),
-        me: true,
-        type: currentChatMode === 'group' ? 'group' : 'private',
-        groupId: currentChatMode === 'group' ? activeGroupId : null
+        time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})
       });
-      savePrivateMessages();
-      input.value = '';
-      renderMessages();
+      savePublicMessages();
+      publicMessageInput.value = '';
+      renderPublicMessages();
     }
 
     function escapeHtml(str){
@@ -720,12 +718,14 @@ a{color:inherit;text-decoration:none;}
         .replaceAll("'",'&#39;');
     }
 
-    document.getElementById('messageInput').addEventListener('keydown', (e) => {
-      if(e.key === 'Enter') sendMessage();
+    publicMessageInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') sendPublicMessage();
     });
 
-    renderGroups();
-    renderMessages();
-    switchChatMode('private');
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') closeAllPanels();
+    });
+
+    renderPublicMessages();
   </script></body>
 </html>
