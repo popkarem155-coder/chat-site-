@@ -1,21 +1,26 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// فتح وإغلاق السايدبار
+function toggleSidebar(show) {
+  document.getElementById("sidebar").style.display = show ? "block" : "none";
+}
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCNCq5bP_UVdQgXPr40lroIkiti5aMWyvw",
-  authDomain: "chat-nar.firebaseapp.com",
-  projectId: "chat-nar",
-  storageBucket: "chat-nar.firebasestorage.app",
-  messagingSenderId: "199917444253",
-  appId: "1:199917444253:web:aef64b8f6cb812d8f2c874",
-  measurementId: "G-B8LJJ7XJ7W"
-};
+// التنقل بين الصفحات
+function setSection(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// إرسال رسالة (تجريبي)
+function sendMessage() {
+  const input = document.getElementById("msgInput");
+  const chat = document.getElementById("chatWindow");
+
+  if (!input.value.trim()) return;
+
+  const msg = document.createElement("div");
+  msg.textContent = "👤 " + input.value;
+
+  chat.appendChild(msg);
+  input.value = "";
+
+  chat.scrollTop = chat.scrollHeight;
+}
