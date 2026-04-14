@@ -727,5 +727,23 @@ a{color:inherit;text-decoration:none;}
     });
 
     renderPublicMessages();
+  </script><script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNCq5bU...mw",
+    authDomain: "chat-nar.firebaseapp.com",
+    projectId: "chat-nar",
+    storageBucket: "chat-nar.firebasestorage.app",
+    messagingSenderId: "199917444253",
+    appId: "1:199917444253:web:aef64b8f6cb812d8f2c874",
+    measurementId: "G-B8LJJ7XJ7W"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  console.log("🔥 Firebase Connected Successfully");
   </script></body>
 </html>
