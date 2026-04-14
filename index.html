@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="شات نار - واجهة عربية داكنة مع شات عام، رسائل خاصة، إشعارات، وأصدقاء متصلين" />
+  <meta name="description" content="شات نار - واجهة عربية داكنة مع شات عام ورسائل خاصة وإشعارات وقائمة متصلين" />
   <title>شات نار</title>  <script src="https://cdn.tailwindcss.com/3.4.17"></script>  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700&display=swap" rel="stylesheet">  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>  <style>
     :root{
       --bg:#0b0910;
@@ -20,15 +20,15 @@
       --shadow:0 16px 40px rgba(0,0,0,.42);
       --radius:18px;
     }
-    *{margin:0;padding:0;box-sizing:border-box;font-family:"Tahoma","Segoe UI",sans-serif;}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:"Tahoma","Segoe UI",sans-serif;}
     html{scroll-behavior:smooth;}
     body{
+      min-height:100vh;
+      color:var(--text);
       background:
         radial-gradient(circle at top right, rgba(255,79,154,.12), transparent 24%),
         radial-gradient(circle at bottom left, rgba(195,39,115,.10), transparent 26%),
         linear-gradient(180deg, #120d18 0%, #09070d 100%);
-      color:var(--text);
-      min-height:100vh;
       overflow-x:hidden;
     }
     button,input,textarea{font:inherit;}
@@ -47,288 +47,202 @@
       border:none;background:rgba(255,255,255,.08);color:white;cursor:pointer;
     }
 
-    .overlay{
-      position:fixed; inset:0; background:rgba(0,0,0,.52);
-      opacity:0; visibility:hidden; transition:.2s ease; z-index:30;
-    }
-    .overlay.show{opacity:1; visibility:visible;}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);opacity:0;visibility:hidden;transition:.2s ease;z-index:30;}
+    .overlay.show{opacity:1;visibility:visible;}
 
     .sidebar{
-      position:fixed; top:44px; right:0; width:min(88vw, 340px); height:calc(100vh - 44px);
-      background:linear-gradient(180deg, #181320 0%, #100c15 100%);
+      position:fixed;top:44px;right:0;width:min(88vw,340px);height:calc(100vh - 44px);
+      background:linear-gradient(180deg,#181320 0%,#100c15 100%);
       border-left:1px solid rgba(255,255,255,.06);
-      transform:translateX(100%); transition:.28s ease;
-      z-index:40; box-shadow:var(--shadow); overflow:hidden;
+      transform:translateX(100%);transition:.28s ease;z-index:40;box-shadow:var(--shadow);overflow:hidden;
     }
     .sidebar.open{transform:translateX(0);}
     .sidebar-header{
       padding:14px 16px;border-bottom:1px solid var(--line);
       background:linear-gradient(90deg, rgba(255,79,154,.14), rgba(255,79,154,.04));
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
     }
-    .brand{display:flex; align-items:center; gap:12px;}
+    .brand{display:flex;align-items:center;gap:12px;}
     .logo{
-      width:50px; height:50px; border-radius:18px; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; font-size:24px;
+      width:50px;height:50px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:24px;
       box-shadow:0 12px 24px rgba(255,79,154,.22);
     }
-    .brand h1{font-size:26px; line-height:1; margin-bottom:4px;}
-    .brand p{color:var(--muted); font-size:12px;}
-    .icon-btn{
-      width:42px; height:42px; border:none; border-radius:14px; background:rgba(255,255,255,.05);
-      color:white; cursor:pointer; transition:.2s ease; display:grid; place-items:center;
-    }
-    .icon-btn:hover{background:rgba(255,255,255,.1); transform:translateY(-1px);}
-    .sidebar-body{height:calc(100% - 78px); overflow:auto; padding-bottom:90px;}
+    .brand h1{font-size:26px;line-height:1;margin-bottom:4px;}
+    .brand p{color:var(--muted);font-size:12px;}
+    .icon-btn{width:42px;height:42px;border:none;border-radius:14px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;transition:.2s ease;display:grid;place-items:center;}
+    .icon-btn:hover{background:rgba(255,255,255,.1);transform:translateY(-1px);}
+    .sidebar-body{height:calc(100% - 78px);overflow:auto;padding-bottom:90px;}
 
-    .auth-mini{
-      margin:14px 14px 10px;background:rgba(255,79,154,.08);
-      border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;
-    }
-    .auth-mini p{color:#f9dbe9; font-size:13px; line-height:1.7; margin-bottom:12px;}
-    .auth-mini .mini-actions{display:flex; gap:10px; flex-wrap:wrap;}
+    .auth-mini{margin:14px 14px 10px;background:rgba(255,79,154,.08);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;}
+    .auth-mini p{color:#f9dbe9;font-size:13px;line-height:1.7;margin-bottom:12px;}
+    .auth-mini .mini-actions{display:flex;gap:10px;flex-wrap:wrap;}
 
     .btn{border:none;border-radius:14px;padding:12px 14px;cursor:pointer;transition:.2s ease;font-weight:700;}
     .btn:hover{transform:translateY(-1px);}
-    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; box-shadow:0 10px 20px rgba(255,79,154,.2);}
-    .btn-secondary{background:rgba(255,255,255,.05); color:#fff; border:1px solid rgba(255,255,255,.06);}
-    .btn-ghost{background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.08);}
-    .social-btn{
-      width:100%;display:flex; align-items:center; justify-content:center; gap:10px;border-radius:14px;
-      padding:12px 14px; font-weight:700; color:#fff; border:none; cursor:pointer;transition:.2s ease;
-    }
-    .social-btn:hover{transform:translateY(-1px);}
-    .social-btn.google{background:#2a2a2f; border:1px solid rgba(255,255,255,.08);}
-    .social-btn.facebook{background:#1877f2;}
-    .social-btn svg{width:18px; height:18px; flex:0 0 auto;}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 10px 20px rgba(255,79,154,.2);}
+    .btn-secondary{background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.06);}
+    .btn-ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.08);}
 
     .menu{margin-top:10px;}
-    .menu-item{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:62px;
-      padding:0 16px 0 18px; border-top:1px solid rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.03);
-      background:linear-gradient(90deg, rgba(255,79,154,.05), transparent 60%); cursor:pointer; transition:.2s ease;
-    }
+    .menu-item{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:62px;padding:0 16px 0 18px;border-top:1px solid rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.03);background:linear-gradient(90deg, rgba(255,79,154,.05), transparent 60%);cursor:pointer;transition:.2s ease;}
     .menu-item:hover,.menu-item.active{background:linear-gradient(90deg, rgba(255,79,154,.16), rgba(255,79,154,.05));}
-    .menu-item .label{display:flex; align-items:center; gap:12px; font-size:17px;}
-    .menu-item .meta{color:var(--muted); font-size:12px;}
-    .menu-icon{
-      width:34px; height:34px; border-radius:12px; display:grid; place-items:center;
-      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.04);flex:0 0 auto;
-    }
+    .menu-item .label{display:flex;align-items:center;gap:12px;font-size:17px;}
+    .menu-item .meta{color:var(--muted);font-size:12px;}
+    .menu-icon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.04);flex:0 0 auto;}
 
-    .layout{display:flex; min-height:calc(100vh - 44px);} 
-    .mini-rail{
-      width:84px; background:linear-gradient(180deg, #130f1a 0%, #0e0b12 100%);
-      border-left:1px solid rgba(255,255,255,.05); display:flex; flex-direction:column; align-items:center;
-      gap:16px; padding:18px 0; position:sticky; top:44px; height:calc(100vh - 44px);
-    }
-    .rail-btn{
-      width:52px; height:52px; border:none; border-radius:18px; background:rgba(255,255,255,.04);
-      color:#fff; cursor:pointer; transition:.2s ease; font-size:20px;
-    }
-    .rail-btn:hover{background:rgba(255,255,255,.09); transform:translateY(-1px);} 
+    .layout{display:flex;min-height:calc(100vh - 44px);} 
+    .mini-rail{width:84px;background:linear-gradient(180deg,#130f1a 0%,#0e0b12 100%);border-left:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px 0;position:sticky;top:44px;height:calc(100vh - 44px);}
+    .rail-btn{width:52px;height:52px;border:none;border-radius:18px;background:rgba(255,255,255,.04);color:#fff;cursor:pointer;transition:.2s ease;font-size:20px;}
+    .rail-btn:hover{background:rgba(255,255,255,.09);transform:translateY(-1px);} 
     .rail-spacer{flex:1;}
-    .content{flex:1; min-width:0;}
-    .header{position:fixed; top:44px; left:0; right:0; z-index:100; background:rgba(13,10,18,.95); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,.05); padding:12px 22px;}
-    .header-inner{max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:10px;}
-    .header-top{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:12px;}
-    .header-right,.header-left{display:flex; align-items:center; gap:10px;}
+    .content{flex:1;min-width:0;}
+
+    .header{
+      position:fixed;top:44px;left:0;right:0;z-index:100;
+      background:rgba(13,10,18,.95);backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(255,255,255,.05);padding:12px 22px;
+    }
+    .header-inner{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:10px;}
+    .header-top{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;}
+    .header-right,.header-left{display:flex;align-items:center;gap:10px;}
     .header-right{justify-content:flex-start;}
     .header-left{justify-content:flex-end;}
-    .header-center{display:flex; align-items:center; justify-content:center; gap:10px; min-width:0;}
-    .title-row{display:flex; align-items:center; justify-content:center; gap:10px; min-width:0;}
-    .title-row strong{font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .search-inline{width:100%; height:42px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.05); border-radius:14px; display:flex; align-items:center; gap:10px; padding:0 12px; color:var(--muted);}
-    .search-inline input{flex:1; border:none; background:transparent; color:white; outline:none;}
-    .header-right,.header-left{display:flex; align-items:center; gap:12px;}
-    .search{
-      width:min(520px, 50vw); height:46px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.05);
-      border-radius:16px; display:flex; align-items:center; gap:10px; padding:0 14px; color:var(--muted);
-    }
-    .search input{flex:1; border:none; background:transparent; color:white; outline:none;}
+    .header-center{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;}
+    .title-row{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;}
+    .title-row strong{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .search-inline{width:100%;height:42px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);border-radius:14px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);}
+    .search-inline input{flex:1;border:none;background:transparent;color:#fff;outline:none;}
 
     .page{padding:172px 24px 24px;}
-    .hero{
-      background:linear-gradient(180deg, rgba(31,22,40,.95), rgba(21,16,29,.95));
-      border:1px solid rgba(255,255,255,.06); border-radius:28px; box-shadow:var(--shadow); overflow:hidden;
-      position:relative; margin-bottom:20px;
-    }
-    .hero::after{
-      content:""; position:absolute; left:-40px; bottom:-80px; width:260px; height:260px;
-      background:radial-gradient(circle, rgba(255,79,154,.16), transparent 70%); pointer-events:none;
-    }
-    .hero-inner{padding:28px; display:grid; grid-template-columns:1.15fr .85fr; gap:18px; align-items:start;}
-    .hero h2{font-size:34px; margin-bottom:10px;}
-    .hero p{color:var(--muted); line-height:1.9; max-width:760px;}
-    .hero-actions{margin-top:18px; display:flex; flex-wrap:wrap; gap:10px;}
-    .hero-side{display:grid; gap:12px;}
-    .small-card{background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05); border-radius:20px; padding:16px;}
-    .small-card h3{font-size:17px; margin-bottom:6px;}
-    .small-card p{font-size:13px; color:var(--muted); line-height:1.7;}
+    .hero{background:linear-gradient(180deg,rgba(31,22,40,.95),rgba(21,16,29,.95));border:1px solid rgba(255,255,255,.06);border-radius:28px;box-shadow:var(--shadow);overflow:hidden;position:relative;margin-bottom:20px;}
+    .hero::after{content:"";position:absolute;left:-40px;bottom:-80px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,79,154,.16),transparent 70%);pointer-events:none;}
+    .hero-inner{padding:28px;display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start;}
+    .hero h2{font-size:34px;margin-bottom:10px;}
+    .hero p{color:var(--muted);line-height:1.9;max-width:760px;}
+    .hero-actions{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;}
+    .hero-side{display:grid;gap:12px;}
+    .small-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:16px;}
+    .small-card h3{font-size:17px;margin-bottom:6px;}
+    .small-card p{font-size:13px;color:var(--muted);line-height:1.7;}
 
-    .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
-    .panel{background:linear-gradient(180deg, rgba(30,23,39,.96), rgba(19,15,27,.96)); border:1px solid rgba(255,255,255,.06); border-radius:24px; box-shadow:var(--shadow); padding:20px;}
-    .panel-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+    .panel{background:linear-gradient(180deg,rgba(30,23,39,.96),rgba(19,15,27,.96));border:1px solid rgba(255,255,255,.06);border-radius:24px;box-shadow:var(--shadow);padding:20px;}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
     .panel-head h3{font-size:22px;}
-    .badge{background:rgba(255,79,154,.12); color:#ffd6e7; padding:7px 12px; border-radius:999px; font-size:12px;}
+    .badge{background:rgba(255,79,154,.12);color:#ffd6e7;padding:7px 12px;border-radius:999px;font-size:12px;}
 
-    .room-list,.online-list,.msg-list{display:grid; gap:12px;}
-    .room,.online-user,.empty,.msg-item{background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05); border-radius:18px; padding:15px 16px;}
-    .room{display:flex; align-items:center; justify-content:space-between; gap:14px;}
-    .room h4{font-size:17px; margin-bottom:5px;}
-    .room p{color:var(--muted); font-size:13px; line-height:1.7;}
-    .status{white-space:nowrap; font-size:12px; border-radius:999px; padding:7px 11px; background:rgba(255,255,255,.06); color:#ffe0ec;}
-    .empty{text-align:center; color:var(--muted); line-height:1.9; padding:24px 16px;}
-    .online-user{display:flex; align-items:center; justify-content:space-between; gap:12px;}
-    .user-info{display:flex; align-items:center; gap:12px; min-width:0;}
-    .avatar{
-      width:46px; height:46px; border-radius:16px; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(135deg,#ff91c2,#8338ec); font-weight:700; flex-shrink:0;
-    }
+    .room-list,.online-list,.msg-list{display:grid;gap:12px;}
+    .room,.online-user,.empty,.msg-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:15px 16px;}
+    .room{display:flex;align-items:center;justify-content:space-between;gap:14px;}
+    .room h4{font-size:17px;margin-bottom:5px;}
+    .room p{color:var(--muted);font-size:13px;line-height:1.7;}
+    .status{white-space:nowrap;font-size:12px;border-radius:999px;padding:7px 11px;background:rgba(255,255,255,.06);color:#ffe0ec;}
+    .empty{text-align:center;color:var(--muted);line-height:1.9;padding:24px 16px;}
+    .online-user{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .user-info{display:flex;align-items:center;gap:12px;min-width:0;}
+    .avatar{width:46px;height:46px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ff91c2,#8338ec);font-weight:700;flex-shrink:0;}
     .user-text{min-width:0;}
-    .user-text h4{font-size:15px; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .user-text p{color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .dot{width:10px; height:10px; border-radius:50%; background:var(--success); box-shadow:0 0 0 4px rgba(74,212,127,.1); flex-shrink:0;}
+    .user-text h4{font-size:15px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-text p{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(74,212,127,.1);flex-shrink:0;}
 
-    .side-pill{
-      position:fixed; left:18px; top:50%; transform:translateY(-50%); writing-mode:vertical-rl; border:none;
-      border-radius:18px; background:linear-gradient(180deg, var(--accent), var(--accent2)); color:#fff;
-      padding:14px 10px; font-weight:700; cursor:pointer; box-shadow:var(--shadow); z-index:25;
-    }
+    .side-pill{position:fixed;left:18px;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;border:none;border-radius:18px;background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff;padding:14px 10px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);z-index:25;}
 
-    .auth-modal{
-      position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.96);
-      width:min(92vw, 460px);background:linear-gradient(180deg,#1b1424,#120d19); border:1px solid rgba(255,255,255,.07);
-      border-radius:26px;box-shadow:var(--shadow); z-index:50; opacity:0; visibility:hidden; transition:.22s ease; overflow:hidden;
-    }
-    .auth-modal.show{opacity:1; visibility:visible; transform:translate(-50%,-50%) scale(1);}
-    .auth-top{
-      padding:18px 18px 12px; background:linear-gradient(90deg, rgba(255,79,154,.18), rgba(255,79,154,.04));
-      border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
+    .auth-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);width:min(92vw,460px);background:linear-gradient(180deg,#1b1424,#120d19);border:1px solid rgba(255,255,255,.07);border-radius:26px;box-shadow:var(--shadow);z-index:50;opacity:0;visibility:hidden;transition:.22s ease;overflow:hidden;}
+    .auth-modal.show{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1);}
+    .auth-top{padding:18px 18px 12px;background:linear-gradient(90deg,rgba(255,79,154,.18),rgba(255,79,154,.04));border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:12px;}
     .auth-top h3{font-size:24px;}
-    .auth-top p{color:var(--muted); font-size:12px; margin-top:4px;}
-    .tabs{display:flex; gap:8px; padding:16px 18px 0;}
-    .tab{flex:1; border:none; border-radius:14px; padding:12px; background:rgba(255,255,255,.04); color:#fff; cursor:pointer;}
+    .auth-top p{color:var(--muted);font-size:12px;margin-top:4px;}
+    .tabs{display:flex;gap:8px;padding:16px 18px 0;}
+    .tab{flex:1;border:none;border-radius:14px;padding:12px;background:rgba(255,255,255,.04);color:#fff;cursor:pointer;}
     .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));}
     .auth-body{padding:18px;}
-    .form{display:none; gap:12px; flex-direction:column;}
+    .form{display:none;gap:12px;flex-direction:column;}
     .form.active{display:flex;}
-    .field{display:flex; flex-direction:column; gap:8px;}
-    .field label{color:#eadff4; font-size:14px;}
-    .field input, .field textarea{
-      min-height:48px; border:none; outline:none; border-radius:14px; background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.06); color:#fff; padding:12px 14px;
-    }
-    .field textarea{min-height:110px; resize:vertical;}
-    .hint{font-size:12px; color:var(--muted); line-height:1.8;}
-    .footer-note{text-align:center; margin-top:20px; color:var(--muted); font-size:13px;}
+    .field{display:flex;flex-direction:column;gap:8px;}
+    .field label{color:#eadff4;font-size:14px;}
+    .field input,.field textarea{min-height:48px;border:none;outline:none;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);color:#fff;padding:12px 14px;}
+    .field textarea{min-height:110px;resize:vertical;}
+    .hint{font-size:12px;color:var(--muted);line-height:1.8;}
+    .footer-note{text-align:center;margin-top:20px;color:var(--muted);font-size:13px;}
 
     .section{display:none;}
     .section.active{display:block;}
-    .messages-layout{display:grid;grid-template-columns:300px 1fr; gap:18px;}
-    .chat-box{min-height:520px; display:flex; flex-direction:column; gap:12px;}
-    .chat-window{
-      flex:1; min-height:360px; max-height:540px; overflow:auto; padding:16px; border-radius:20px;
-      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05);display:flex; flex-direction:column; gap:10px;
-    }
-    .bubble{
-      max-width:78%; padding:12px 14px; border-radius:18px; line-height:1.8; font-size:14px;
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.05); word-break:break-word;
-    }
-    .bubble.me{margin-right:auto; background:linear-gradient(135deg, rgba(255,79,154,.20), rgba(195,39,115,.18));}
+    .messages-layout{display:grid;grid-template-columns:300px 1fr;gap:18px;}
+    .chat-box{min-height:520px;display:flex;flex-direction:column;gap:12px;}
+    .chat-window{flex:1;min-height:360px;max-height:540px;overflow:auto;padding:16px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:10px;}
+    .bubble{max-width:78%;padding:12px 14px;border-radius:18px;line-height:1.8;font-size:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.05);word-break:break-word;}
+    .bubble.me{margin-right:auto;background:linear-gradient(135deg,rgba(255,79,154,.20),rgba(195,39,115,.18));}
     .bubble.them{margin-left:auto;}
-    .bubble small{display:block; color:var(--muted); font-size:11px; margin-top:6px;}
-    .chat-compose{display:flex; gap:10px; align-items:center;}
-    .chat-compose input{
-      flex:1; height:50px; border-radius:16px; border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.05);color:#fff; padding:0 14px; outline:none;
-    }
+    .bubble small{display:block;color:var(--muted);font-size:11px;margin-top:6px;}
+    .chat-compose{display:flex;gap:10px;align-items:center;}
+    .chat-compose input{flex:1;height:50px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.05);color:#fff;padding:0 14px;outline:none;}
 
-    .group-tools{display:grid; gap:10px;}
-    .tool-row{display:flex; gap:10px;}
-    .tool-row input{
-      flex:1; height:46px; border-radius:14px; border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.05); color:#fff; padding:0 12px; outline:none;
-    }
-    .group-list{display:grid; gap:10px;}
-    .group-card{
-      border-radius:18px; border:1px solid rgba(255,255,255,.05); background:rgba(255,255,255,.03);
-      padding:14px;display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .group-card h4{font-size:15px; margin-bottom:4px;}
-    .group-card p{font-size:12px; color:var(--muted); line-height:1.6;}
-    .public-strip{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;
-      padding:14px 16px; border-radius:18px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.05);
-    }
+    .group-tools{display:grid;gap:10px;}
+    .tool-row{display:flex;gap:10px;}
+    .tool-row input{flex:1;height:46px;border-radius:14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.05);color:#fff;padding:0 12px;outline:none;}
+    .group-list{display:grid;gap:10px;}
+    .group-card{border-radius:18px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.03);padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .group-card h4{font-size:15px;margin-bottom:4px;}
+    .group-card p{font-size:12px;color:var(--muted);line-height:1.6;}
+    .public-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);}
     .public-strip strong{font-size:15px;}
-    .public-strip span{font-size:12px; color:var(--muted);}
+    .public-strip span{font-size:12px;color:var(--muted);}
 
-    .msg-item{display:flex; gap:12px; align-items:flex-start;}
-    .msg-item .avatar{width:40px; height:40px; border-radius:14px; font-size:14px;}
-    .msg-item .meta-line{display:flex; gap:10px; align-items:center; margin-bottom:6px;}
+    .msg-item{display:flex;gap:12px;align-items:flex-start;}
+    .msg-item .avatar{width:40px;height:40px;border-radius:14px;font-size:14px;}
+    .msg-item .meta-line{display:flex;gap:10px;align-items:center;margin-bottom:6px;}
     .msg-item .meta-line strong{font-size:14px;}
-    .msg-item .meta-line small{color:var(--muted); font-size:11px;}
-    .msg-item p{color:#f6ebff; line-height:1.8; font-size:14px;}
-    .auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+    .msg-item .meta-line small{color:var(--muted);font-size:11px;}
+    .msg-item p{color:#f6ebff;line-height:1.8;font-size:14px;}
+    .auth-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px;}
 
-    .status-bar{
-      margin-top:10px; padding:10px 14px; border-radius:14px; background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.05); color:var(--muted); font-size:13px; line-height:1.7;
-    }
-    .status-bar.ok{color:#d8ffe6; border-color:rgba(74,212,127,.2); background:rgba(74,212,127,.08);}
-    .status-bar.err{color:#ffd7df; border-color:rgba(255,107,133,.2); background:rgba(255,107,133,.08);}
+    .status-bar{margin-top:10px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);color:var(--muted);font-size:13px;line-height:1.7;}
+    .status-bar.ok{color:#d8ffe6;border-color:rgba(74,212,127,.2);background:rgba(74,212,127,.08);}
+    .status-bar.err{color:#ffd7df;border-color:rgba(255,107,133,.2);background:rgba(255,107,133,.08);}
 
-    .drawer{
-      position:fixed; top:44px; bottom:0; width:min(92vw, 420px); background:linear-gradient(180deg, #181320 0%, #100c15 100%);
-      z-index:45; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.06); overflow:hidden;
-      display:flex; flex-direction:column; transition:.28s ease;
-    }
-    .drawer.left{left:0; transform:translateX(-100%); border-right:1px solid rgba(255,255,255,.06);}
-    .drawer.right{right:0; transform:translateX(100%); border-left:1px solid rgba(255,255,255,.06);}
+    .drawer{position:fixed;top:44px;bottom:0;width:min(92vw,420px);background:linear-gradient(180deg,#181320 0%,#100c15 100%);z-index:45;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.06);overflow:hidden;display:flex;flex-direction:column;transition:.28s ease;}
+    .drawer.left{left:0;transform:translateX(-100%);border-right:1px solid rgba(255,255,255,.06);}
+    .drawer.right{right:0;transform:translateX(100%);border-left:1px solid rgba(255,255,255,.06);}
     .drawer.open{transform:translateX(0);} 
     .drawer-head{padding:16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(90deg, rgba(255,79,154,.12), rgba(255,79,154,.03));}
-    .drawer-body{padding:16px; overflow:auto; flex:1;}
-    .mini-card{background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05); border-radius:18px; padding:14px; margin-bottom:12px;}
-    .mini-card h4{font-size:15px; margin-bottom:4px;}
-    .mini-card p{font-size:12px; color:var(--muted); line-height:1.6;}
-    .drawer-tabs{display:flex; gap:8px; margin-bottom:12px;}
-    .drawer-tabs .tab{padding:10px 12px; font-size:13px;}
-    .profile-card{display:flex; align-items:flex-start; gap:12px; padding:14px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05); border-radius:18px; margin-bottom:12px;}
+    .drawer-body{padding:16px;overflow:auto;flex:1;}
+    .mini-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:14px;margin-bottom:12px;}
+    .mini-card h4{font-size:15px;margin-bottom:4px;}
+    .mini-card p{font-size:12px;color:var(--muted);line-height:1.6;}
+    .drawer-tabs{display:flex;gap:8px;margin-bottom:12px;}
+    .drawer-tabs .tab{padding:10px 12px;font-size:13px;}
+    .profile-card{display:flex;align-items:flex-start;gap:12px;padding:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:18px;margin-bottom:12px;}
     .profile-card .avatar{width:52px;height:52px;border-radius:18px;}
-    .profile-meta h4{font-size:16px; margin-bottom:4px;}
-    .profile-meta p{color:var(--muted); font-size:12px; line-height:1.6;}
-    .chip{display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:6px 10px; background:rgba(255,255,255,.05); font-size:12px; color:#fff; margin-top:8px;}
+    .profile-meta h4{font-size:16px;margin-bottom:4px;}
+    .profile-meta p{color:var(--muted);font-size:12px;line-height:1.6;}
+    .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.05);font-size:12px;color:#fff;margin-top:8px;}
     .list-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);margin-bottom:10px;cursor:pointer;}
     .list-item:hover{background:rgba(255,255,255,.06);}
     .list-item strong{font-size:14px;}
     .list-item small{display:block;color:var(--muted);font-size:11px;margin-top:2px;}
-    .visits{display:grid; gap:10px;}
-    .search-results{display:grid; gap:10px; margin-top:12px;}
+    .visits{display:grid;gap:10px;}
+    .search-results{display:grid;gap:10px;margin-top:12px;}
 
-    @media (max-width: 980px){
+    @media (max-width:980px){
       .hero-inner,.grid,.messages-layout{grid-template-columns:1fr;}
       .mini-rail{width:72px;}
-      .search{width:100%; max-width:360px;}
-      .drawer{width:min(100vw, 420px);} 
+      .search{width:100%;max-width:360px;}
     }
-    @media (max-width: 700px){
+    @media (max-width:700px){
       .mini-rail{display:none;}
       .header{padding:10px 12px;}
-      .header-top{grid-template-columns:auto 1fr auto; gap:8px;}
+      .header-top{grid-template-columns:auto 1fr auto;gap:8px;}
       .header-right,.header-left{gap:8px;}
-      .search{display:none;}
-      .search-inline{height:40px;}
       .page{padding:172px 16px 16px;}
       .hero-inner{padding:20px;}
       .hero h2{font-size:28px;}
       .side-pill{left:10px;}
       .messages-layout{grid-template-columns:1fr;}
       .auth-actions{grid-template-columns:1fr;}
-      .drawer{top:44px; width:100vw;}
+      .drawer{top:44px;width:100vw;}
     }
-
     .hidden{display:none !important;}
   </style></head>
 <body>
@@ -352,7 +266,7 @@
   </div>
   <div class="sidebar-body">
     <div class="auth-mini">
-      <p>سجل دخولك لعرض اسمك داخل الشات. الواجهة جاهزة والتنقل منظم، والاتصال مع Firestore يعمل من نفس الملف.</p>
+      <p>سجل دخولك لعرض اسمك داخل الشات. الواجهة مرتبة ومهيأة للربط مع Firebase.</p>
       <div class="mini-actions">
         <button class="btn btn-primary" onclick="openAuth('login')">دخول</button>
         <button class="btn btn-secondary" onclick="openAuth('register')">حساب جديد</button>
@@ -391,16 +305,6 @@
 
   <div class="auth-body">
     <form class="form active" id="loginForm" onsubmit="return false;">
-      <div class="auth-actions">
-        <button type="button" class="social-btn google" onclick="fakeOAuth('google')">
-          <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.3 9.3 3.5l6.9-6.9C35.9 2.1 30.4 0 24 0 14.6 0 6.4 5.4 2.4 13.2l8 6.2C12.4 13.8 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.5-.1-2.7-.4-3.9H24v7.5h12.8c-.3 2-1.7 5-4.8 7l7.4 5.7c4.4-4 7.1-9.9 7.1-16.3z"/><path fill="#FBBC05" d="M10.4 28.2c-.5-1.5-.8-3.1-.8-4.7s.3-3.2.8-4.7l-8-6.2C.9 15.6 0 19.3 0 23.5S.9 31.4 2.4 35.2l8-7z"/><path fill="#34A853" d="M24 48c6.4 0 11.8-2.1 15.7-5.7l-7.4-5.7c-2.1 1.4-4.9 2.4-8.3 2.4-6.4 0-11.6-4.3-13.6-10.2l-8 6.2C6.4 42.6 14.6 48 24 48z"/></svg>
-          المتابعة بـ Google
-        </button>
-        <button type="button" class="social-btn facebook" onclick="fakeOAuth('facebook')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="white" d="M13.5 22v-8h2.7l.4-3.1h-3.1V9c0-.9.2-1.4 1.4-1.4h1.8V5.1c-.3 0-1.3-.1-2.4-.1-2.3 0-3.8 1.4-3.8 4v1.9H8v3.1h2.5v8h3z"/></svg>
-          المتابعة بـ Facebook
-        </button>
-      </div>
       <div class="field">
         <label>اسم المستخدم أو البريد</label>
         <input id="loginUser" type="text" placeholder="اكتب اسم المستخدم أو البريد" />
@@ -414,17 +318,6 @@
     </form>
 
     <form class="form" id="registerForm" onsubmit="return false;">
-      <div class="auth-actions">
-        <button type="button" class="social-btn google" onclick="fakeOAuth('google')">
-          <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.3 9.3 3.5l6.9-6.9C35.9 2.1 30.4 0 24 0 14.6 0 6.4 5.4 2.4 13.2l8 6.2C12.4 13.8 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.5-.1-2.7-.4-3.9H24v7.5h12.8c-.3 2-1.7 5-4.8 7l7.4 5.7c4.4-4 7.1-9.9 7.1-16.3z"/><path fill="#FBBC05" d="M10.4 28.2c-.5-1.5-.8-3.1-.8-4.7s.3-3.2.8-4.7l-8-6.2C.9 15.6 0 19.3 0 23.5S.9 31.4 2.4 35.2l8-7z"/><path fill="#34A853" d="M24 48c6.4 0 11.8-2.1 15.7-5.7l-7.4-5.7c-2.1 1.4-4.9 2.4-8.3 2.4-6.4 0-11.6-4.3-13.6-10.2l-8 6.2C6.4 42.6 14.6 48 24 48z"/></svg>
-          التسجيل بـ Google
-        </button>
-        <button type="button" class="social-btn facebook" onclick="fakeOAuth('facebook')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="white" d="M13.5 22v-8h2.7l.4-3.1h-3.1V9c0-.9.2-1.4 1.4-1.4h1.8V5.1c-.3 0-1.3-.1-2.4-.1-2.3 0-3.8 1.4-3.8 4v1.9H8v3.1h2.5v8h3z"/></svg>
-          التسجيل بـ Facebook
-        </button>
-      </div>
-
       <div class="field">
         <label>الاسم الظاهر</label>
         <input id="registerName" type="text" placeholder="مثال: نار الشرق" />
@@ -499,8 +392,8 @@
             <div>
               <h2>مرحبًا بك في شات نار</h2>
               <p>
-                هنا الرسائل العامة تظهر في الواجهة الرئيسية، والرسائل الخاصة في لوحة جانبية تُفتح عند الطلب،
-                مع إشعارات زيارة الملف الشخصي وقائمة المتصلين الآن، وواجهة متجاوبة للموبايل والكمبيوتر.
+                الرسائل العامة تظهر في الواجهة الرئيسية، والرسائل الخاصة في لوحة جانبية تفتح عند الطلب،
+                مع إشعارات الزيارات وقائمة المتصلين الآن، وتصميم متجاوب للموبايل والكمبيوتر.
               </p>
               <div class="hero-actions">
                 <button class="btn btn-primary" onclick="openAuth('register')">ابدأ الآن</button>
@@ -511,7 +404,7 @@
             <div class="hero-side">
               <div class="small-card">
                 <h3>Firebase Auth</h3>
-                <p>يدعم الإيميل والباسورد وGoogle.</p>
+                <p>يدعم الإيميل والباسورد فقط مؤقتًا.</p>
               </div>
               <div class="small-card">
                 <h3>Firestore Realtime</h3>
@@ -943,7 +836,7 @@
       box.innerHTML = messages.map((m) => {
         const isMe = currentUserId && m.uid === currentUserId;
         return `
-          <div class="msg-enter msg-item">
+          <div class="msg-item">
             <div class="avatar" style="background: linear-gradient(135deg, ${m.color || '#ff91c2'}, #8338ec);">${escapeHtml(getInitials(m.senderName || 'م'))}</div>
             <div class="flex-1 min-w-0">
               <div class="meta-line ${isMe ? '' : 'justify-end'}">
@@ -1077,6 +970,7 @@
           if (data.isOnline || data.displayName) users.push(data);
         });
         users.sort((a, b) => (b.isOnline === true) - (a.isOnline === true));
+        window.__cachedUsers = users;
         renderUsers(users);
       }, (error) => {
         console.error(error);
@@ -1121,7 +1015,6 @@
         box.innerHTML = '<div class="empty">سجّل الدخول لعرض المحادثات الخاصة.</div>';
         return;
       }
-
       if (unsubPrivateChats) unsubPrivateChats();
       unsubPrivateChats = db.collection('privateChats').onSnapshot((snapshot) => {
         const chats = [];
@@ -1136,7 +1029,7 @@
         }
         box.innerHTML = chats.map(chat => {
           const peerId = (chat.participants || []).find(id => id !== currentUserId);
-          const peerName = chat.peerName || chat.peerDisplayName || 'مستخدم';
+          const peerName = chat.peerName || 'مستخدم';
           return `
             <div class="list-item" onclick="openPrivateChat('${peerId}')">
               <div>
@@ -1161,9 +1054,9 @@
         const users = [];
         snapshot.forEach(doc => users.push(doc.data()));
         window.__cachedUsers = users;
+        renderUsers(users);
         renderFriendsDrawer(users);
         renderPrivateMembers(users);
-        renderUsers(users);
       });
     }
 
@@ -1218,589 +1111,9 @@
       currentUserId = user.uid;
       userColor = COLORS[Math.floor(Math.random() * COLORS.length)];
       document.getElementById('headerUserName').textContent = baseData.displayName;
-      document.getElementById('headerSub').textContent = `@${baseData.username}`;
       document.getElementById('logoutBtn').style.display = 'inline-flex';
       document.getElementById('topAlert').style.display = 'none';
-      setStatus('تم الاتصال بـ Firestore', 'ok');
-    }
-
-    async function registerWithEmail() {
-      try {
-        const displayName = document.getElementById('registerName').value.trim();
-        const username = normalizeUsername(document.getElementById('registerUsername').value);
-        const email = document.getElementById('registerEmail').value.trim();
-        const password = document.getElementById('registerPass').value;
-        const bio = document.getElementById('registerBio').value.trim();
-
-        if (!displayName || !username || !email || !password) {
-          setStatus('من فضلك املأ كل الحقول الأساسية.', 'err');
-          return;
-        }
-        if (password.length < 6) {
-          setStatus('كلمة المرور لازم تكون 6 أحرف على الأقل.', 'err');
-          return;
-        }
-
-        const checkUsername = await db.collection('users').where('username', '==', username).limit(1).get();
-        if (!checkUsername.empty) {
-          setStatus('اسم المستخدم مستخدم بالفعل.', 'err');
-          return;
-        }
-
-        const cred = await auth.createUserWithEmailAndPassword(email, password);
-        await cred.user.updateProfile({ displayName });
-        await saveUserProfile(cred.user, { displayName, username, bio, provider: 'email' });
-        setStatus('تم إنشاء الحساب بنجاح.', 'ok');
-        closeAuth();
-      } catch (error) {
-        setStatus(mapFirebaseError(error), 'err');
-      }
-    }
-
-    async function resolveEmailFromUsername(inputValue) {
-      if (inputValue.includes('@')) return inputValue;
-      const snap = await db.collection('users').where('username', '==', normalizeUsername(inputValue)).limit(1).get();
-      if (snap.empty) throw { code: 'USERNAME_NOT_FOUND' };
-      return snap.docs[0].data().email;
-    }
-
-    async function loginWithEmail() {
-      try {
-        const userInput = document.getElementById('loginUser').value.trim();
-        const password = document.getElementById('loginPass').value;
-        if (!userInput || !password) {
-          setStatus('اكتب اسم المستخدم/البريد وكلمة المرور.', 'err');
-          return;
-        }
-        const email = await resolveEmailFromUsername(userInput);
-        await auth.signInWithEmailAndPassword(email, password);
-        setStatus('تم تسجيل الدخول بنجاح.', 'ok');
-        closeAuth();
-      } catch (error) {
-        setStatus(mapFirebaseError(error), 'err');
-      }
-    }
-
-    async function fakeOAuth(providerName) {
-      try {
-        if (providerName === 'google') {
-          const result = await auth.signInWithPopup(googleProvider);
-          const displayName = result.user.displayName || 'مستخدم اجتماعي';
-          const username = normalizeUsername(result.user.email?.split('@')[0] || displayName);
-          await saveUserProfile(result.user, { displayName, username, provider: providerName });
-          closeAuth();
-          return;
-        }
-        setStatus('Facebook يحتاج تفعيل مزود Facebook داخل Firebase Console.', 'err');
-      } catch (error) {
-        setStatus(mapFirebaseError(error), 'err');
-      }
-    }
-
-    async function sendPublicMessage() {
-      try {
-        if (!auth.currentUser) {
-          setStatus('سجل دخولك أولاً لإرسال رسالة.', 'err');
-          openAuth('login');
-          return;
-        }
-        const input = document.getElementById('publicMessageInput');
-        const text = input.value.trim();
-        if (!text) return;
-        await db.collection('publicMessages').add({
-          text,
-          uid: auth.currentUser.uid,
-          senderName: currentUser?.displayName || auth.currentUser.displayName || 'مستخدم',
-          username: currentUser?.username || '',
-          color: userColor || '#ec4899',
-          time: Date.now(),
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        input.value = '';
-      } catch (error) {
-        setStatus(mapFirebaseError(error), 'err');
-      }
-    }
-
-    async function createRoom() {
-      try {
-        if (!auth.currentUser) {
-          setStatus('لازم تسجل دخول الأول عشان تنشئ غرفة.', 'err');
-          openAuth('login');
-          return;
-        }
-        const title = document.getElementById('roomNameInput').value.trim();
-        const description = document.getElementById('roomDescInput').value.trim();
-        if (!title) {
-          setStatus('اكتب اسم الغرفة.', 'err');
-          return;
-        }
-        await db.collection('rooms').add({
-          title,
-          description,
-          createdBy: auth.currentUser.uid,
-          createdByName: currentUser?.displayName || auth.currentUser.displayName || 'مستخدم',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById('roomNameInput').value = '';
-        document.getElementById('roomDescInput').value = '';
-        setStatus('تم إنشاء الغرفة.', 'ok');
-      } catch (error) {
-        setStatus(mapFirebaseError(error), 'err');
-      }
-    }
-
-    async function logoutUser() {
-      try {
-        if (auth.currentUser) {
-          await db.collection('users').doc(auth.currentUser.uid).set({
-            isOnline: false,
-            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-        }
-      } catch {}
-      await auth.signOut();
-      setStatus('تم تسجيل الخروج.', 'ok');
-    }
-
-    function mapFirebaseError(error) {
-      const code = error?.code || error?.message || '';
-      if (code.includes('auth/invalid-credential')) return 'بيانات الدخول غير صحيحة.';
-      if (code.includes('auth/user-not-found')) return 'المستخدم غير موجود.';
-      if (code.includes('auth/wrong-password')) return 'كلمة المرور غير صحيحة.';
-      if (code.includes('auth/email-already-in-use')) return 'البريد مستخدم بالفعل.';
-      if (code.includes('auth/popup-closed-by-user')) return 'تم غلق نافذة تسجيل الدخول قبل الإكمال.';
-      if (code.includes('auth/operation-not-allowed')) return 'فعّل طريقة تسجيل الدخول من Firebase Console.';
-      if (code.includes('auth/invalid-email')) return 'البريد الإلكتروني غير صالح.';
-      if (code.includes('USERNAME_NOT_FOUND')) return 'اسم المستخدم غير موجود.';
-      if (code.includes('permission-denied')) return 'صلاحيات Firestore الحالية لا تسمح بهذه العملية.';
-      return 'حدث خطأ، راجع إعدادات Firebase أو جرّب مرة أخرى.';
-    }
-
-    function filterMembers() {
-      if (window.__cachedUsers) renderUsers(window.__cachedUsers);
-    }
-
-    async function openProfile(uid) {
-      if (!uid || !window.__cachedUsers) return;
-      const profile = window.__cachedUsers.find(u => u.uid === uid);
-      if (!profile) return;
-      currentProfileViewedId = uid;
-      currentPrivatePeerId = uid;
-      currentPrivatePeerProfile = profile;
-
-      document.getElementById('profileDrawerContent').innerHTML = `
-        <div class="profile-card">
-          <div class="avatar">${escapeHtml(getInitials(profile.displayName || 'م'))}</div>
-          <div class="profile-meta">
-            <h4>${escapeHtml(profile.displayName || 'مستخدم')}</h4>
-            <p>@${escapeHtml(profile.username || 'user')}</p>
-            <div class="chip">${profile.isOnline ? '🟢 متصل الآن' : '⚪ غير متصل'}</div>
-            ${profile.bio ? `<p style="margin-top:10px;">${escapeHtml(profile.bio)}</p>` : ''}
-          </div>
-        </div>
-        <div class="mini-card">
-          <h4>عن هذا العضو</h4>
-          <p>يمكنك إضافته كصديق أو فتح رسالة خاصة معه من هنا.</p>
-        </div>
-      `;
-      document.getElementById('profileFriendBtn').textContent = isFriend(uid) ? 'إزالة صديق' : 'إضافة صديق';
-      openDrawer('profile');
-      await logProfileVisit(uid, profile);
-    }
-
-    async function logProfileVisit(visitedUid, visitedProfile) {
-      if (!auth.currentUser || !visitedUid || visitedUid === auth.currentUser.uid) return;
-      await db.collection('profileVisits').add({
-        visitedUid,
-        visitedName: visitedProfile.displayName || 'مستخدم',
-        visitorUid: auth.currentUser.uid,
-        visitorName: currentUser?.displayName || auth.currentUser.displayName || 'مستخدم',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-
-    async function toggleFriendFromProfile() {
-      if (!currentProfileViewedId || !auth.currentUser || currentProfileViewedId === auth.currentUser.uid) return;
-      const ref = db.collection('users').doc(auth.currentUser.uid);
-      const snap = await ref.get();
-      const data = snap.exists ? snap.data() : {};
-      const friendIds = Array.isArray(data.friendIds) ? data.friendIds : [];
-      const exists = friendIds.includes(currentProfileViewedId);
-      const next = exists ? friendIds.filter(id => id !== currentProfileViewedId) : [...friendIds, currentProfileViewedId];
-      await ref.set({ friendIds: next }, { merge: true });
-      document.getElementById('profileFriendBtn').textContent = exists ? 'إضافة صديق' : 'إزالة صديق';
-    }
-
-    function closeProfileDrawer() { closeDrawer('profile'); }
-
-    async function startPrivateChatFromProfile() {
-      if (!currentProfileViewedId) return;
-      await openPrivateChat(currentProfileViewedId);
-      closeDrawer('profile');
-      openDrawer('private');
-      switchPrivateTab('chats');
-    }
-
-    async function openPrivateChat(peerId) {
-      if (!auth.currentUser || !peerId) {
-        openAuth('login');
-        return;
-      }
-      currentPrivatePeerId = peerId;
-      const peer = (window.__cachedUsers || []).find(u => u.uid === peerId);
-      currentPrivatePeerProfile = peer || null;
-      activePrivateChatId = privateChatId(auth.currentUser.uid, peerId);
-      document.getElementById('headerSub').textContent = peer ? `خاص مع @${peer.username || 'user'}` : 'محادثة خاصة';
-      openDrawer('private');
-      await ensurePrivateChatDoc(peerId, peer);
-      listenPrivateMessages(activePrivateChatId);
-      renderPrivatePanel();
-    }
-
-    async function ensurePrivateChatDoc(peerId, peerProfile) {
-      const id = privateChatId(auth.currentUser.uid, peerId);
-      const ref = db.collection('privateChats').doc(id);
-      const snap = await ref.get();
-      if (!snap.exists) {
-        await ref.set({
-          participants: [auth.currentUser.uid, peerId],
-          peerId,
-          peerName: peerProfile?.displayName || 'مستخدم',
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          lastMessage: ''
-        }, { merge: true });
-      }
-    }
-
-    function listenPrivateMessages(chatId) {
-      if (unsubPrivateMessages) unsubPrivateMessages();
-      if (!chatId) return;
-      const q = db.collection('privateChats').doc(chatId).collection('messages').orderBy('createdAt', 'asc');
-      unsubPrivateMessages = q.onSnapshot((snapshot) => {
-        const boxId = 'privateMessagesBox';
-        let box = document.getElementById(boxId);
-        if (!box) {
-          box = document.createElement('div');
-          box.id = boxId;
-          box.className = 'chat-window';
-          const drawerBody = document.getElementById('privateDrawer').querySelector('.drawer-body');
-          drawerBody.appendChild(box);
-        }
-        const msgs = [];
-        snapshot.forEach(doc => msgs.push(doc.data()));
-        box.innerHTML = msgs.length ? msgs.map(m => `
-          <div class="bubble ${m.uid === currentUserId ? 'me' : 'them'}">
-            ${escapeHtml(m.text || '')}
-            <small>${escapeHtml(m.senderName || 'مستخدم')} • ${escapeHtml(formatTime(m.createdAt || m.time))}</small>
-          </div>
-        `).join('') : '<div class="empty">ابدأ أول رسالة خاصة.</div>';
-        box.scrollTop = box.scrollHeight;
-      });
-    }
-
-    function renderPrivateMessagesFallback() {
-      const existing = document.getElementById('privateMessagesBox');
-      if (existing) existing.remove();
-    }
-
-    function renderPrivateChats() {
-      const box = document.getElementById('privateChatsList');
-      if (!currentUserId) {
-        box.innerHTML = '<div class="empty">سجّل الدخول لعرض المحادثات الخاصة.</div>';
-        return;
-      }
-      if (unsubPrivateChats) unsubPrivateChats();
-      unsubPrivateChats = db.collection('privateChats').onSnapshot((snapshot) => {
-        const chats = [];
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          if (Array.isArray(data.participants) && data.participants.includes(currentUserId)) chats.push({ id: doc.id, ...data });
-        });
-        chats.sort((a, b) => toMillis(b.updatedAt || 0) - toMillis(a.updatedAt || 0));
-        if (!chats.length) {
-          box.innerHTML = '<div class="empty">لا توجد محادثات خاصة بعد.</div>';
-          renderPrivateMessagesFallback();
-          return;
-        }
-        box.innerHTML = chats.map(chat => {
-          const peerId = (chat.participants || []).find(id => id !== currentUserId);
-          const peerName = chat.peerName || 'مستخدم';
-          return `
-            <div class="list-item" onclick="openPrivateChat('${peerId}')">
-              <div>
-                <strong>${escapeHtml(peerName)}</strong>
-                <small>${escapeHtml(chat.lastMessage || 'محادثة خاصة')}</small>
-              </div>
-              <span class="status">خاص</span>
-            </div>
-          `;
-        }).join('');
-      });
-    }
-
-    function renderPrivateMembers(users = null) {
-      const box = document.getElementById('privateMembersList');
-      const list = users || window.__cachedUsers || [];
-      const q = document.getElementById('searchInput').value.trim().toLowerCase();
-      const filtered = list.filter(u => u.uid !== currentUserId && memberMatchesSearch(u, q));
-      box.innerHTML = filtered.length ? filtered.map(user => `
-        <div class="list-item" onclick="openProfile('${user.uid}')">
-          <div>
-            <strong>${escapeHtml(user.displayName || 'مستخدم')}</strong>
-            <small>@${escapeHtml(user.username || 'user')}</small>
-          </div>
-          <button class="btn btn-secondary" type="button" onclick="event.stopPropagation(); openPrivateChat('${user.uid}')">خاص</button>
-        </div>
-      `).join('') : '<div class="empty">لا توجد نتائج مطابقة.</div>';
-    }
-
-    function renderFriendsDrawer(users = null) {
-      const box = document.getElementById('friendsDrawerList');
-      const list = users || window.__cachedUsers || [];
-      const friends = list.filter(u => isFriend(u.uid) && u.uid !== currentUserId && u.isOnline);
-      box.innerHTML = friends.length ? friends.map(user => `
-        <div class="list-item" onclick="openProfile('${user.uid}')">
-          <div>
-            <strong>${escapeHtml(user.displayName || 'مستخدم')}</strong>
-            <small>@${escapeHtml(user.username || 'user')}</small>
-          </div>
-          <span class="dot"></span>
-        </div>
-      `).join('') : '<div class="empty">لا يوجد أصدقاء متصلون حالياً.</div>';
-    }
-
-    function loadVisits() {
-      if (unsubVisits) unsubVisits();
-      unsubVisits = db.collection('profileVisits').onSnapshot((snapshot) => {
-        const visits = [];
-        snapshot.forEach(doc => visits.push(doc.data()));
-        window.__cachedVisits = visits;
-        renderNotifications(visits);
-      });
-    }
-
-    function renderNotifications(visits) {
-      const list = visits.filter(v => v.visitedUid === currentUserId).sort((a, b) => toMillis(b.createdAt || 0) - toMillis(a.createdAt || 0));
-      const html = list.length ? list.map(v => `
-        <div class="list-item" onclick="openProfile('${v.visitorUid}')">
-          <div>
-            <strong>${escapeHtml(v.visitorName || 'زائر')}</strong>
-            <small>زار ملفك الشخصي ${escapeHtml(formatTime(v.createdAt))}</small>
-          </div>
-          <span class="status">زيارة</span>
-        </div>
-      `).join('') : '<div class="empty">لا توجد إشعارات حالياً.</div>';
-      document.getElementById('notificationList').innerHTML = html;
-      document.getElementById('notificationDrawerList').innerHTML = html;
-    }
-
-    function renderNotificationDrawer() {
-      const visits = window.__cachedVisits || [];
-      renderNotifications(visits);
-    }
-
-    function filterMembers() {
-      if (window.__cachedUsers) {
-        renderUsers(window.__cachedUsers);
-        renderPrivateMembers(window.__cachedUsers);
-        renderFriendsDrawer(window.__cachedUsers);
-      }
-    }
-
-    async function openProfile(uid) {
-      const profile = (window.__cachedUsers || []).find(u => u.uid === uid);
-      if (!profile) return;
-      currentProfileViewedId = uid;
-      currentPrivatePeerId = uid;
-      currentPrivatePeerProfile = profile;
-      document.getElementById('profileDrawerContent').innerHTML = `
-        <div class="profile-card">
-          <div class="avatar">${escapeHtml(getInitials(profile.displayName || 'م'))}</div>
-          <div class="profile-meta">
-            <h4>${escapeHtml(profile.displayName || 'مستخدم')}</h4>
-            <p>@${escapeHtml(profile.username || 'user')}</p>
-            <div class="chip">${profile.isOnline ? '🟢 متصل الآن' : '⚪ غير متصل'}</div>
-            ${profile.bio ? `<p style="margin-top:10px;">${escapeHtml(profile.bio)}</p>` : ''}
-          </div>
-        </div>
-        <div class="mini-card">
-          <h4>عن هذا العضو</h4>
-          <p>يمكنك إضافته كصديق أو فتح رسالة خاصة معه من هنا.</p>
-        </div>
-      `;
-      document.getElementById('profileFriendBtn').textContent = isFriend(uid) ? 'إزالة صديق' : 'إضافة صديق';
-      openDrawer('profile');
-      await logProfileVisit(uid, profile);
-    }
-
-    async function logProfileVisit(visitedUid, visitedProfile) {
-      if (!auth.currentUser || !visitedUid || visitedUid === auth.currentUser.uid) return;
-      await db.collection('profileVisits').add({
-        visitedUid,
-        visitedName: visitedProfile.displayName || 'مستخدم',
-        visitorUid: auth.currentUser.uid,
-        visitorName: currentUser?.displayName || auth.currentUser.displayName || 'مستخدم',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-
-    async function toggleFriendFromProfile() {
-      if (!currentProfileViewedId || !auth.currentUser || currentProfileViewedId === auth.currentUser.uid) return;
-      const ref = db.collection('users').doc(auth.currentUser.uid);
-      const snap = await ref.get();
-      const data = snap.exists ? snap.data() : {};
-      const friendIds = Array.isArray(data.friendIds) ? data.friendIds : [];
-      const exists = friendIds.includes(currentProfileViewedId);
-      const next = exists ? friendIds.filter(id => id !== currentProfileViewedId) : [...friendIds, currentProfileViewedId];
-      await ref.set({ friendIds: next }, { merge: true });
-      document.getElementById('profileFriendBtn').textContent = exists ? 'إضافة صديق' : 'إزالة صديق';
-    }
-
-    function closeProfileDrawer() { closeDrawer('profile'); }
-
-    async function startPrivateChatFromProfile() {
-      if (!currentProfileViewedId) return;
-      await openPrivateChat(currentProfileViewedId);
-      closeDrawer('profile');
-      openDrawer('private');
-      switchPrivateTab('chats');
-    }
-
-    async function openPrivateChat(peerId) {
-      if (!auth.currentUser || !peerId) {
-        openAuth('login');
-        return;
-      }
-      currentPrivatePeerId = peerId;
-      const peer = (window.__cachedUsers || []).find(u => u.uid === peerId);
-      currentPrivatePeerProfile = peer || null;
-      activePrivateChatId = privateChatId(auth.currentUser.uid, peerId);
-      document.getElementById('headerSub').textContent = peer ? `خاص مع @${peer.username || 'user'}` : 'محادثة خاصة';
-      openDrawer('private');
-      await ensurePrivateChatDoc(peerId, peer);
-      listenPrivateMessages(activePrivateChatId);
-      renderPrivatePanel();
-    }
-
-    async function ensurePrivateChatDoc(peerId, peerProfile) {
-      const id = privateChatId(auth.currentUser.uid, peerId);
-      const ref = db.collection('privateChats').doc(id);
-      const snap = await ref.get();
-      if (!snap.exists) {
-        await ref.set({
-          participants: [auth.currentUser.uid, peerId],
-          peerId,
-          peerName: peerProfile?.displayName || 'مستخدم',
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          lastMessage: ''
-        }, { merge: true });
-      }
-    }
-
-    function listenPrivateMessages(chatId) {
-      if (unsubPrivateMessages) unsubPrivateMessages();
-      if (!chatId) return;
-      const boxId = 'privateMessagesBox';
-      const existing = document.getElementById(boxId);
-      if (existing) existing.remove();
-      const box = document.createElement('div');
-      box.id = boxId;
-      box.className = 'chat-window';
-      box.style.marginTop = '14px';
-      box.innerHTML = '<div class="empty">جارٍ تحميل الرسائل الخاصة...</div>';
-      const body = document.getElementById('privateDrawer').querySelector('.drawer-body');
-      body.appendChild(box);
-
-      const q = db.collection('privateChats').doc(chatId).collection('messages').orderBy('createdAt', 'asc');
-      unsubPrivateMessages = q.onSnapshot((snapshot) => {
-        const msgs = [];
-        snapshot.forEach(doc => msgs.push(doc.data()));
-        box.innerHTML = msgs.length ? msgs.map(m => `
-          <div class="bubble ${m.uid === currentUserId ? 'me' : 'them'}">
-            ${escapeHtml(m.text || '')}
-            <small>${escapeHtml(m.senderName || 'مستخدم')} • ${escapeHtml(formatTime(m.createdAt || m.time))}</small>
-          </div>
-        `).join('') : '<div class="empty">ابدأ أول رسالة خاصة.</div>';
-        box.scrollTop = box.scrollHeight;
-      }, (error) => {
-        console.error(error);
-        box.innerHTML = '<div class="empty">تعذر تحميل الرسائل الخاصة.</div>';
-      });
-    }
-
-    function renderPrivateChats() {
-      const box = document.getElementById('privateChatsList');
-      if (!currentUserId) {
-        box.innerHTML = '<div class="empty">سجّل الدخول لعرض المحادثات الخاصة.</div>';
-        return;
-      }
-      if (unsubPrivateChats) unsubPrivateChats();
-      unsubPrivateChats = db.collection('privateChats').onSnapshot((snapshot) => {
-        const chats = [];
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          if (Array.isArray(data.participants) && data.participants.includes(currentUserId)) chats.push({ id: doc.id, ...data });
-        });
-        chats.sort((a, b) => toMillis(b.updatedAt || 0) - toMillis(a.updatedAt || 0));
-        if (!chats.length) {
-          box.innerHTML = '<div class="empty">لا توجد محادثات خاصة بعد.</div>';
-          return;
-        }
-        box.innerHTML = chats.map(chat => {
-          const peerId = (chat.participants || []).find(id => id !== currentUserId);
-          const peerName = chat.peerName || 'مستخدم';
-          return `
-            <div class="list-item" onclick="openPrivateChat('${peerId}')">
-              <div>
-                <strong>${escapeHtml(peerName)}</strong>
-                <small>${escapeHtml(chat.lastMessage || 'محادثة خاصة')}</small>
-              </div>
-              <span class="status">خاص</span>
-            </div>
-          `;
-        }).join('');
-      });
-    }
-
-    function renderPrivatePanel() {
-      if (selectedPrivateTab === 'chats') renderPrivateChats();
-      else renderPrivateMembers();
-    }
-
-    function listenPublicUserCache() {
-      if (window.__usersCacheUnsub) return;
-      window.__usersCacheUnsub = db.collection('users').onSnapshot((snapshot) => {
-        const users = [];
-        snapshot.forEach(doc => users.push(doc.data()));
-        window.__cachedUsers = users;
-        renderUsers(users);
-        renderFriendsDrawer(users);
-        renderPrivateMembers(users);
-      });
-    }
-
-    function loadVisits() {
-      if (unsubVisits) unsubVisits();
-      unsubVisits = db.collection('profileVisits').onSnapshot((snapshot) => {
-        const visits = [];
-        snapshot.forEach(doc => visits.push(doc.data()));
-        window.__cachedVisits = visits;
-        renderNotifications(visits);
-      });
-    }
-
-    function renderNotificationDrawer() {
-      const visits = window.__cachedVisits || [];
-      renderNotifications(visits);
-    }
-
-    async function storePresence(isOnline) {
-      if (!auth.currentUser) return;
-      await db.collection('users').doc(auth.currentUser.uid).set({
-        isOnline,
-        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
+      setStatus('تم الاتصال بـ Firebase', 'ok');
     }
 
     async function registerWithEmail() {
@@ -1902,9 +1215,7 @@
     }
 
     async function logoutUser() {
-      try {
-        await storePresence(false);
-      } catch {}
+      try { await storePresence(false); } catch {}
       await auth.signOut();
       setStatus('تم تسجيل الخروج.', 'ok');
     }
@@ -1923,17 +1234,309 @@
       return 'حدث خطأ، راجع إعدادات Firebase أو جرّب مرة أخرى.';
     }
 
-    function updateHeaderFromProfile() {
-      if (currentUser) {
-        document.getElementById('headerUserName').textContent = currentUser.displayName || 'مستخدم';
-        document.getElementById('headerSub').textContent = `@${currentUser.username || 'user'}`;
-        document.getElementById('logoutBtn').style.display = 'inline-flex';
-        document.getElementById('topAlert').style.display = 'none';
+    function filterMembers() {
+      if (window.__cachedUsers) {
+        renderUsers(window.__cachedUsers);
+        renderPrivateMembers(window.__cachedUsers);
+        renderFriendsDrawer(window.__cachedUsers);
+      }
+    }
+
+    async function openProfile(uid) {
+      const profile = (window.__cachedUsers || []).find(u => u.uid === uid);
+      if (!profile) return;
+      currentProfileViewedId = uid;
+      currentPrivatePeerId = uid;
+      currentPrivatePeerProfile = profile;
+      document.getElementById('profileDrawerContent').innerHTML = `
+        <div class="profile-card">
+          <div class="avatar">${escapeHtml(getInitials(profile.displayName || 'م'))}</div>
+          <div class="profile-meta">
+            <h4>${escapeHtml(profile.displayName || 'مستخدم')}</h4>
+            <p>@${escapeHtml(profile.username || 'user')}</p>
+            <div class="chip">${profile.isOnline ? '🟢 متصل الآن' : '⚪ غير متصل'}</div>
+            ${profile.bio ? `<p style="margin-top:10px;">${escapeHtml(profile.bio)}</p>` : ''}
+          </div>
+        </div>
+        <div class="mini-card">
+          <h4>عن هذا العضو</h4>
+          <p>يمكنك إضافته كصديق أو فتح رسالة خاصة معه من هنا.</p>
+        </div>
+      `;
+      document.getElementById('profileFriendBtn').textContent = isFriend(uid) ? 'إزالة صديق' : 'إضافة صديق';
+      openDrawer('profile');
+      await logProfileVisit(uid, profile);
+    }
+
+    async function logProfileVisit(visitedUid, visitedProfile) {
+      if (!auth.currentUser || !visitedUid || visitedUid === auth.currentUser.uid) return;
+      await db.collection('profileVisits').add({
+        visitedUid,
+        visitedName: visitedProfile.displayName || 'مستخدم',
+        visitorUid: auth.currentUser.uid,
+        visitorName: currentUser?.displayName || auth.currentUser.displayName || 'مستخدم',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    async function toggleFriendFromProfile() {
+      if (!currentProfileViewedId || !auth.currentUser || currentProfileViewedId === auth.currentUser.uid) return;
+      const ref = db.collection('users').doc(auth.currentUser.uid);
+      const snap = await ref.get();
+      const data = snap.exists ? snap.data() : {};
+      const friendIds = Array.isArray(data.friendIds) ? data.friendIds : [];
+      const exists = friendIds.includes(currentProfileViewedId);
+      const next = exists ? friendIds.filter(id => id !== currentProfileViewedId) : [...friendIds, currentProfileViewedId];
+      await ref.set({ friendIds: next }, { merge: true });
+      document.getElementById('profileFriendBtn').textContent = exists ? 'إزالة صديق' : 'إضافة صديق';
+    }
+
+    function closeProfileDrawer() { closeDrawer('profile'); }
+
+    async function startPrivateChatFromProfile() {
+      if (!currentProfileViewedId) return;
+      await openPrivateChat(currentProfileViewedId);
+      closeDrawer('profile');
+      openDrawer('private');
+      switchPrivateTab('chats');
+    }
+
+    async function openPrivateChat(peerId) {
+      if (!auth.currentUser || !peerId) { openAuth('login'); return; }
+      currentPrivatePeerId = peerId;
+      const peer = (window.__cachedUsers || []).find(u => u.uid === peerId);
+      currentPrivatePeerProfile = peer || null;
+      activePrivateChatId = privateChatId(auth.currentUser.uid, peerId);
+      document.getElementById('headerUserName').textContent = peer ? `خاص مع @${peer.username || 'user'}` : 'شات نار';
+      openDrawer('private');
+      await ensurePrivateChatDoc(peerId, peer);
+      listenPrivateMessages(activePrivateChatId);
+      renderPrivatePanel();
+    }
+
+    async function ensurePrivateChatDoc(peerId, peerProfile) {
+      const id = privateChatId(auth.currentUser.uid, peerId);
+      const ref = db.collection('privateChats').doc(id);
+      const snap = await ref.get();
+      if (!snap.exists) {
+        await ref.set({
+          participants: [auth.currentUser.uid, peerId],
+          peerId,
+          peerName: peerProfile?.displayName || 'مستخدم',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastMessage: ''
+        }, { merge: true });
+      }
+    }
+
+    function listenPrivateMessages(chatId) {
+      if (unsubPrivateMessages) unsubPrivateMessages();
+      if (!chatId) return;
+      const boxId = 'privateMessagesBox';
+      const existing = document.getElementById(boxId);
+      if (existing) existing.remove();
+      const box = document.createElement('div');
+      box.id = boxId;
+      box.className = 'chat-window';
+      box.style.marginTop = '14px';
+      box.innerHTML = '<div class="empty">جارٍ تحميل الرسائل الخاصة...</div>';
+      const body = document.getElementById('privateDrawer').querySelector('.drawer-body');
+      body.appendChild(box);
+
+      const q = db.collection('privateChats').doc(chatId).collection('messages').orderBy('createdAt', 'asc');
+      unsubPrivateMessages = q.onSnapshot((snapshot) => {
+        const msgs = [];
+        snapshot.forEach(doc => msgs.push(doc.data()));
+        box.innerHTML = msgs.length ? msgs.map(m => `
+          <div class="bubble ${m.uid === currentUserId ? 'me' : 'them'}">
+            ${escapeHtml(m.text || '')}
+            <small>${escapeHtml(m.senderName || 'مستخدم')} • ${escapeHtml(formatTime(m.createdAt || m.time))}</small>
+          </div>
+        `).join('') : '<div class="empty">ابدأ أول رسالة خاصة.</div>';
+        box.scrollTop = box.scrollHeight;
+      }, (error) => {
+        console.error(error);
+        box.innerHTML = '<div class="empty">تعذر تحميل الرسائل الخاصة.</div>';
+      });
+    }
+
+    function renderPrivateChats() {
+      const box = document.getElementById('privateChatsList');
+      if (!currentUserId) { box.innerHTML = '<div class="empty">سجّل الدخول لعرض المحادثات الخاصة.</div>'; return; }
+      if (unsubPrivateChats) unsubPrivateChats();
+      unsubPrivateChats = db.collection('privateChats').onSnapshot((snapshot) => {
+        const chats = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (Array.isArray(data.participants) && data.participants.includes(currentUserId)) chats.push({ id: doc.id, ...data });
+        });
+        chats.sort((a, b) => toMillis(b.updatedAt || 0) - toMillis(a.updatedAt || 0));
+        if (!chats.length) { box.innerHTML = '<div class="empty">لا توجد محادثات خاصة بعد.</div>'; return; }
+        box.innerHTML = chats.map(chat => {
+          const peerId = (chat.participants || []).find(id => id !== currentUserId);
+          const peerName = chat.peerName || 'مستخدم';
+          return `
+            <div class="list-item" onclick="openPrivateChat('${peerId}')">
+              <div>
+                <strong>${escapeHtml(peerName)}</strong>
+                <small>${escapeHtml(chat.lastMessage || 'محادثة خاصة')}</small>
+              </div>
+              <span class="status">خاص</span>
+            </div>
+          `;
+        }).join('');
+      });
+    }
+
+    function renderPrivatePanel() {
+      if (selectedPrivateTab === 'chats') renderPrivateChats();
+      else renderPrivateMembers();
+    }
+
+    function listenPublicUserCache() {
+      if (window.__usersCacheUnsub) return;
+      window.__usersCacheUnsub = db.collection('users').onSnapshot((snapshot) => {
+        const users = [];
+        snapshot.forEach(doc => users.push(doc.data()));
+        window.__cachedUsers = users;
+        renderUsers(users);
+        renderFriendsDrawer(users);
+        renderPrivateMembers(users);
+      });
+    }
+
+    function loadVisits() {
+      if (unsubVisits) unsubVisits();
+      unsubVisits = db.collection('profileVisits').onSnapshot((snapshot) => {
+        const visits = [];
+        snapshot.forEach(doc => visits.push(doc.data()));
+        window.__cachedVisits = visits;
+        renderNotifications(visits);
+      });
+    }
+
+    function renderNotificationDrawer() {
+      const visits = window.__cachedVisits || [];
+      renderNotifications(visits);
+    }
+
+    async function storePresence(isOnline) {
+      if (!auth.currentUser) return;
+      await db.collection('users').doc(auth.currentUser.uid).set({
+        isOnline,
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
+
+    async function registerWithEmail() {
+      try {
+        const displayName = document.getElementById('registerName').value.trim();
+        const username = normalizeUsername(document.getElementById('registerUsername').value);
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPass').value;
+        const bio = document.getElementById('registerBio').value.trim();
+        if (!displayName || !username || !email || !password) { setStatus('من فضلك املأ كل الحقول الأساسية.', 'err'); return; }
+        if (password.length < 6) { setStatus('كلمة المرور لازم تكون 6 أحرف على الأقل.', 'err'); return; }
+        const checkUsername = await db.collection('users').where('username', '==', username).limit(1).get();
+        if (!checkUsername.empty) { setStatus('اسم المستخدم مستخدم بالفعل.', 'err'); return; }
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        await cred.user.updateProfile({ displayName });
+        await saveUserProfile(cred.user, { displayName, username, bio, provider: 'email' });
+        closeAuth();
+      } catch (error) {
+        setStatus(mapFirebaseError(error), 'err');
+      }
+    }
+
+    async function resolveEmailFromUsername(inputValue) {
+      if (inputValue.includes('@')) return inputValue;
+      const snap = await db.collection('users').where('username', '==', normalizeUsername(inputValue)).limit(1).get();
+      if (snap.empty) throw { code: 'USERNAME_NOT_FOUND' };
+      return snap.docs[0].data().email;
+    }
+
+    async function loginWithEmail() {
+      try {
+        const userInput = document.getElementById('loginUser').value.trim();
+        const password = document.getElementById('loginPass').value;
+        if (!userInput || !password) { setStatus('اكتب اسم المستخدم/البريد وكلمة المرور.', 'err'); return; }
+        const email = await resolveEmailFromUsername(userInput);
+        await auth.signInWithEmailAndPassword(email, password);
+        closeAuth();
+      } catch (error) {
+        setStatus(mapFirebaseError(error), 'err');
+      }
+    }
+
+    function fakeOAuth(providerName) {
+      if (providerName === 'google') {
+        setStatus('Google login موقوف مؤقتًا.', 'err');
+        return;
+      }
+      setStatus('هذا الزر غير مفعّل مؤقتًا.', 'err');
+    }
+
+    async function sendPublicMessage() {
+      try {
+        if (!auth.currentUser) { openAuth('login'); setStatus('سجل دخولك أولاً لإرسال رسالة.', 'err'); return; }
+        const input = document.getElementById('publicMessageInput');
+        const text = input.value.trim();
+        if (!text) return;
+        await db.collection('publicMessages').add({
+          text,
+          uid: auth.currentUser.uid,
+          senderName: currentUser?.displayName || auth.currentUser.displayName || 'مستخدم',
+          username: currentUser?.username || '',
+          color: userColor || '#ec4899',
+          time: Date.now(),
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        input.value = '';
+      } catch (error) {
+        setStatus(mapFirebaseError(error), 'err');
+      }
+    }
+
+    async function createRoom() {
+      try {
+        if (!auth.currentUser) { openAuth('login'); setStatus('لازم تسجل دخول الأول عشان تنشئ غرفة.', 'err'); return; }
+        const title = document.getElementById('roomNameInput').value.trim();
+        const description = document.getElementById('roomDescInput').value.trim();
+        if (!title) { setStatus('اكتب اسم الغرفة.', 'err'); return; }
+        await db.collection('rooms').add({
+          title,
+          description,
+          createdBy: auth.currentUser.uid,
+          createdByName: currentUser?.displayName || auth.currentUser.displayName || 'مستخدم',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('roomNameInput').value = '';
+        document.getElementById('roomDescInput').value = '';
+        setStatus('تم إنشاء الغرفة.', 'ok');
+      } catch (error) {
+        setStatus(mapFirebaseError(error), 'err');
+      }
+    }
+
+    async function logoutUser() {
+      try { await storePresence(false); } catch {}
+      await auth.signOut();
+      setStatus('تم تسجيل الخروج.', 'ok');
+    }
+
+    function filterMembers() {
+      if (window.__cachedUsers) {
+        renderUsers(window.__cachedUsers);
+        renderPrivateMembers(window.__cachedUsers);
+        renderFriendsDrawer(window.__cachedUsers);
+      }
+    }
+
+    function updateHeaderNameFromState() {
+      if (currentUser?.displayName) {
+        document.getElementById('headerUserName').textContent = currentUser.displayName;
       } else {
-        document.getElementById('headerUserName').textContent = 'زائر';
-        document.getElementById('headerSub').textContent = 'أهلاً بك في شات نار';
-        document.getElementById('logoutBtn').style.display = 'none';
-        document.getElementById('topAlert').style.display = '';
+        document.getElementById('headerUserName').textContent = 'شات نار';
       }
     }
 
@@ -1945,13 +1548,17 @@
         currentUserId = user.uid;
         userColor = profile.color || COLORS[Math.floor(Math.random() * COLORS.length)];
         await storePresence(true);
-        updateHeaderFromProfile();
-        setStatus('تم الاتصال بـ Firestore', 'ok');
+        updateHeaderNameFromState();
+        document.getElementById('logoutBtn').style.display = 'inline-flex';
+        document.getElementById('topAlert').style.display = 'none';
+        setStatus('تم الاتصال بـ Firebase', 'ok');
       } else {
         currentUser = null;
         currentUserId = null;
         userColor = null;
-        updateHeaderFromProfile();
+        updateHeaderNameFromState();
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('topAlert').style.display = '';
       }
     });
 
@@ -1988,7 +1595,7 @@
     loadVisits();
     listenPublicUserCache();
     renderPrivateChats();
-    updateHeaderFromProfile();
+    updateHeaderNameFromState();
     lucide.createIcons();
   </script></body>
 </html>
