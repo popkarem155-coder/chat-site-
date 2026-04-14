@@ -5,46 +5,122 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>كريم 1 - شات نار</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      onSnapshot,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNCq5bP_UVdQgXPr40lroIkiti5aMWyvw",
+      authDomain: "chat-nar.firebaseapp.com",
+      projectId: "chat-nar",
+      storageBucket: "chat-nar.firebasestorage.app",
+      messagingSenderId: "199917444253",
+      appId: "1:199917444253:web:aef64b8f6cb812d8f2c874",
+      measurementId: "G-B8LJJ7XJ7W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let username = "زائر";
+
+    // عناصر الصفحة
+    const msgInput = document.getElementById("msgInput");
+    const msgBox = document.getElementById("messages");
+    const form = document.getElementById("msgForm");
+
+    // إرسال رسالة
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!msgInput.value.trim()) return;
+
+      await addDoc(collection(db, "messages"), {
+        message: msgInput.value,
+        username: username,
+        timestamp: Date.now()
+      });
+
+      msgInput.value = "";
+    });
+
+    // استقبال الرسائل (Realtime)
+    const q = query(collection(db, "messages"), orderBy("timestamp"));
+
+    onSnapshot(q, (snapshot) => {
+      msgBox.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const m = doc.data();
+
+        const div = document.createElement("div");
+        div.className = "msg";
+
+        div.innerHTML = `
+          <div style="color:#888;font-size:12px">${m.username}</div>
+          <div>${m.message}</div>
+        `;
+
+        msgBox.appendChild(div);
+      });
+
+      msgBox.scrollTop = msgBox.scrollHeight;
+    });
+
+  </script>
 
   <style>
-    body{
+    body {
       margin:0;
       font-family:tahoma;
       background:#0f0f1a;
       color:white;
-      height:100vh;
       display:flex;
       flex-direction:column;
-      overflow:hidden;
+      height:100vh;
     }
 
-    header{
+    header {
+      padding:15px;
       background:#1a1a2e;
-      padding:12px;
       text-align:center;
       font-weight:bold;
-      border-bottom:1px solid #2a2a4a;
+      border-bottom:1px solid #333;
     }
 
-    #messages{
+    #messages {
       flex:1;
-      overflow-y:auto;
+      overflow:auto;
       padding:10px;
       display:flex;
       flex-direction:column;
       gap:10px;
     }
 
-    form{
+    .msg {
+      background:#1e1e35;
+      padding:10px;
+      border-radius:10px;
+      max-width:70%;
+    }
+
+    form {
       display:flex;
       gap:10px;
       padding:10px;
       background:#1a1a2e;
-      border-top:1px solid #2a2a4a;
+      border-top:1px solid #333;
     }
 
-    input{
+    input {
       flex:1;
       padding:10px;
       border-radius:10px;
@@ -54,16 +130,27 @@
       outline:none;
     }
 
-    button{
-      padding:10px 14px;
+    button {
+      padding:10px 15px;
       border:none;
       border-radius:10px;
-      cursor:pointer;
       background:linear-gradient(135deg,#6366f1,#ec4899);
       color:white;
+      cursor:pointer;
     }
+  </style>
+</head>
 
-    .msg{
-      background:#1e1e35;
-      padding:10px;
-      border
+<body>
+
+<header>🔥 شات نار - كريم 1</header>
+
+<div id="messages"></div>
+
+<form id="msgForm">
+  <input id="msgInput" placeholder="اكتب رسالة..." />
+  <button>إرسال</button>
+</form>
+
+</body>
+</html>
