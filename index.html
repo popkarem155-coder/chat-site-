@@ -346,7 +346,7 @@
               </div>
             </div>
           </div>
-          <div class="panel">
+          <div class="panel" id="groups">
             <div class="panel-head"><h3>إدارة الغرف</h3><span class="badge">Tools</span></div>
             <div class="group-tools">
               <div class="tool-row">
@@ -417,15 +417,8 @@
     let currentUserId = null;
     let userColor = null;
     let currentChatId = 'general';
-    let allUsers = [];
     let unsubMessages = null;
 
-    const defaultConfig = {
-      app_title: 'منصة الدردشة الاجتماعية',
-      welcome_msg: 'مرحباً بك في مجتمعنا! 👋'
-    };
-
-    // ===== Firebase =====
     const firebaseConfig = {
       apiKey: "PUT_YOUR_API_KEY_HERE",
       authDomain: "PUT_YOUR_AUTH_DOMAIN_HERE",
@@ -459,6 +452,14 @@
       }
     }
 
+    function toMillis(msg) {
+      if (!msg) return 0;
+      if (msg.createdAt && typeof msg.createdAt.toDate === 'function') return msg.createdAt.toDate().getTime();
+      if (typeof msg.time === 'number') return msg.time;
+      if (msg.time && !Number.isNaN(Date.parse(msg.time))) return Date.parse(msg.time);
+      return 0;
+    }
+
     function setStatus(text, type = '') {
       const statusBar = document.getElementById('statusBar');
       const chatHint = document.getElementById('chatHint');
@@ -471,10 +472,16 @@
         chatHint.className = 'status-bar' + (type ? ` ${type}` : '');
       }
       const connBadge = document.getElementById('connBadge');
-      if (connBadge && type === 'ok') {
-        connBadge.textContent = 'متصل';
-        connBadge.style.background = 'rgba(74,212,127,.12)';
-        connBadge.style.color = '#d8ffe6';
+      if (connBadge) {
+        if (type === 'ok') {
+          connBadge.textContent = 'متصل';
+          connBadge.style.background = 'rgba(74,212,127,.12)';
+          connBadge.style.color = '#d8ffe6';
+        } else if (type === 'err') {
+          connBadge.textContent = 'مشكلة اتصال';
+        } else {
+          connBadge.textContent = 'غير متصل';
+        }
       }
     }
 
@@ -553,15 +560,23 @@
 
     function listenMessages() {
       if (unsubMessages) unsubMessages();
-      const q = db.collection('messages').orderBy('createdAt');
-      unsubMessages = q.onSnapshot((snap) => {
+      unsubMessages = db.collection('messages').onSnapshot((snap) => {
         const messages = [];
         snap.forEach((doc) => messages.push(doc.data()));
+        messages.sort((a, b) => toMillis(a) - toMillis(b));
         renderMessages(messages);
+        setStatus('تم الاتصال بـ Firestore', 'ok');
       }, (err) => {
         console.error(err);
         setStatus('تعذر الاتصال بـ Firestore. راجع القواعد أو اسم المجموعة.', 'err');
       });
+    }
+
+    function applyProfileUI(displayName, color) {
+      document.getElementById('profileName').textContent = displayName;
+      document.getElementById('profileAvatar').textContent = displayName.charAt(0) || '👤';
+      document.getElementById('profileAvatar').style.background = `linear-gradient(135deg, ${color}, #ec4899)`;
+      document.getElementById('chatAvatar').style.background = `linear-gradient(135deg, ${color}, #ec4899)`;
     }
 
     async function signInGuestProfile() {
@@ -586,15 +601,11 @@
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
 
-      document.getElementById('profileName').textContent = name + ' (زائر)';
-      document.getElementById('profileAvatar').textContent = name.charAt(0) || '👤';
-      document.getElementById('profileAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
-      document.getElementById('chatAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
+      applyProfileUI(name + ' (زائر)', userColor);
       document.getElementById('guestRegModal').classList.add('hidden');
       document.getElementById('loginModal').classList.add('hidden');
       document.getElementById('msgInput').disabled = false;
       document.getElementById('sendBtn').disabled = false;
-      setStatus('متصل', 'ok');
       listenMessages();
     }
 
@@ -615,15 +626,11 @@
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
 
-      document.getElementById('profileName').textContent = user.displayName || 'مستخدم';
-      document.getElementById('profileAvatar').textContent = (user.displayName || 'م').charAt(0);
-      document.getElementById('profileAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
-      document.getElementById('chatAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
+      applyProfileUI(user.displayName || 'مستخدم', userColor);
       document.getElementById('googleRegModal').classList.add('hidden');
       document.getElementById('loginModal').classList.add('hidden');
       document.getElementById('msgInput').disabled = false;
       document.getElementById('sendBtn').disabled = false;
-      setStatus('متصل', 'ok');
       listenMessages();
     }
 
@@ -662,35 +669,28 @@
     window.fakeOAuth = function fakeOAuth(provider) {
       setStatus(`زر ${provider} جاهز شكليًا. اربطه لاحقًا إن احتجت.`, 'ok');
     };
+
+    function finishLocalAuth(name) {
+      currentUser = { displayName: name, uid: 'local_' + Date.now() };
+      currentUserId = currentUser.uid;
+      userColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+      applyProfileUI(name, userColor);
+      document.getElementById('loginModal').classList.add('hidden');
+      document.getElementById('msgInput').disabled = false;
+      document.getElementById('sendBtn').disabled = false;
+      listenMessages();
+    }
+
     window.fakeLogin = function fakeLogin() {
       const value = document.getElementById('loginUser').value.trim();
-      currentUser = { displayName: value || 'Kimo', uid: 'local_' + Date.now() };
-      currentUserId = currentUser.uid;
-      userColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-      document.getElementById('profileName').textContent = currentUser.displayName;
-      document.getElementById('profileAvatar').textContent = currentUser.displayName.charAt(0);
-      document.getElementById('profileAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
-      document.getElementById('chatAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
+      finishLocalAuth(value || 'Kimo');
       closeAuth();
-      document.getElementById('loginModal').classList.add('hidden');
-      document.getElementById('msgInput').disabled = false;
-      document.getElementById('sendBtn').disabled = false;
-      setStatus('متصل', 'ok');
     };
+
     window.fakeRegister = function fakeRegister() {
       const value = document.getElementById('regUser').value.trim();
-      currentUser = { displayName: value || 'Kimo', uid: 'local_' + Date.now() };
-      currentUserId = currentUser.uid;
-      userColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-      document.getElementById('profileName').textContent = currentUser.displayName;
-      document.getElementById('profileAvatar').textContent = currentUser.displayName.charAt(0);
-      document.getElementById('profileAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
-      document.getElementById('chatAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
+      finishLocalAuth(value || 'Kimo');
       closeAuth();
-      document.getElementById('loginModal').classList.add('hidden');
-      document.getElementById('msgInput').disabled = false;
-      document.getElementById('sendBtn').disabled = false;
-      setStatus('متصل', 'ok');
     };
 
     function renderStaticLists() {
@@ -772,16 +772,12 @@
       const displayName = profile.name || user.displayName || 'المستخدم';
       userColor = profile.color || COLORS[Math.floor(Math.random() * COLORS.length)];
 
-      document.getElementById('profileName').textContent = displayName;
-      document.getElementById('profileAvatar').textContent = displayName.charAt(0) || '👤';
-      document.getElementById('profileAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
-      document.getElementById('chatAvatar').style.background = `linear-gradient(135deg, ${userColor}, #ec4899)`;
+      applyProfileUI(displayName, userColor);
       document.getElementById('loginModal').classList.add('hidden');
       document.getElementById('guestRegModal').classList.add('hidden');
       document.getElementById('googleRegModal').classList.add('hidden');
       document.getElementById('msgInput').disabled = false;
       document.getElementById('sendBtn').disabled = false;
-      setStatus('تم الاتصال بـ Firestore', 'ok');
       listenMessages();
     });
 
