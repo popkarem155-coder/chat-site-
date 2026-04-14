@@ -1,780 +1,235 @@
-        <div class="field">
-          <label>اسم المستخدم أو البريد</label>
-          <input id="loginUser" type="text" placeholder="اكتب اسم المستخدم أو البريد" />
-        </div>
-        <div class="field">
-          <label>كلمة المرور</label>
-          <input id="loginPass" type="password" placeholder="اكتب كلمة المرور" />
-        </div>
-        <div class="hint">يمكنك تسجيل الدخول بالبريد أو باسم المستخدم إذا كان محفوظًا داخل Firestore.</div>
-        <button type="button" class="btn btn-primary" onclick="loginWithEmail()">دخول الآن</button>
-      </form>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>شات نار</title>
 
-      <form class="form" id="registerForm" onsubmit="return false;">
-        <div class="auth-actions">
-          <button type="button" class="social-btn google" onclick="fakeOAuth('google')">
-            <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.6 0 6.8 1.3 9.3 3.5l6.9-6.9C35.9 2.1 30.4 0 24 0 14.6 0 6.4 5.4 2.4 13.2l8 6.2C12.4 13.8 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.5-.1-2.7-.4-3.9H24v7.5h12.8c-.3 2-1.7 5-4.8 7l7.4 5.7c4.4-4 7.1-9.9 7.1-16.3z"/><path fill="#FBBC05" d="M10.4 28.2c-.5-1.5-.8-3.1-.8-4.7s.3-3.2.8-4.7l-8-6.2C.9 15.6 0 19.3 0 23.5S.9 31.4 2.4 35.2l8-7z"/><path fill="#34A853" d="M24 48c6.4 0 11.8-2.1 15.7-5.7l-7.4-5.7c-2.1 1.4-4.9 2.4-8.3 2.4-6.4 0-11.6-4.3-13.6-10.2l-8 6.2C6.4 42.6 14.6 48 24 48z"/></svg>
-            المتابعة بـ Google
-          </button>
-          <button type="button" class="social-btn facebook" onclick="fakeOAuth('facebook')">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="white" d="M13.5 22v-8h2.7l.4-3.1h-3.1V9c0-.9.2-1.4 1.4-1.4h1.8V5.1c-.3 0-1.3-.1-2.4-.1-2.3 0-3.8 1.4-3.8 4v1.9H8v3.1h2.5v8h3z"/></svg>
-            المتابعة بـ Facebook
-          </button>
-        </div>
+  <style>
+    body { margin:0; font-family:Arial; background:#0b0910; color:#fff; }
+    .hidden { display:none; }
+  </style>
+</head>
 
-        <div class="field">
-          <label>الاسم الظاهر</label>
-          <input id="registerName" type="text" placeholder="مثال: نار الشرق" />
-        </div>
-        <div class="field">
-          <label>اسم المستخدم</label>
-          <input id="registerUsername" type="text" placeholder="مثال: nar_user" />
-        </div>
-        <div class="field">
-          <label>البريد الإلكتروني</label>
-          <input id="registerEmail" type="email" placeholder="name@email.com" />
-        </div>
-        <div class="field">
-          <label>كلمة المرور</label>
-          <input id="registerPass" type="password" placeholder="6 أحرف على الأقل" />
-        </div>
-        <div class="field">
-          <label>نبذة قصيرة</label>
-          <textarea id="registerBio" placeholder="اكتب نبذة تعريفية قصيرة"></textarea>
-        </div>
-        <div class="hint">بعد إنشاء الحساب سيتم حفظ بياناتك في Firestore.</div>
-        <button type="button" class="btn btn-primary" onclick="registerWithEmail()">إنشاء الحساب</button>
-      </form>
+<body>
 
-      <div class="status-bar" id="authStatus">جاهز للاتصال مع Firebase.</div>
-      <div class="footer-note">واجهة عربية داكنة متوافقة مع Firebase Authentication وFirestore</div>
-    </div>
+<div id="overlay"></div>
+
+<!-- AUTH -->
+<div id="authModal">
+  <div>
+    <form id="loginForm">
+      <input id="loginUser" placeholder="اسم المستخدم أو البريد" />
+      <input id="loginPass" type="password" placeholder="كلمة المرور" />
+      <button type="button" onclick="loginWithEmail()">دخول</button>
+    </form>
+
+    <form id="registerForm">
+      <input id="registerName" placeholder="الاسم" />
+      <input id="registerUsername" placeholder="اسم المستخدم" />
+      <input id="registerEmail" placeholder="البريد" />
+      <input id="registerPass" type="password" placeholder="كلمة المرور" />
+      <button type="button" onclick="registerWithEmail()">إنشاء</button>
+    </form>
+
+    <div id="authStatus">جاهز</div>
   </div>
-
-  <div class="app">
-    <div class="layout">
-      <aside class="mini-rail">
-        <button class="rail-btn" onclick="toggleSidebar(true)">☰</button>
-        <button class="rail-btn" onclick="setSection('important')">🏠</button>
-        <button class="rail-btn" onclick="setSection('messages')">✉️</button>
-        <button class="rail-btn" onclick="setSection('rooms')">💬</button>
-        <button class="rail-btn" onclick="setSection('online')">🟢</button>
-        <div class="rail-spacer"></div>
-        <button class="rail-btn" onclick="openAuth('login')">👤</button>
-      </aside>
-
-      <main class="content">
-        <header class="header">
-          <div class="header-right">
-            <button class="icon-btn" onclick="toggleSidebar(true)">☰</button>
-            <div>
-              <strong id="headerUserName">زائر</strong>
-              <div style="font-size:12px;color:var(--muted);" id="headerSub">أهلاً بك في شات نار</div>
-            </div>
-          </div>
-          <div class="header-left">
-            <div class="search">
-              <span>🔎</span>
-              <input type="text" placeholder="ابحث داخل الواجهة..." />
-            </div>
-            <button class="btn btn-secondary" id="logoutBtn" style="display:none;" onclick="logoutUser()">تسجيل خروج</button>
-          </div>
-        </header>
-
-        <div class="page">
-          <section class="section active" id="important">
-            <div class="hero">
-              <div class="hero-inner">
-                <div>
-                  <h2>مرحبًا بك في شات نار</h2>
-                  <p>
-                    واجهة عربية داكنة وعصرية، جاهزة للربط مع Firebase Authentication وFirestore.
-                    يمكنك تسجيل الدخول، إرسال رسائل عامة، وإنشاء غرف دردشة مع تحديثات لحظية.
-                  </p>
-                  <div class="hero-actions">
-                    <button class="btn btn-primary" onclick="openAuth('register')">ابدأ الآن</button>
-                    <button class="btn btn-secondary" onclick="setSection('messages')">الرسائل العامة</button>
-                    <button class="btn btn-ghost" onclick="setSection('rooms')">غرف الدردشة</button>
-                  </div>
-                </div>
-                <div class="hero-side">
-                  <div class="small-card">
-                    <h3>Firebase Auth</h3>
-                    <p>يدعم الإيميل والباسورد وGoogle وFacebook.</p>
-                  </div>
-                  <div class="small-card">
-                    <h3>Firestore Realtime</h3>
-                    <p>الرسائل والغرف تتحدث مباشرة بدون إعادة تحميل الصفحة.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="panel">
-                <div class="panel-head">
-                  <h3>آخر الغرف</h3>
-                  <span class="badge">مباشر</span>
-                </div>
-                <div class="room-list" id="roomList">
-                  <div class="empty">جارٍ تحميل الغرف...</div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-head">
-                  <h3>المتصلون الآن</h3>
-                  <span class="badge">أعضاء</span>
-                </div>
-                <div class="online-list" id="onlineList">
-                  <div class="empty">سجّل دخولك لعرض الأعضاء المتصلين.</div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="section" id="messages">
-            <div class="panel">
-              <div class="panel-head">
-                <h3>الرسائل العامة</h3>
-                <span class="badge">Firestore</span>
-              </div>
-
-              <div class="public-strip">
-                <div>
-                  <strong>الغرفة العامة</strong>
-                  <span>كل الرسائل تُحفظ داخل مجموعة publicMessages</span>
-                </div>
-                <button class="btn btn-secondary" onclick="loadPublicMessages()">تحديث</button>
-              </div>
-
-              <div class="msg-list" id="publicMessages">
-                <div class="empty">لا توجد رسائل بعد.</div>
-              </div>
-
-              <div class="chat-compose" style="margin-top:14px;">
-                <input id="publicMessageInput" type="text" placeholder="اكتب رسالة عامة..." />
-                <button class="btn btn-primary" onclick="sendPublicMessage()">إرسال</button>
-              </div>
-            </div>
-          </section>
-
-          <section class="section" id="rooms">
-            <div class="messages-layout">
-              <div class="panel">
-                <div class="panel-head">
-                  <h3>إنشاء غرفة</h3>
-                  <span class="badge">جديد</span>
-                </div>
-                <div class="group-tools">
-                  <div class="tool-row">
-                    <input id="roomNameInput" type="text" placeholder="اسم الغرفة" />
-                  </div>
-                  <div class="tool-row">
-                    <input id="roomDescInput" type="text" placeholder="وصف الغرفة" />
-                  </div>
-                  <button class="btn btn-primary" onclick="createRoom()">إنشاء الغرفة</button>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-head">
-                  <h3>الغرف المتاحة</h3>
-                  <span class="badge">Realtime</span>
-                </div>
-                <div class="group-list" id="groupList">
-                  <div class="empty">لا توجد غرف حتى الآن.</div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="section" id="notifications">
-            <div class="panel">
-              <div class="panel-head">
-                <h3>الإشعارات</h3>
-                <span class="badge">قريبًا</span>
-              </div>
-              <div class="empty">يمكنك لاحقًا ربط تنبيهات Firestore هنا.</div>
-            </div>
-          </section>
-
-          <section class="section" id="categories">
-            <div class="panel">
-              <div class="panel-head">
-                <h3>التصنيفات</h3>
-                <span class="badge">واجهة</span>
-              </div>
-              <div class="empty">أضف تصنيفات مخصصة حسب طبيعة الشات.</div>
-            </div>
-          </section>
-
-          <section class="section" id="online">
-            <div class="panel">
-              <div class="panel-head">
-                <h3>المتصل الآن</h3>
-                <span class="badge">Live</span>
-              </div>
-              <div class="online-list" id="onlineListSecondary">
-                <div class="empty">سيظهر الأعضاء المتصلون هنا.</div>
-              </div>
-            </div>
-          </section>
-
-          <section class="section" id="friends">
-            <div class="panel">
-              <div class="panel-head">
-                <h3>الأصدقاء</h3>
-                <span class="badge">قائمة</span>
-              </div>
-              <div class="empty">يمكنك لاحقًا إنشاء مجموعة friends داخل Firestore.</div>
-            </div>
-          </section>
-
-          <section class="section" id="games">
-            <div class="panel">
-              <div class="panel-head">
-                <h3>الألعاب</h3>
-                <span class="badge">Fun</span>
-              </div>
-              <div class="empty">مكان مناسب لإضافة ألعاب بسيطة داخل الواجهة.</div>
-            </div>
-          </section>
-
-          <section class="section" id="wallet">
-            <div class="panel">
-              <div class="panel-head">
-                <h3>المحفظة</h3>
-                <span class="badge">رصيد</span>
-              </div>
-              <div class="empty">يمكنك ربط بيانات الرصيد من Firestore لاحقًا.</div>
-            </div>
-          </section>
-        </div>
-      </main>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signInWithPopup,
-      GoogleAuthProvider,
-      FacebookAuthProvider,
-      signOut,
-      updateProfile
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-    import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      getDoc,
-      getDocs,
-      addDoc,
-      updateDoc,
-      onSnapshot,
-      query,
-      orderBy,
-      where,
-      limit,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-    // =========================
-    // ضع بيانات Firebase الخاصة بك هنا
-    // =========================
-    const firebaseConfig = {
-      apiKey: "PUT_YOUR_API_KEY",
-      authDomain: "PUT_YOUR_AUTH_DOMAIN",
-      projectId: "PUT_YOUR_PROJECT_ID",
-      storageBucket: "PUT_YOUR_STORAGE_BUCKET",
-      messagingSenderId: "PUT_YOUR_MESSAGING_SENDER_ID",
-      appId: "PUT_YOUR_APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const overlay = document.getElementById("overlay");
-    const sidebar = document.getElementById("sidebar");
-    const authModal = document.getElementById("authModal");
-    const authStatus = document.getElementById("authStatus");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const headerUserName = document.getElementById("headerUserName");
-    const headerSub = document.getElementById("headerSub");
-    const topAlert = document.getElementById("topAlert");
-
-    let currentUserData = null;
-    let unsubscribeMessages = null;
-    let unsubscribeRooms = null;
-    let unsubscribeUsers = null;
-
-    function setStatus(message, type = "") {
-      authStatus.textContent = message;
-      authStatus.className = "status-bar";
-      if (type) authStatus.classList.add(type);
-    }
-
-    function escapeHtml(text = "") {
-      return text
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function getInitials(name = "زائر") {
-      const parts = name.trim().split(/\s+/).filter(Boolean);
-      if (!parts.length) return "ز";
-      return parts.slice(0, 2).map(p => p[0]).join("").toUpperCase();
-    }
-
-    function formatTime(value) {
-      try {
-        const date = value?.toDate ? value.toDate() : new Date();
-        return new Intl.DateTimeFormat("ar-EG", {
-          hour: "2-digit",
-          minute: "2-digit"
-        }).format(date);
-      } catch {
-        return "الآن";
-      }
-    }
-
-    function normalizeUsername(username = "") {
-      return username.trim().toLowerCase().replace(/\s+/g, "_");
-    }
-
-    function toggleSidebar(force) {
-      const shouldOpen = typeof force === "boolean" ? force : !sidebar.classList.contains("open");
-      sidebar.classList.toggle("open", shouldOpen);
-      overlay.classList.toggle("show", shouldOpen || authModal.classList.contains("show"));
-    }
-
-    function openAuth(tab = "login") {
-      switchTab(tab);
-      authModal.classList.add("show");
-      overlay.classList.add("show");
-    }
-
-    function closeAuth() {
-      authModal.classList.remove("show");
-      if (!sidebar.classList.contains("open")) overlay.classList.remove("show");
-    }
-
-    function closeAllPanels() {
-      sidebar.classList.remove("open");
-      authModal.classList.remove("show");
-      overlay.classList.remove("show");
-    }
-
-    function switchTab(tab) {
-      const loginTab = document.getElementById("loginTab");
-      const registerTab = document.getElementById("registerTab");
-      const loginForm = document.getElementById("loginForm");
-      const registerForm = document.getElementById("registerForm");
-
-      const isLogin = tab === "login";
-      loginTab.classList.toggle("active", isLogin);
-      registerTab.classList.toggle("active", !isLogin);
-      loginForm.classList.toggle("active", isLogin);
-      registerForm.classList.toggle("active", !isLogin);
-    }
-
-    function setSection(id, el = null) {
-      document.querySelectorAll(".section").forEach(sec => {
-        sec.classList.toggle("active", sec.id === id);
-      });
-
-      document.querySelectorAll(".menu-item").forEach(item => item.classList.remove("active"));
-      if (el) el.classList.add("active");
-
-      closeAllPanels();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    async function saveUserProfile(user, extra = {}) {
-      const ref = doc(db, "users", user.uid);
-      const existing = await getDoc(ref);
-      const baseData = {
-        uid: user.uid,
-        email: user.email || "",
-        displayName: extra.displayName || user.displayName || "مستخدم جديد",
-        username: extra.username || normalizeUsername(user.displayName || user.email?.split("@")[0] || "user"),
-        photoURL: user.photoURL || "",
-        bio: extra.bio || "",
-        provider: extra.provider || user.providerId || "email",
-        isOnline: true,
-        lastSeen: serverTimestamp(),
-        createdAt: existing.exists() ? existing.data().createdAt || serverTimestamp() : serverTimestamp()
-      };
-      await setDoc(ref, baseData, { merge: true });
-    }
-
-    async function registerWithEmail() {
-      try {
-        const displayName = document.getElementById("registerName").value.trim();
-        const username = normalizeUsername(document.getElementById("registerUsername").value);
-        const email = document.getElementById("registerEmail").value.trim();
-        const password = document.getElementById("registerPass").value;
-        const bio = document.getElementById("registerBio").value.trim();
-
-        if (!displayName || !username || !email || !password) {
-          setStatus("من فضلك املأ كل الحقول الأساسية.", "err");
-          return;
-        }
-
-        if (password.length < 6) {
-          setStatus("كلمة المرور لازم تكون 6 أحرف على الأقل.", "err");
-          return;
-        }
-
-        const checkUsername = await getDocs(query(collection(db, "users"), where("username", "==", username), limit(1)));
-        if (!checkUsername.empty) {
-          setStatus("اسم المستخدم مستخدم بالفعل.", "err");
-          return;
-        }
-
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(cred.user, { displayName });
-        await saveUserProfile(cred.user, { displayName, username, bio, provider: "email" });
-
-        setStatus("تم إنشاء الحساب بنجاح.", "ok");
-        closeAuth();
-      } catch (error) {
-        setStatus(mapFirebaseError(error), "err");
-      }
-    }
-
-    async function resolveEmailFromUsername(inputValue) {
-      if (inputValue.includes("@")) return inputValue;
-      const snap = await getDocs(query(collection(db, "users"), where("username", "==", normalizeUsername(inputValue)), limit(1)));
-      if (snap.empty) throw new Error("USERNAME_NOT_FOUND");
-      return snap.docs[0].data().email;
-    }
-
-    async function loginWithEmail() {
-      try {
-        const userInput = document.getElementById("loginUser").value.trim();
-        const password = document.getElementById("loginPass").value;
-
-        if (!userInput || !password) {
-          setStatus("اكتب اسم المستخدم/البريد وكلمة المرور.", "err");
-          return;
-        }
-
-        const email = await resolveEmailFromUsername(userInput);
-        await signInWithEmailAndPassword(auth, email, password);
-        setStatus("تم تسجيل الدخول بنجاح.", "ok");
-        closeAuth();
-      } catch (error) {
-        setStatus(mapFirebaseError(error), "err");
-      }
-    }
-
-    async function fakeOAuth(providerName) {
-      try {
-        let provider;
-        if (providerName === "google") provider = new GoogleAuthProvider();
-        else provider = new FacebookAuthProvider();
-
-        const result = await signInWithPopup(auth, provider);
-        const displayName = result.user.displayName || "مستخدم اجتماعي";
-        const username = normalizeUsername(result.user.email?.split("@")[0] || displayName);
-
-        await saveUserProfile(result.user, {
-          displayName,
-          username,
-          provider: providerName
-        });
-
-        setStatus(`تم تسجيل الدخول بواسطة ${providerName === "google" ? "Google" : "Facebook"}.`, "ok");
-        closeAuth();
-      } catch (error) {
-        setStatus(mapFirebaseError(error), "err");
-      }
-    }
-
-    async function logoutUser() {
-      try {
-        if (auth.currentUser) {
-          await updateDoc(doc(db, "users", auth.currentUser.uid), {
-            isOnline: false,
-            lastSeen: serverTimestamp()
-          });
-        }
-      } catch {}
-      await signOut(auth);
-      setStatus("تم تسجيل الخروج.", "ok");
-    }
-
-    async function sendPublicMessage() {
-      try {
-        if (!auth.currentUser) {
-          setStatus("سجل دخولك أولاً لإرسال رسالة.", "err");
-          openAuth("login");
-          return;
-        }
-
-        const input = document.getElementById("publicMessageInput");
-        const text = input.value.trim();
-        if (!text) return;
-
-        await addDoc(collection(db, "publicMessages"), {
-          text,
-          uid: auth.currentUser.uid,
-          senderName: currentUserData?.displayName || auth.currentUser.displayName || "مستخدم",
-          username: currentUserData?.username || "",
-          createdAt: serverTimestamp()
-        });
-
-        input.value = "";
-      } catch (error) {
-        setStatus(mapFirebaseError(error), "err");
-      }
-    }
-
-    function loadPublicMessages() {
-      if (unsubscribeMessages) unsubscribeMessages();
-
-      const list = document.getElementById("publicMessages");
-      const q = query(collection(db, "publicMessages"), orderBy("createdAt", "asc"));
-
-      unsubscribeMessages = onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) {
-          list.innerHTML = '<div class="empty">لا توجد رسائل بعد.</div>';
-          return;
-        }
-
-        list.innerHTML = snapshot.docs.map(docSnap => {
-          const msg = docSnap.data();
-          const me = auth.currentUser && msg.uid === auth.currentUser.uid;
-          return `
-            <div class="msg-item">
-              <div class="avatar">${escapeHtml(getInitials(msg.senderName || "م"))}</div>
-              <div style="flex:1;">
-                <div class="meta-line">
-                  <strong>${escapeHtml(msg.senderName || "مستخدم")}</strong>
-                  <small>${escapeHtml(formatTime(msg.createdAt))}</small>
-                </div>
-                <p>${escapeHtml(msg.text || "")}</p>
-              </div>
-            </div>
-          `;
-        }).join("");
-      }, (error) => {
-        list.innerHTML = '<div class="empty">تعذر تحميل الرسائل.</div>';
-        setStatus(mapFirebaseError(error), "err");
-      });
-    }
-
-    async function createRoom() {
-      try {
-        if (!auth.currentUser) {
-          setStatus("لازم تسجل دخول الأول عشان تنشئ غرفة.", "err");
-          openAuth("login");
-          return;
-        }
-
-        const nameInput = document.getElementById("roomNameInput");
-        const descInput = document.getElementById("roomDescInput");
-        const title = nameInput.value.trim();
-        const description = descInput.value.trim();
-
-        if (!title) {
-          setStatus("اكتب اسم الغرفة.", "err");
-          return;
-        }
-
-        await addDoc(collection(db, "rooms"), {
-          title,
-          description,
-          createdBy: auth.currentUser.uid,
-          createdByName: currentUserData?.displayName || auth.currentUser.displayName || "مستخدم",
-          createdAt: serverTimestamp()
-        });
-
-        nameInput.value = "";
-        descInput.value = "";
-        setStatus("تم إنشاء الغرفة.", "ok");
-      } catch (error) {
-        setStatus(mapFirebaseError(error), "err");
-      }
-    }
-
-    function loadRooms() {
-      if (unsubscribeRooms) unsubscribeRooms();
-
-      const roomList = document.getElementById("roomList");
-      const groupList = document.getElementById("groupList");
-
-      const q = query(collection(db, "rooms"), orderBy("createdAt", "desc"));
-
-      unsubscribeRooms = onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) {
-          roomList.innerHTML = '<div class="empty">لا توجد غرف حتى الآن.</div>';
-          groupList.innerHTML = '<div class="empty">لا توجد غرف حتى الآن.</div>';
-          return;
-        }
-
-        const roomHtml = snapshot.docs.map(docSnap => {
-          const room = docSnap.data();
-          return `
-            <div class="room">
-              <div>
-                <h4>${escapeHtml(room.title || "غرفة بدون اسم")}</h4>
-                <p>${escapeHtml(room.description || "بدون وصف")}</p>
-              </div>
-              <span class="status">مفتوحة</span>
-            </div>
-          `;
-        }).join("");
-
-        const groupHtml = snapshot.docs.map(docSnap => {
-          const room = docSnap.data();
-          return `
-            <div class="group-card">
-              <div>
-                <h4>${escapeHtml(room.title || "غرفة بدون اسم")}</h4>
-                <p>${escapeHtml(room.description || "بدون وصف")}</p>
-              </div>
-              <button class="btn btn-secondary" onclick="setSection('messages')">عرض</button>
-            </div>
-          `;
-        }).join("");
-
-        roomList.innerHTML = roomHtml;
-        groupList.innerHTML = groupHtml;
-      }, (error) => {
-        roomList.innerHTML = '<div class="empty">حدث خطأ أثناء تحميل الغرف.</div>';
-        groupList.innerHTML = '<div class="empty">حدث خطأ أثناء تحميل الغرف.</div>';
-        setStatus(mapFirebaseError(error), "err");
-      });
-    }
-
-    function loadUsers() {
-      if (unsubscribeUsers) unsubscribeUsers();
-
-      const onlineList = document.getElementById("onlineList");
-      const onlineListSecondary = document.getElementById("onlineListSecondary");
-
-      unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
-        const users = snapshot.docs
-          .map(d => d.data())
-          .filter(user => user.isOnline);
-
-        if (!users.length) {
-          const emptyHtml = '<div class="empty">لا يوجد أعضاء متصلون الآن.</div>';
-          onlineList.innerHTML = emptyHtml;
-          onlineListSecondary.innerHTML = emptyHtml;
-          return;
-        }
-
-        const usersHtml = users.map(user => `
-          <div class="online-user">
-            <div class="user-info">
-              <div class="avatar">${escapeHtml(getInitials(user.displayName || "م"))}</div>
-              <div class="user-text">
-                <h4>${escapeHtml(user.displayName || "مستخدم")}</h4>
-                <p>@${escapeHtml(user.username || "user")}</p>
-              </div>
-            </div>
-            <span class="dot"></span>
-          </div>
-        `).join("");
-
-        onlineList.innerHTML = usersHtml;
-        onlineListSecondary.innerHTML = usersHtml;
-      });
-    }
-
-    async function updatePresence(user, isOnline = true) {
-      try {
-        await setDoc(doc(db, "users", user.uid), {
-          isOnline,
-          lastSeen: serverTimestamp()
-        }, { merge: true });
-      } catch {}
-    }
-
-    function mapFirebaseError(error) {
-      const code = error?.code || error?.message || "";
-      if (code.includes("auth/invalid-credential")) return "بيانات الدخول غير صحيحة.";
-      if (code.includes("auth/user-not-found")) return "المستخدم غير موجود.";
-      if (code.includes("auth/wrong-password")) return "كلمة المرور غير صحيحة.";
-      if (code.includes("auth/email-already-in-use")) return "البريد مستخدم بالفعل.";
-      if (code.includes("auth/popup-closed-by-user")) return "تم غلق نافذة تسجيل الدخول قبل الإكمال.";
-      if (code.includes("auth/operation-not-allowed")) return "فعّل طريقة تسجيل الدخول من Firebase Console.";
-      if (code.includes("auth/invalid-email")) return "البريد الإلكتروني غير صالح.";
-      if (code.includes("USERNAME_NOT_FOUND")) return "اسم المستخدم غير موجود.";
-      if (code.includes("permission-denied")) return "صلاحيات Firestore الحالية لا تسمح بهذه العملية.";
-      return "حدث خطأ، راجع إعدادات Firebase أو جرّب مرة أخرى.";
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const ref = doc(db, "users", user.uid);
-        const snap = await getDoc(ref);
-
-        currentUserData = snap.exists() ? snap.data() : {
-          displayName: user.displayName || "مستخدم",
-          username: normalizeUsername(user.email?.split("@")[0] || "user")
-        };
-
-        await updatePresence(user, true);
-
-        headerUserName.textContent = currentUserData.displayName || "مستخدم";
-        headerSub.textContent = `@${currentUserData.username || "user"}`;
-        logoutBtn.style.display = "inline-flex";
-        topAlert.style.display = "none";
-      } else {
-        currentUserData = null;
-        headerUserName.textContent = "زائر";
-        headerSub.textContent = "أهلاً بك في شات نار";
-        logoutBtn.style.display = "none";
-        topAlert.style.display = "";
-      }
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <button onclick="toggleSidebar(true)">☰</button>
+
+  <section id="important" class="section active">
+    <h2>شات نار</h2>
+  </section>
+
+  <section id="messages" class="section">
+    <div id="publicMessages"></div>
+
+    <input id="publicMessageInput" placeholder="رسالة..." />
+    <button onclick="sendPublicMessage()">إرسال</button>
+  </section>
+
+  <section id="rooms" class="section">
+    <input id="roomNameInput" placeholder="اسم الغرفة" />
+    <input id="roomDescInput" placeholder="الوصف" />
+    <button onclick="createRoom()">إنشاء</button>
+
+    <div id="roomList"></div>
+  </section>
+
+</div>
+
+<script type="module">
+/* ================= FIREBASE ================= */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  getDocs,
+  where,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* ================= CONFIG ================= */
+
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_ID",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ================= STATE ================= */
+
+let currentUser = null;
+
+/* ================= HELPERS ================= */
+
+const $ = (id) => document.getElementById(id);
+
+function setStatus(msg) {
+  $("authStatus").textContent = msg;
+}
+
+function normalize(u) {
+  return u.trim().toLowerCase().replace(/\s+/g, "_");
+}
+
+/* ================= AUTH ================= */
+
+async function registerWithEmail() {
+  try {
+    const name = $("registerName").value;
+    const username = normalize($("registerUsername").value);
+    const email = $("registerEmail").value;
+    const pass = $("registerPass").value;
+
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+
+    await updateProfile(cred.user, { displayName: name });
+
+    await setDoc(doc(db, "users", cred.user.uid), {
+      uid: cred.user.uid,
+      displayName: name,
+      username,
+      email,
+      isOnline: true,
+      createdAt: serverTimestamp()
     });
 
-    window.addEventListener("beforeunload", async () => {
-      if (auth.currentUser) {
-        try {
-          await updatePresence(auth.currentUser, false);
-        } catch {}
-      }
-    });
+    setStatus("تم إنشاء الحساب");
+  } catch (e) {
+    setStatus(e.message);
+  }
+}
 
-    document.getElementById("publicMessageInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") sendPublicMessage();
-    });
+async function loginWithEmail() {
+  try {
+    const input = $("loginUser").value;
+    const pass = $("loginPass").value;
 
-    // تعريض الدوال للـ HTML inline handlers
-    window.toggleSidebar = toggleSidebar;
-    window.openAuth = openAuth;
-    window.closeAuth = closeAuth;
-    window.closeAllPanels = closeAllPanels;
-    window.switchTab = switchTab;
-    window.setSection = setSection;
-    window.fakeOAuth = fakeOAuth;
-    window.loginWithEmail = loginWithEmail;
-    window.registerWithEmail = registerWithEmail;
-    window.sendPublicMessage = sendPublicMessage;
-    window.createRoom = createRoom;
-    window.logoutUser = logoutUser;
-    window.loadPublicMessages = loadPublicMessages;
+    let email = input;
 
-    // تحميل البيانات الأولية
-    loadPublicMessages();
-    loadRooms();
-    loadUsers();
-  </script>
+    if (!input.includes("@")) {
+      const snap = await getDocs(
+        query(collection(db, "users"), where("username", "==", normalize(input)))
+      );
+
+      if (snap.empty) throw new Error("user not found");
+      email = snap.docs[0].data().email;
+    }
+
+    await signInWithEmailAndPassword(auth, email, pass);
+    setStatus("تم تسجيل الدخول");
+  } catch (e) {
+    setStatus(e.message);
+  }
+}
+
+/* ================= MESSAGES ================= */
+
+async function sendPublicMessage() {
+  if (!auth.currentUser) return;
+
+  const text = $("publicMessageInput").value;
+  if (!text) return;
+
+  await addDoc(collection(db, "publicMessages"), {
+    text,
+    uid: auth.currentUser.uid,
+    createdAt: serverTimestamp()
+  });
+
+  $("publicMessageInput").value = "";
+}
+
+function loadMessages() {
+  const q = query(collection(db, "publicMessages"), orderBy("createdAt"));
+
+  onSnapshot(q, (snap) => {
+    $("publicMessages").innerHTML = snap.docs.map(d =>
+      `<div>👤 ${d.data().text}</div>`
+    ).join("");
+  });
+}
+
+/* ================= ROOMS ================= */
+
+async function createRoom() {
+  const name = $("roomNameInput").value;
+  const desc = $("roomDescInput").value;
+
+  await addDoc(collection(db, "rooms"), {
+    name,
+    desc,
+    createdAt: serverTimestamp()
+  });
+}
+
+/* ================= AUTH STATE ================= */
+
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+
+  if (user) {
+    setDoc(doc(db, "users", user.uid), { isOnline: true }, { merge: true });
+  }
+});
+
+/* ================= EXPORT ================= */
+
+window.registerWithEmail = registerWithEmail;
+window.loginWithEmail = loginWithEmail;
+window.sendPublicMessage = sendPublicMessage;
+window.createRoom = createRoom;
+
+/* ================= INIT ================= */
+
+loadMessages();
+
+</script>
+
 </body>
 </html>
