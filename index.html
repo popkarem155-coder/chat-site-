@@ -1,100 +1,241 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شات نار</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="شات نار - واجهة عربية داكنة مع ربط Firebase Firestore" />
+  <title>شات نار</title>
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 
-<!-- Icons -->
-<script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <style>
+    :root{
+      --bg:#0b0910;
+      --bg2:#120d18;
+      --panel:#171320;
+      --panel2:#1d1628;
+      --line:#3a2742;
+      --accent:#ff4f9a;
+      --accent2:#c32773;
+      --accent-soft:rgba(255,79,154,.12);
+      --text:#f8f1ff;
+      --muted:#b6a9c3;
+      --danger:#ff6b85;
+      --success:#4ad47f;
+      --shadow:0 16px 40px rgba(0,0,0,.42);
+      --radius:18px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Tahoma","Segoe UI",sans-serif;}
+    html{scroll-behavior:smooth;}
+    body{
+      background:
+        radial-gradient(circle at top right, rgba(255,79,154,.12), transparent 24%),
+        radial-gradient(circle at bottom left, rgba(195,39,115,.10), transparent 26%),
+        linear-gradient(180deg, #120d18 0%, #09070d 100%);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    button,input,textarea{font:inherit;}
+    a{color:inherit;text-decoration:none;}
+    ::selection{background:rgba(255,79,154,.35);}
 
-<style>
-body{
-  background:#0b0910;
-  color:white;
-  font-family:Arial;
-}
-.chat{
-  max-width:600px;
-  margin:40px auto;
-}
-.msg{
-  background:#1d1628;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:10px;
-}
-</style>
-</head>
+    .top-alert{
+      height:44px;display:flex;align-items:center;justify-content:center;gap:10px;
+      padding:0 16px;font-size:15px;color:#ffe6f1;
+      background:linear-gradient(90deg, rgba(255,79,154,.18), rgba(255,79,154,.05));
+      border-bottom:1px solid rgba(255,255,255,.06);
+      position:sticky;top:0;z-index:60;backdrop-filter:blur(10px);
+    }
+    .top-alert .close-small{
+      position:absolute;right:12px;width:28px;height:28px;border-radius:50%;
+      border:none;background:rgba(255,255,255,.08);color:white;cursor:pointer;
+    }
 
-<body>
+    .overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.52);
+      opacity:0; visibility:hidden; transition:.2s ease; z-index:30;
+    }
+    .overlay.show{opacity:1; visibility:visible;}
 
-<div class="chat">
-  <h1 class="text-2xl mb-4">🔥 شات نار</h1>
+    .sidebar{
+      position:fixed; top:44px; right:0; width:min(88vw, 340px); height:calc(100vh - 44px);
+      background:linear-gradient(180deg, #181320 0%, #100c15 100%);
+      border-left:1px solid rgba(255,255,255,.06);
+      transform:translateX(100%); transition:.28s ease;
+      z-index:40; box-shadow:var(--shadow); overflow:hidden;
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-header{
+      padding:14px 16px;border-bottom:1px solid var(--line);
+      background:linear-gradient(90deg, rgba(255,79,154,.14), rgba(255,79,154,.04));
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{
+      width:50px; height:50px; border-radius:18px; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent2)); color:white; font-size:24px;
+      box-shadow:0 12px 24px rgba(255,79,154,.22);
+    }
+    .brand h1{font-size:26px; line-height:1; margin-bottom:4px;}
+    .brand p{color:var(--muted); font-size:12px;}
+    .icon-btn{
+      width:42px; height:42px; border:none; border-radius:14px; background:rgba(255,255,255,.05);
+      color:white; cursor:pointer; transition:.2s ease; display:grid; place-items:center;
+    }
+    .icon-btn:hover{background:rgba(255,255,255,.1); transform:translateY(-1px);}
+    .sidebar-body{height:calc(100% - 78px); overflow:auto; padding-bottom:90px;}
 
-  <div id="messages"></div>
+    .auth-mini{
+      margin:14px 14px 10px;background:rgba(255,79,154,.08);
+      border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;
+    }
+    .auth-mini p{color:#f9dbe9; font-size:13px; line-height:1.7; margin-bottom:12px;}
+    .auth-mini .mini-actions{display:flex; gap:10px; flex-wrap:wrap;}
 
-  <div class="flex gap-2 mt-4">
-    <input id="msgInput" class="flex-1 p-2 rounded text-black" placeholder="اكتب رسالة">
-    <button onclick="sendMessage()" class="bg-pink-600 px-4 rounded">إرسال</button>
-  </div>
-</div>
+    .btn{border:none;border-radius:14px;padding:12px 14px;cursor:pointer;transition:.2s ease;font-weight:700;}
+    .btn:hover{transform:translateY(-1px);}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; box-shadow:0 10px 20px rgba(255,79,154,.2);}
+    .btn-secondary{background:rgba(255,255,255,.05); color:#fff; border:1px solid rgba(255,255,255,.06);}
+    .btn-ghost{background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.08);}
+    .social-btn{
+      width:100%;display:flex; align-items:center; justify-content:center; gap:10px;border-radius:14px;
+      padding:12px 14px; font-weight:700; color:#fff; border:none; cursor:pointer;transition:.2s ease;
+    }
+    .social-btn:hover{transform:translateY(-1px);}
+    .social-btn.google{background:#2a2a2f; border:1px solid rgba(255,255,255,.08);}
+    .social-btn.facebook{background:#1877f2;}
+    .social-btn svg{width:18px; height:18px; flex:0 0 auto;}
 
-<script>
-/* Firebase Config */
-const firebaseConfig = {
-  apiKey: "AIzaSyCNCq5bP_UVdQgXPr40lroIkiti5aMWyvw",
-  authDomain: "chat-nar.firebaseapp.com",
-  projectId: "chat-nar",
-  storageBucket: "chat-nar.firebasestorage.app",
-  messagingSenderId: "199917444253",
-  appId: "1:199917444253:web:aef64b8f6cb812d8f2c874"
-};
+    .menu{margin-top:10px;}
+    .menu-item{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:62px;
+      padding:0 16px 0 18px; border-top:1px solid rgba(255,255,255,.03); border-bottom:1px solid rgba(255,255,255,.03);
+      background:linear-gradient(90deg, rgba(255,79,154,.05), transparent 60%); cursor:pointer; transition:.2s ease;
+    }
+    .menu-item:hover,.menu-item.active{background:linear-gradient(90deg, rgba(255,79,154,.16), rgba(255,79,154,.05));}
+    .menu-item .label{display:flex; align-items:center; gap:12px; font-size:17px;}
+    .menu-item .meta{color:var(--muted); font-size:12px;}
+    .menu-icon{
+      width:34px; height:34px; border-radius:12px; display:grid; place-items:center;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.04);flex:0 0 auto;
+    }
 
-/* Init */
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+    .layout{display:flex; min-height:calc(100vh - 44px);}
+    .mini-rail{
+      width:84px; background:linear-gradient(180deg, #130f1a 0%, #0e0b12 100%);
+      border-left:1px solid rgba(255,255,255,.05); display:flex; flex-direction:column; align-items:center;
+      gap:16px; padding:18px 0; position:sticky; top:44px; height:calc(100vh - 44px);
+    }
+    .rail-btn{
+      width:52px; height:52px; border:none; border-radius:18px; background:rgba(255,255,255,.04);
+      color:#fff; cursor:pointer; transition:.2s ease; font-size:20px;
+    }
+    .rail-btn:hover{background:rgba(255,255,255,.09); transform:translateY(-1px);}
+    .rail-spacer{flex:1;}
+    .content{flex:1; min-width:0;}
+    .header{
+      height:76px; border-bottom:1px solid rgba(255,255,255,.05);display:flex; align-items:center; justify-content:space-between;
+      gap:16px; padding:0 22px;background:rgba(13,10,18,.84); backdrop-filter:blur(8px); position:sticky; top:44px; z-index:10;
+    }
+    .header-right,.header-left{display:flex; align-items:center; gap:12px;}
+    .search{
+      width:min(520px, 50vw); height:46px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.05);
+      border-radius:16px; display:flex; align-items:center; gap:10px; padding:0 14px; color:var(--muted);
+    }
+    .search input{flex:1; border:none; background:transparent; color:white; outline:none;}
 
-/* عرض الرسائل */
-db.collection("messages")
-.orderBy("createdAt")
-.onSnapshot((snapshot)=>{
-  const box = document.getElementById("messages");
-  box.innerHTML = "";
+    .page{padding:24px;}
+    .hero{
+      background:linear-gradient(180deg, rgba(31,22,40,.95), rgba(21,16,29,.95));
+      border:1px solid rgba(255,255,255,.06); border-radius:28px; box-shadow:var(--shadow); overflow:hidden;
+      position:relative; margin-bottom:20px;
+    }
+    .hero::after{
+      content:""; position:absolute; left:-40px; bottom:-80px; width:260px; height:260px;
+      background:radial-gradient(circle, rgba(255,79,154,.16), transparent 70%); pointer-events:none;
+    }
+    .hero-inner{padding:28px; display:grid; grid-template-columns:1.15fr .85fr; gap:18px; align-items:start;}
+    .hero h2{font-size:34px; margin-bottom:10px;}
+    .hero p{color:var(--muted); line-height:1.9; max-width:760px;}
+    .hero-actions{margin-top:18px; display:flex; flex-wrap:wrap; gap:10px;}
+    .hero-side{display:grid; gap:12px;}
+    .small-card{background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05); border-radius:20px; padding:16px;}
+    .small-card h3{font-size:17px; margin-bottom:6px;}
+    .small-card p{font-size:13px; color:var(--muted); line-height:1.7;}
 
-  snapshot.forEach(doc=>{
-    const data = doc.data();
-    box.innerHTML += `
-      <div class="msg">
-        <b>${data.name || "مستخدم"}:</b>
-        <p>${data.text}</p>
-      </div>
-    `;
-  });
-});
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    .panel{background:linear-gradient(180deg, rgba(30,23,39,.96), rgba(19,15,27,.96)); border:1px solid rgba(255,255,255,.06); border-radius:24px; box-shadow:var(--shadow); padding:20px;}
+    .panel-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;}
+    .panel-head h3{font-size:22px;}
+    .badge{background:rgba(255,79,154,.12); color:#ffd6e7; padding:7px 12px; border-radius:999px; font-size:12px;}
 
-/* إرسال */
-function sendMessage(){
-  const input = document.getElementById("msgInput");
-  const text = input.value.trim();
-  if(!text) return;
+    .room-list,.online-list,.msg-list{display:grid; gap:12px;}
+    .room,.online-user,.empty,.msg-item{background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05); border-radius:18px; padding:15px 16px;}
+    .room{display:flex; align-items:center; justify-content:space-between; gap:14px;}
+    .room h4{font-size:17px; margin-bottom:5px;}
+    .room p{color:var(--muted); font-size:13px; line-height:1.7;}
+    .status{white-space:nowrap; font-size:12px; border-radius:999px; padding:7px 11px; background:rgba(255,255,255,.06); color:#ffe0ec;}
+    .empty{text-align:center; color:var(--muted); line-height:1.9; padding:24px 16px;}
+    .online-user{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .user-info{display:flex; align-items:center; gap:12px; min-width:0;}
+    .avatar{
+      width:46px; height:46px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,#ff91c2,#8338ec); font-weight:700; flex-shrink:0;
+    }
+    .user-text{min-width:0;}
+    .user-text h4{font-size:15px; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .user-text p{color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .dot{width:10px; height:10px; border-radius:50%; background:var(--success); box-shadow:0 0 0 4px rgba(74,212,127,.1); flex-shrink:0;}
 
-  db.collection("messages").add({
-    text:text,
-    name:"Kimo",
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+    .side-pill{
+      position:fixed; left:18px; top:50%; transform:translateY(-50%); writing-mode:vertical-rl; border:none;
+      border-radius:18px; background:linear-gradient(180deg, var(--accent), var(--accent2)); color:#fff;
+      padding:14px 10px; font-weight:700; cursor:pointer; box-shadow:var(--shadow); z-index:25;
+    }
 
-  input.value="";
-}
-</script>
+    .auth-modal{
+      position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(.96);
+      width:min(92vw, 460px);background:linear-gradient(180deg,#1b1424,#120d19); border:1px solid rgba(255,255,255,.07);
+      border-radius:26px;box-shadow:var(--shadow); z-index:50; opacity:0; visibility:hidden; transition:.22s ease; overflow:hidden;
+    }
+    .auth-modal.show{opacity:1; visibility:visible; transform:translate(-50%,-50%) scale(1);}
+    .auth-top{
+      padding:18px 18px 12px; background:linear-gradient(90deg, rgba(255,79,154,.18), rgba(255,79,154,.04));
+      border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .auth-top h3{font-size:24px;}
+    .auth-top p{color:var(--muted); font-size:12px; margin-top:4px;}
+    .tabs{display:flex; gap:8px; padding:16px 18px 0;}
+    .tab{flex:1; border:none; border-radius:14px; padding:12px; background:rgba(255,255,255,.04); color:#fff; cursor:pointer;}
+    .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));}
+    .auth-body{padding:18px;}
+    .form{display:none; gap:12px; flex-direction:column;}
+    .form.active{display:flex;}
+    .field{display:flex; flex-direction:column; gap:8px;}
+    .field label{color:#eadff4; font-size:14px;}
+    .field input, .field textarea{
+      min-height:48px; border:none; outline:none; border-radius:14px; background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.06); color:#fff; padding:12px 14px;
+    }
+    .field textarea{min-height:110px; resize:vertical;}
+    .hint{font-size:12px; color:var(--muted); line-height:1.8;}
+    .footer-note{text-align:center; margin-top:20px; color:var(--muted); font-size:13px;}
 
-</body>
-</html>
+    .section{display:none;}
+    .section.active{display:block;}
+    .messages-layout{display:grid;grid-template-columns:300px 1fr; gap:18px;}
+    .chat-box{min-height:520px; display:flex; flex-direction:column; gap:12px;}
+    .chat-window{
+      flex:1; min-height:360px; max-height:540px; overflow:auto; padding:16px; border-radius:20px;
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05);display:flex; flex-direction:column; gap:10px;
+    }
+    .bubble{
+      max-width:78%; padding:12px 14px; border-radius:18px; line-height:1.8; font-size:14px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,
