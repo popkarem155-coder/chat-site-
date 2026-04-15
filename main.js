@@ -1,4 +1,4 @@
-import { db, collection, addDoc, onSnapshot, query, orderBy } from "./firebase.js";
+// وضع تجريبي بدون Firebase
 
 let username = "زائر";
 
@@ -7,36 +7,41 @@ const msgInput = document.getElementById("msgInput");
 const msgBox = document.getElementById("messages");
 const form = document.getElementById("msgForm");
 
+// مصفوفة مؤقتة للرسائل
+let messages = [];
+
 // إرسال رسالة
-form.addEventListener("submit", async (e) => {
+form.addEventListener("submit", (e) => {
   e.preventDefault();
 
   const text = msgInput.value.trim();
   if (!text) return;
 
-  await addDoc(collection(db, "messages"), {
-    message: text,
+  const msg = {
     username: username,
-    timestamp: Date.now()
-  });
+    message: text,
+    time: new Date().toLocaleTimeString("ar", {
+      hour: "2-digit",
+      minute: "2-digit"
+    })
+  };
+
+  messages.push(msg);
+  renderMessages();
 
   msgInput.value = "";
 });
 
-// استقبال الرسائل (Realtime)
-const q = query(collection(db, "messages"), orderBy("timestamp"));
-
-onSnapshot(q, (snapshot) => {
+// عرض الرسائل
+function renderMessages() {
   msgBox.innerHTML = "";
 
-  snapshot.forEach(doc => {
-    const m = doc.data();
-
+  messages.forEach(m => {
     const div = document.createElement("div");
     div.className = "msg";
 
     div.innerHTML = `
-      <small>${m.username}</small>
+      <small>${m.username} • ${m.time}</small>
       <div>${m.message}</div>
     `;
 
@@ -44,4 +49,23 @@ onSnapshot(q, (snapshot) => {
   });
 
   msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+//////////////////////////////////////////////////
+// 🔥 سحب لتحت لتحديث الصفحة (Pull To Refresh)
+//////////////////////////////////////////////////
+
+let startY = 0;
+
+window.addEventListener("touchstart", (e) => {
+  startY = e.touches[0].clientY;
+});
+
+window.addEventListener("touchend", (e) => {
+  let endY = e.changedTouches[0].clientY;
+
+  // لو سحبت لتحت من فوق
+  if (endY - startY > 100 && window.scrollY === 0) {
+    location.reload(); // إعادة تحميل الصفحة
+  }
 });
