@@ -3,923 +3,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="شات نار - واجهة عربية داكنة منظمة" />
   <title>كريم 1 - شات نار</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
-
-  <style>
-    :root{
-      --bg:#0b0910;
-      --bg2:#120d18;
-      --panel:#171320;
-      --panel2:#1d1628;
-      --line:#3a2742;
-      --accent:#ff4f9a;
-      --accent2:#c32773;
-      --accent-soft:rgba(255,79,154,.12);
-      --text:#f8f1ff;
-      --muted:#b6a9c3;
-      --danger:#ff6b85;
-      --success:#4ad47f;
-      --shadow:0 16px 40px rgba(0,0,0,.42);
-      --radius:18px;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body{
-      font-family:"Noto Kufi Arabic", Tahoma, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top right, rgba(255,79,154,.12), transparent 24%),
-        radial-gradient(circle at bottom left, rgba(195,39,115,.10), transparent 26%),
-        linear-gradient(180deg, #120d18 0%, #09070d 100%);
-      color:var(--text);
-      overflow:hidden;
-    }
-
-    button, input { font: inherit; }
-    button { cursor: pointer; }
-    ::selection { background: rgba(255,79,154,.35); }
-
-    .app {
-      height: 100%;
-      display: grid;
-      grid-template-columns: 360px minmax(0, 1fr);
-      grid-template-areas: "sidebar main";
-    }
-
-    .sidebar {
-      grid-area: sidebar;
-      background: linear-gradient(180deg, #181320 0%, #100c15 100%);
-      border-left: 1px solid rgba(255,255,255,.06);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      position: relative;
-      z-index: 20;
-    }
-
-    .sidebar-header {
-      padding: 18px 18px 14px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(90deg, rgba(255,79,154,.14), rgba(255,79,154,.04));
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-    }
-
-    .logo {
-      width: 52px;
-      height: 52px;
-      border-radius: 18px;
-      display:grid;
-      place-items:center;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 12px 24px rgba(255,79,154,.22);
-      flex: 0 0 auto;
-      color: #fff;
-      font-size: 24px;
-    }
-
-    .brand h1{
-      margin:0;
-      font-size: 24px;
-      line-height: 1.1;
-    }
-
-    .brand p{
-      margin:4px 0 0;
-      color:var(--muted);
-      font-size:12px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .icon-btn{
-      width:42px;
-      height:42px;
-      border:none;
-      border-radius:14px;
-      background:rgba(255,255,255,.05);
-      color:#fff;
-      display:grid;
-      place-items:center;
-      transition:.2s ease;
-      flex:0 0 auto;
-    }
-    .icon-btn:hover{
-      background:rgba(255,255,255,.1);
-      transform:translateY(-1px);
-    }
-
-    .sidebar-tools{
-      padding:14px 14px 10px;
-      display:grid;
-      gap:10px;
-    }
-
-    .auth-card{
-      background:rgba(255,79,154,.08);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:18px;
-      padding:14px;
-    }
-    .auth-card p{
-      margin:0 0 12px;
-      color:#f9dbe9;
-      font-size:13px;
-      line-height:1.8;
-    }
-    .auth-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      border:none;
-      border-radius:14px;
-      padding:12px 14px;
-      cursor:pointer;
-      transition:.2s ease;
-      font-weight:700;
-    }
-    .btn:hover{ transform:translateY(-1px); }
-    .btn-primary{
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#fff;
-      box-shadow:0 10px 20px rgba(255,79,154,.2);
-    }
-    .btn-secondary{
-      background:rgba(255,255,255,.05);
-      color:#fff;
-      border:1px solid rgba(255,255,255,.06);
-    }
-
-    .search-box{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      height:48px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:16px;
-      padding:0 14px;
-      color:var(--muted);
-    }
-    .search-box input{
-      flex:1;
-      border:none;
-      outline:none;
-      background:transparent;
-      color:#fff;
-      min-width:0;
-    }
-
-    .nav-tabs{
-      padding:0 14px 14px;
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
-    }
-
-    .nav-tab{
-      border:none;
-      border-radius:16px;
-      padding:11px 10px;
-      background:rgba(255,255,255,.04);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      transition:.2s ease;
-      min-width:0;
-    }
-    .nav-tab span{
-      font-size:12px;
-      white-space:nowrap;
-    }
-    .nav-tab.active,
-    .nav-tab:hover{
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-    }
-
-    .sidebar-body{
-      flex:1;
-      overflow:auto;
-      padding: 0 14px 14px;
-      min-height:0;
-    }
-
-    .panel{
-      display:none;
-      animation: fadeIn .18s ease-out;
-    }
-    .panel.active{ display:block; }
-    @keyframes fadeIn{
-      from{ opacity:0; transform:translateY(6px); }
-      to{ opacity:1; transform:translateY(0); }
-    }
-
-    .panel-card{
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.05);
-      border-radius:18px;
-      padding:14px;
-      margin-bottom:10px;
-    }
-
-    .panel-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:12px;
-    }
-    .panel-head h2{
-      margin:0;
-      font-size:15px;
-    }
-    .badge{
-      background:rgba(255,79,154,.12);
-      color:#ffd6e7;
-      padding:7px 12px;
-      border-radius:999px;
-      font-size:12px;
-      white-space:nowrap;
-    }
-
-    .item-list{
-      display:grid;
-      gap:10px;
-    }
-
-    .item{
-      background:rgba(15,15,26,.78);
-      border:1px solid rgba(255,255,255,.05);
-      border-radius:16px;
-      padding:12px;
-      transition:.2s ease;
-    }
-    .item:hover{
-      background:rgba(30,30,53,.92);
-      transform:translateY(-1px);
-    }
-
-    .item.search-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .user-chip{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-    }
-
-    .avatar{
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      background:linear-gradient(135deg,#ff91c2,#8338ec);
-      display:grid;
-      place-items:center;
-      color:#fff;
-      font-weight:700;
-      flex:0 0 auto;
-    }
-
-    .user-text{
-      min-width:0;
-    }
-    .user-text strong{
-      display:block;
-      font-size:14px;
-      margin-bottom:4px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .user-text span{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .status-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:var(--success);
-      box-shadow:0 0 0 4px rgba(74,212,127,.1);
-      flex:0 0 auto;
-    }
-
-    .main {
-      grid-area: main;
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-      min-height:0;
-    }
-
-    .topbar{
-      height: 72px;
-      padding: 0 18px;
-      border-bottom: 1px solid rgba(255,255,255,.05);
-      background: rgba(13,10,18,.82);
-      backdrop-filter: blur(10px);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      position:sticky;
-      top:0;
-      z-index:10;
-      flex-shrink:0;
-    }
-
-    .topbar-left,
-    .topbar-right{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-    }
-
-    .burger{
-      display:none;
-    }
-
-    .title-wrap{
-      min-width:0;
-    }
-    .title-wrap h1{
-      margin:0;
-      font-size: 18px;
-      line-height:1.1;
-    }
-    .title-wrap p{
-      margin:4px 0 0;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .search-wrap{
-      width:min(520px, 48vw);
-    }
-
-    .workspace{
-      flex:1;
-      min-height:0;
-      overflow:auto;
-      padding: 18px;
-    }
-
-    .hero{
-      background: linear-gradient(180deg, rgba(31,22,40,.96), rgba(21,16,29,.96));
-      border:1px solid rgba(255,255,255,.06);
-      border-radius: 26px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      margin-bottom: 18px;
-      position:relative;
-    }
-    .hero::after{
-      content:"";
-      position:absolute;
-      left:-50px;
-      bottom:-90px;
-      width:280px;
-      height:280px;
-      background:radial-gradient(circle, rgba(255,79,154,.16), transparent 70%);
-      pointer-events:none;
-    }
-    .hero-inner{
-      padding: 22px;
-      display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap: 18px;
-      align-items:start;
-    }
-
-    .hero h2{
-      margin:0 0 10px;
-      font-size: 28px;
-    }
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.95;
-      max-width: 760px;
-      font-size:14px;
-    }
-    .hero-actions{
-      margin-top:18px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-
-    .hero-side{
-      display:grid;
-      gap:12px;
-    }
-
-    .small-card{
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.05);
-      border-radius:20px;
-      padding:16px;
-    }
-    .small-card h3{
-      margin:0 0 6px;
-      font-size:16px;
-    }
-    .small-card p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.75;
-      font-size:13px;
-    }
-
-    .stats{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .stat{
-      background:linear-gradient(180deg, rgba(30,23,39,.96), rgba(19,15,27,.96));
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:24px;
-      box-shadow: var(--shadow);
-      padding:16px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-    .stat-icon{
-      width:46px;
-      height:46px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      background:rgba(255,79,154,.12);
-      color:#ffd6e7;
-      flex:0 0 auto;
-    }
-    .stat strong{
-      display:block;
-      font-size:16px;
-      margin-bottom:4px;
-    }
-    .stat span{
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .chat-shell{
-      background: linear-gradient(180deg, rgba(30,23,39,.96), rgba(19,15,27,.96));
-      border:1px solid rgba(255,255,255,.06);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      min-height: 480px;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .chat-head{
-      padding: 16px 18px;
-      border-bottom: 1px solid rgba(255,255,255,.05);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      background: linear-gradient(90deg, rgba(255,79,154,.12), rgba(255,79,154,.03));
-    }
-
-    .chat-head-left{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-    }
-
-    .chat-mark{
-      width:46px;
-      height:46px;
-      border-radius:16px;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      display:grid;
-      place-items:center;
-      flex:0 0 auto;
-      box-shadow: 0 12px 24px rgba(255,79,154,.18);
-    }
-
-    .chat-head h2{
-      margin:0;
-      font-size:18px;
-    }
-    .chat-head p{
-      margin:4px 0 0;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    #messages{
-      flex:1;
-      min-height:0;
-      overflow:auto;
-      padding: 18px;
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-    }
-
-    .msg{
-      background: rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.05);
-      padding: 12px 14px;
-      border-radius: 18px;
-      max-width: min(760px, 75%);
-      word-break: break-word;
-      line-height: 1.8;
-      align-self: flex-start;
-      position:relative;
-    }
-
-    .msg small{
-      display:block;
-      color:var(--muted);
-      font-size:11px;
-      margin-bottom: 5px;
-    }
-
-    .composer{
-      padding: 14px;
-      border-top: 1px solid rgba(255,255,255,.05);
-      background: rgba(16,12,22,.92);
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-shrink:0;
-    }
-
-    .composer input{
-      flex:1;
-      height: 52px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.06);
-      background: rgba(255,255,255,.05);
-      color:#fff;
-      padding: 0 14px;
-      outline:none;
-      min-width:0;
-    }
-    .composer input:focus{
-      box-shadow: 0 0 0 2px rgba(255,79,154,.18);
-      border-color: rgba(255,79,154,.35);
-    }
-
-    .send-btn{
-      height:52px;
-      width:52px;
-      border:none;
-      border-radius: 16px;
-      display:grid;
-      place-items:center;
-      color:#fff;
-      background: linear-gradient(135deg,var(--accent),var(--accent2));
-      box-shadow: 0 10px 20px rgba(255,79,154,.2);
-      flex:0 0 auto;
-    }
-
-    .mobile-overlay{
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.55);
-      z-index:15;
-    }
-
-    .empty-note{
-      color:var(--muted);
-      line-height:1.9;
-      font-size:13px;
-    }
-
-    .mini-link{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px;
-      border-radius:16px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.05);
-      margin-bottom:10px;
-    }
-
-    .mini-link strong{ font-size:14px; }
-    .mini-link span{ color:var(--muted); font-size:12px; }
-
-    @media (max-width: 1100px){
-      .app{ grid-template-columns: 320px minmax(0,1fr); }
-      .hero-inner{ grid-template-columns: 1fr; }
-      .stats{ grid-template-columns: 1fr; }
-      .search-wrap{ width:min(420px, 42vw); }
-    }
-
-    @media (max-width: 860px){
-      .app{
-        grid-template-columns: 1fr;
-        grid-template-areas: "main";
-      }
-
-      .sidebar{
-        position: fixed;
-        right: 0;
-        top: 0;
-        height: 100%;
-        width: min(88vw, 360px);
-        transform: translateX(100%);
-        transition: transform .22s ease;
-      }
-      .sidebar.open{
-        transform: translateX(0);
-      }
-
-      .mobile-overlay.show{
-        display:block;
-      }
-
-      .burger{
-        display:grid;
-      }
-
-      .search-wrap{
-        width: min(100%, 55vw);
-      }
-
-      .hero h2{
-        font-size: 24px;
-      }
-
-      .workspace{
-        padding: 14px;
-      }
-
-      .msg{
-        max-width: 92%;
-      }
-    }
-
-    @media (max-width: 560px){
-      .topbar{
-        height:auto;
-        padding: 12px 14px;
-        flex-wrap:wrap;
-      }
-
-      .topbar-right,
-      .topbar-left{
-        width:100%;
-      }
-
-      .search-wrap{
-        width:100%;
-      }
-
-      .title-wrap h1{
-        font-size:17px;
-      }
-
-      .hero-inner{
-        padding: 18px;
-      }
-
-      .chat-head{
-        padding: 14px;
-      }
-
-      .composer{
-        padding: 12px;
-      }
-
-      .composer input{
-        height:48px;
-      }
-
-      .send-btn{
-        width:48px;
-        height:48px;
-      }
-    }
-  </style>
 </head>
 
 <body>
-  <div class="mobile-overlay" id="mobileOverlay"></div>
-
   <div class="app">
-    <aside class="sidebar" id="sidebar" aria-label="الشريط الجانبي">
-      <div class="sidebar-header">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
         <div class="brand">
-          <div class="logo">🔥</div>
-          <div class="title-wrap">
+          <div class="brand-logo">🔥</div>
+          <div>
             <h1>شات نار</h1>
-            <p>واجهة منسقة ومناسبة للموبايل والكمبيوتر</p>
+            <p>واجهة مرتبة وسريعة</p>
           </div>
         </div>
-        <button class="icon-btn burger" id="closeSidebarBtn" type="button" aria-label="إغلاق القائمة">
+
+        <button class="icon-btn mobile-only" id="closeSidebarBtn" type="button" aria-label="إغلاق القائمة">
           <i data-lucide="x"></i>
         </button>
       </div>
 
-      <div class="sidebar-tools">
-        <div class="auth-card">
-          <p>التصميم هنا معمول بحيث يكون كل عنصر له وظيفة واضحة، والبحث والقوائم الجانبية مخصصين فعلًا للتنقل والتنظيم.</p>
-          <div class="auth-actions">
-            <button class="btn btn-primary" type="button" id="focusMessageBtn">اذهب للشات</button>
-            <button class="btn btn-secondary" type="button" id="scrollTopBtn">أعلى الصفحة</button>
-          </div>
-        </div>
-
-        <div class="search-box">
-          <i data-lucide="search"></i>
-          <input id="memberSearch" type="text" placeholder="ابحث عن عضو أو غرفة..." autocomplete="off" />
-        </div>
+      <div class="sidebar-search">
+        <i data-lucide="search"></i>
+        <input id="searchInput" type="text" placeholder="ابحث في المحادثات..." autocomplete="off" />
       </div>
 
-      <div class="nav-tabs" role="tablist" aria-label="التنقل">
-        <button class="nav-tab active" type="button" data-view="chats">
-          <i data-lucide="messages-square"></i><span>الدردشات</span>
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" data-tab="chats" type="button">
+          <i data-lucide="messages-square"></i>
+          <span>الدردشات</span>
         </button>
-        <button class="nav-tab" type="button" data-view="online">
-          <i data-lucide="users"></i><span>المتصلون</span>
+        <button class="tab-btn" data-tab="private" type="button">
+          <i data-lucide="lock-keyhole"></i>
+          <span>الخاص</span>
         </button>
-        <button class="nav-tab" type="button" data-view="alerts">
-          <i data-lucide="bell-ring"></i><span>الإشعارات</span>
+        <button class="tab-btn" data-tab="alerts" type="button">
+          <i data-lucide="bell"></i>
+          <span>الإشعارات</span>
         </button>
       </div>
 
-      <div class="sidebar-body">
+      <div class="sidebar-content">
         <section class="panel active" id="panel-chats">
           <div class="panel-card">
             <div class="panel-head">
-              <h2>الغرف النشطة</h2>
-              <span class="badge">Live</span>
+              <h2>المحادثات</h2>
+              <span class="badge">1 فقط</span>
             </div>
 
-            <div class="item-list">
-              <div class="item search-item">
-                <div class="user-chip">
-                  <div class="avatar">A</div>
-                  <div class="user-text">
-                    <strong>الشات العام</strong>
-                    <span>كل الرسائل العامة تظهر هنا</span>
-                  </div>
+            <div class="chat-list" id="chatList">
+              <button class="chat-item active" type="button" data-room="general">
+                <div class="chat-item-avatar">A</div>
+                <div class="chat-item-text">
+                  <strong>الشات العام</strong>
+                  <span>كل الرسائل هنا</span>
                 </div>
-                <i data-lucide="arrow-right-left"></i>
-              </div>
-
-              <div class="item search-item">
-                <div class="user-chip">
-                  <div class="avatar">P</div>
-                  <div class="user-text">
-                    <strong>الرسائل الخاصة</strong>
-                    <span>تفتح من داخل المحادثة لاحقًا</span>
-                  </div>
-                </div>
-                <i data-lucide="lock-keyhole"></i>
-              </div>
-
-              <div class="item search-item">
-                <div class="user-chip">
-                  <div class="avatar">G</div>
-                  <div class="user-text">
-                    <strong>المجموعات</strong>
-                    <span>تنظيم الناس حسب الاهتمام</span>
-                  </div>
-                </div>
-                <i data-lucide="users-round"></i>
-              </div>
+                <i data-lucide="chevron-left"></i>
+              </button>
             </div>
           </div>
 
           <div class="panel-card">
             <div class="panel-head">
-              <h2>أصدقاء متصلون الآن</h2>
-              <span class="badge">8 Online</span>
+              <h2>معلومة</h2>
+              <span class="badge">جاهز</span>
             </div>
-
-            <div class="item-list" id="sidebarChats">
-              <div class="item search-item filter-item">
-                <div class="user-chip">
-                  <div class="avatar">K</div>
-                  <div class="user-text">
-                    <strong>Kimo</strong>
-                    <span>متصل الآن</span>
-                  </div>
-                </div>
-                <span class="status-dot"></span>
-              </div>
-
-              <div class="item search-item filter-item">
-                <div class="user-chip">
-                  <div class="avatar">M</div>
-                  <div class="user-text">
-                    <strong>Mahmoud</strong>
-                    <span>آخر ظهور منذ دقيقة</span>
-                  </div>
-                </div>
-                <span class="status-dot"></span>
-              </div>
-
-              <div class="item search-item filter-item">
-                <div class="user-chip">
-                  <div class="avatar">N</div>
-                  <div class="user-text">
-                    <strong>Nada</strong>
-                    <span>متصل الآن</span>
-                  </div>
-                </div>
-                <span class="status-dot"></span>
-              </div>
+            <div class="note">
+              هنا هنضيف Firebase بعدين من غير ما نغير الواجهة أو IDs.
             </div>
           </div>
         </section>
 
-        <section class="panel" id="panel-online">
+        <section class="panel" id="panel-private">
           <div class="panel-card">
             <div class="panel-head">
-              <h2>المتصلون الآن</h2>
-              <span class="badge">Realtime</span>
+              <h2>الرسائل الخاصة</h2>
+              <span class="badge">قريبًا</span>
             </div>
-
-            <div class="item-list" id="sidebarOnline">
-              <div class="mini-link">
-                <div>
-                  <strong>غرفة الأصدقاء</strong>
-                  <span>تفاعل مباشر مع الأصدقاء</span>
-                </div>
-                <i data-lucide="sparkles"></i>
-              </div>
-
-              <div class="item search-item filter-item">
-                <div class="user-chip">
-                  <div class="avatar">A</div>
-                  <div class="user-text">
-                    <strong>Ahmed</strong>
-                    <span>يكتب الآن</span>
-                  </div>
-                </div>
-                <span class="status-dot"></span>
-              </div>
-
-              <div class="item search-item filter-item">
-                <div class="user-chip">
-                  <div class="avatar">S</div>
-                  <div class="user-text">
-                    <strong>Sara</strong>
-                    <span>متصلة</span>
-                  </div>
-                </div>
-                <span class="status-dot"></span>
-              </div>
-
-              <div class="item search-item filter-item">
-                <div class="user-chip">
-                  <div class="avatar">Y</div>
-                  <div class="user-text">
-                    <strong>Youssef</strong>
-                    <span>آخر ظهور منذ 5 دقائق</span>
-                  </div>
-                </div>
-                <span class="status-dot"></span>
-              </div>
+            <div class="empty-state">
+              لا توجد محادثات خاصة الآن.
             </div>
           </div>
         </section>
@@ -928,120 +92,96 @@
           <div class="panel-card">
             <div class="panel-head">
               <h2>الإشعارات</h2>
-              <span class="badge">0 New</span>
+              <span class="badge">0</span>
             </div>
-
-            <div class="item-list">
-              <div class="mini-link">
-                <div>
-                  <strong>لا توجد إشعارات الآن</strong>
-                  <span>هنا هتظهر التنبيهات الحقيقية لاحقًا</span>
-                </div>
-                <i data-lucide="bell-off"></i>
-              </div>
-
-              <div class="item">
-                <div class="empty-note">
-                  تم تصميم هذه المنطقة لتنبيهات حقيقية فقط، مثل الرسائل الجديدة أو نشاط الأصدقاء، من غير أي قوائم وهمية.
-                </div>
-              </div>
+            <div class="empty-state">
+              لا توجد إشعارات حاليًا.
             </div>
           </div>
         </section>
       </div>
     </aside>
 
-    <main class="main" id="main">
-      <div class="topbar">
-        <div class="topbar-right">
-          <button class="icon-btn burger" id="openSidebarBtn" type="button" aria-label="فتح القائمة">
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-side">
+          <button class="icon-btn mobile-only" id="openSidebarBtn" type="button" aria-label="فتح القائمة">
             <i data-lucide="menu"></i>
           </button>
 
-          <div class="title-wrap">
-            <h1>شات نار</h1>
-            <p>تصميم داكن عصري مع تنظيم واضح</p>
+          <div class="title-block">
+            <h1 id="roomTitle">الشات العام</h1>
+            <p id="roomSubtitle">ابدأ المحادثة الآن</p>
           </div>
         </div>
 
-        <div class="topbar-left">
-          <div class="search-wrap">
-            <div class="search-box">
-              <i data-lucide="search"></i>
-              <input id="topSearch" type="text" placeholder="ابحث في الأعضاء أو الغرف..." autocomplete="off" />
-            </div>
-          </div>
-
-          <button class="icon-btn" type="button" id="toggleInfoBtn" aria-label="معلومات">
-            <i data-lucide="circle-help"></i>
+        <div class="topbar-actions">
+          <button class="icon-btn" type="button" id="scrollTopBtn" aria-label="أعلى الصفحة">
+            <i data-lucide="arrow-up"></i>
           </button>
         </div>
-      </div>
+      </header>
 
-      <div class="workspace">
-        <section class="hero">
-          <div class="hero-inner">
-            <div>
-              <h2>مرحبًا بك في شات نار</h2>
-              <p>
-                الواجهة دي معمولة بشكل منظم: شريط جانبي حقيقي، بحث واضح، أقسام لها وظيفة، وصندوق شات مخصص للرسائل.
-                نفس ألوانك الداكنة الهادية مع لمسة فاخرة تناسب الموبايل والكمبيوتر.
-              </p>
+      <section class="hero">
+        <div class="hero-content">
+          <div>
+            <h2>واجهة داكنة منظمة</h2>
+            <p>
+              تصميم مريح للموبايل والكمبيوتر، عناصر واضحة، ولا توجد أيقونات أو قوائم بلا وظيفة.
+              كل شيء هنا له استخدام حقيقي.
+            </p>
 
-              <div class="hero-actions">
-                <button class="btn btn-primary" type="button" id="goToChatBtn">افتح الشات</button>
-                <button class="btn btn-secondary" type="button" id="goToOnlineBtn">المتصلون الآن</button>
-                <button class="btn btn-secondary" type="button" id="goToAlertsBtn">الإشعارات</button>
-              </div>
-            </div>
-
-            <div class="hero-side">
-              <div class="small-card">
-                <h3>تنظيم فعلي</h3>
-                <p>كل جزء ظاهر له استخدام حقيقي: الشات، المتصلون، والإشعارات.</p>
-              </div>
-              <div class="small-card">
-                <h3>بحث سريع</h3>
-                <p>شريط البحث فوق وفي الشريط الجانبي يفلتر العناصر مباشرة.</p>
-              </div>
-              <div class="small-card">
-                <h3>مناسب للموبايل</h3>
-                <p>القائمة بتتحول لدرج جانبي قابل للفتح والإغلاق بسهولة.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="stats">
-          <div class="stat">
-            <div class="stat-icon"><i data-lucide="message-circle"></i></div>
-            <div>
-              <strong>الشات العام</strong>
-              <span>المكان الأساسي للرسائل</span>
+            <div class="hero-actions">
+              <button class="btn btn-primary" id="goToChatBtn" type="button">اذهب للشات</button>
+              <button class="btn btn-secondary" id="goToPrivateBtn" type="button">الخاص</button>
+              <button class="btn btn-secondary" id="goToAlertsBtn" type="button">الإشعارات</button>
             </div>
           </div>
 
-          <div class="stat">
-            <div class="stat-icon"><i data-lucide="users"></i></div>
+          <div class="hero-cards">
+            <div class="mini-card">
+              <h3>تنظيم واضح</h3>
+              <p>الشريط الجانبي مخصص للتنقل الحقيقي فقط.</p>
+            </div>
+            <div class="mini-card">
+              <h3>جاهز للتوسع</h3>
+              <p>لاحقًا سنضيف Firebase بدون تغيير الواجهة.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="chat-shell" id="chatShell">
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <div class="chat-avatar">🔥</div>
             <div>
-              <strong>الأصدقاء الآن</strong>
-              <span>عرض واضح للمتصلين</span>
+              <h2>الشات العام</h2>
+              <p>الرسائل تظهر هنا</p>
             </div>
           </div>
 
-          <div class="stat">
-            <div class="stat-icon"><i data-lucide="sparkles"></i></div>
-            <div>
-              <strong>واجهة حديثة</strong>
-              <span>منظمة بدون عناصر بلا وظيفة</span>
-            </div>
-          </div>
-        </section>
+          <div class="pill">Local Demo</div>
+        </div>
 
-        <section class="chat-shell" id="chatSection">
-          <div class="chat-head">
-            <div class="chat-head-left">
-              <div class="chat-mark">
-                <i data-lucide="messages-square"></i>
-              </div>
-              <
+        <div id="messages" class="messages">
+          <div class="system-message">
+            اكتب أول رسالة من الأسفل.
+          </div>
+        </div>
+
+        <form id="msgForm" class="composer">
+          <input id="msgInput" type="text" placeholder="اكتب رسالة..." autocomplete="off" />
+          <button class="send-btn" type="submit" aria-label="إرسال">
+            <i data-lucide="send"></i>
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
