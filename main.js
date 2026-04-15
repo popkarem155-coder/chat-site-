@@ -1,4 +1,29 @@
-const STORAGE_KEY = "kareem1_messages_v5";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+  getDocs,
+  writeBatch
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCG2tZ86jmtuc_smyyJE4a0mx7V5kgU6Xc",
+  authDomain: "shatnar-f2081.firebaseapp.com",
+  projectId: "shatnar-f2081",
+  storageBucket: "shatnar-f2081.firebasestorage.app",
+  messagingSenderId: "237897103941",
+  appId: "1:237897103941:web:989dcd6cae6bc7e84d012c",
+  measurementId: "G-HVNTN7FGH4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const messagesRef = collection(db, "messages");
 
 const ui = {
   sidebar: document.getElementById("sidebar"),
@@ -14,7 +39,6 @@ const ui = {
   msgInput: document.getElementById("msgInput"),
   messagesBox: document.getElementById("messages"),
   searchInput: document.getElementById("searchInput"),
-  topbarSearch: document.getElementById("searchInput"),
   searchResults: document.getElementById("searchResults"),
   searchCountBadge: document.getElementById("searchCountBadge"),
   totalCountText: document.getElementById("totalCountText"),
@@ -32,38 +56,8 @@ const ui = {
 
 const state = {
   query: "",
-  messages: loadMessages()
+  messages: []
 };
-
-function loadMessages() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeMessage);
-  } catch {
-    return [];
-  }
-}
-
-function saveMessages() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.messages));
-  } catch {}
-}
-
-function normalizeMessage(message) {
-  const now = Date.now();
-  return {
-    id: message?.id || cryptoSafeId(),
-    author: String(message?.author || "أنت"),
-    text: String(message?.text || ""),
-    time: String(message?.time || formatTime(now)),
-    ts: Number(message?.ts || now),
-    mine: Boolean(message?.mine ?? true)
-  };
-}
 
 function cryptoSafeId() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {
@@ -92,15 +86,76 @@ function escapeHtml(text = "") {
     .replaceAll("'", "&#039;");
 }
 
+function normalizeMessage(message = {}) {
+  const now = Date.now();
+  const ts = Number(message.ts ?? now);
+
+  return {
+    id: message.id || cryptoSafeId(),
+    author: String(message.author || "أنت"),
+    text: String(message.text || ""),
+    time: String(message.time || formatTime(ts)),
+    ts: Number.isFinite(ts) ? ts : now,
+    mine: Boolean(message.mine ?? true)
+  };
+}
+
 function filteredMessages() {
   const q = state.query.trim().toLowerCase();
-  if (!q) return [...state.messages].sort((a, b) => a.ts - b.ts);
-  return state.messages
-    .filter((m) => {
-      const hay = `${m.author} ${m.text} ${m.time}`.toLowerCase();
-      return hay.includes(q);
-    })
-    .sort((a, b) => a.ts - b.ts);
+
+  const items = [...state.messages].sort((a, b) => a.ts - b.ts);
+
+  if (!q) return items;
+
+  return items.filter((m) => {
+    const hay = `${m.author} ${m.text} ${m.time}`.toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+function updateCounts() {
+  const total = state.messages.length;
+  ui.totalCountText.textContent = String(total);
+  ui.chatCountText.textContent = `${total} رسالة`;
+  ui.statMessages.textContent = String(total);
+}
+
+function renderSearchResults() {
+  const q = state.query.trim().toLowerCase();
+  const results = q
+    ? state.messages.filter((m) => {
+        const hay = `${m.author} ${m.text} ${m.time}`.toLowerCase();
+        return hay.includes(q);
+      })
+    : [];
+
+  ui.searchCountBadge.textContent = String(results.length);
+
+  if (!q) {
+    ui.searchResults.innerHTML = `<div class="empty-state">اكتب في مربع البحث.</div>`;
+    return;
+  }
+
+  if (!results.length) {
+    ui.searchResults.innerHTML = `<div class="empty-state">لا توجد نتائج.</div>`;
+    return;
+  }
+
+  ui.searchResults.innerHTML = results
+    .slice()
+    .reverse()
+    .map(
+      (m) => `
+        <div class="mini-action">
+          <div>
+            <strong>${escapeHtml(m.author)}</strong>
+            <span>${escapeHtml(m.text)}</span>
+          </div>
+          <span class="mini-pill">${escapeHtml(m.time)}</span>
+        </div>
+      `
+    )
+    .join("");
 }
 
 function renderMessages() {
@@ -109,9 +164,7 @@ function renderMessages() {
 
   if (!messages.length) {
     ui.messagesBox.innerHTML = `
-      <div class="system-message">
-        لا توجد رسائل. اكتب أول رسالة من الأسفل.
-      </div>
+      <div class="system-message">اكتب أول رسالة من الأسفل.</div>
     `;
   } else {
     for (const message of messages) {
@@ -128,46 +181,10 @@ function renderMessages() {
   ui.messagesBox.scrollTop = ui.messagesBox.scrollHeight;
   updateCounts();
   renderSearchResults();
-}
 
-function updateCounts() {
-  const total = state.messages.length;
-  ui.totalCountText.textContent = String(total);
-  ui.chatCountText.textContent = `${total} رسالة`;
-  ui.statMessages.textContent = String(total);
-}
-
-function renderSearchResults() {
-  const q = state.query.trim().toLowerCase();
-  const results = q
-    ? state.messages.filter((m) => `${m.author} ${m.text} ${m.time}`.toLowerCase().includes(q))
-    : [];
-
-  ui.searchCountBadge.textContent = String(results.length);
-
-  if (!q) {
-    ui.searchResults.innerHTML = `
-      <div class="empty-state">اكتب في مربع البحث.</div>
-    `;
-    return;
+  if (window.lucide?.createIcons) {
+    window.lucide.createIcons();
   }
-
-  if (!results.length) {
-    ui.searchResults.innerHTML = `
-      <div class="empty-state">لا توجد نتائج.</div>
-    `;
-    return;
-  }
-
-  ui.searchResults.innerHTML = results.slice().reverse().map((m) => `
-    <div class="mini-action">
-      <div>
-        <strong>${escapeHtml(m.author)}</strong>
-        <span>${escapeHtml(m.text)}</span>
-      </div>
-      <span class="mini-pill">${escapeHtml(m.time)}</span>
-    </div>
-  `).join("");
 }
 
 function setTab(tabName) {
@@ -194,29 +211,34 @@ function scrollToChat() {
   ui.chatShell.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function addMessage(text) {
-  const message = normalizeMessage({
-    author: "أنت",
-    text,
-    mine: true
-  });
+async function addMessage(text) {
+  const cleanText = String(text || "").trim();
+  if (!cleanText) return;
 
-  state.messages.push(message);
-  saveMessages();
-  renderMessages();
+  await addDoc(messagesRef, {
+    author: "أنت",
+    text: cleanText,
+    ts: Date.now(),
+    createdAt: serverTimestamp()
+  });
 }
 
-function clearMessages() {
-  const ok = confirm("مسح كل الرسائل من هذا الجهاز؟");
+async function clearMessages() {
+  const ok = confirm("مسح كل الرسائل من قاعدة البيانات؟");
   if (!ok) return;
-  state.messages = [];
-  saveMessages();
-  renderMessages();
+
+  const snapshot = await getDocs(messagesRef);
+  if (snapshot.empty) return;
+
+  const batch = writeBatch(db);
+  snapshot.docs.forEach((docSnap) => batch.delete(docSnap.ref));
+  await batch.commit();
 }
 
 async function copyLastMessage() {
   const last = state.messages[state.messages.length - 1];
   if (!last) return;
+
   try {
     await navigator.clipboard.writeText(last.text);
   } catch {
@@ -251,15 +273,25 @@ function bindEvents() {
     renderMessages();
   });
 
-  ui.msgForm?.addEventListener("submit", (e) => {
+  ui.msgForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const text = ui.msgInput.value.trim();
     if (!text) return;
-    addMessage(text);
+
+    await addMessage(text);
     ui.msgInput.value = "";
+    ui.msgInput.focus();
   });
 
-  ui.clearBtn?.addEventListener("click", clearMessages);
+  ui.clearBtn?.addEventListener("click", async () => {
+    try {
+      await clearMessages();
+    } catch (error) {
+      console.error("Clear messages error:", error);
+      alert("تعذر مسح الرسائل. راجع Firestore rules.");
+    }
+  });
+
   ui.copyLastBtn?.addEventListener("click", copyLastMessage);
 
   document.addEventListener("keydown", (e) => {
@@ -269,18 +301,43 @@ function bindEvents() {
 
 window.KAREEM1_CHAT = {
   getMessages: () => [...state.messages],
-  setQuery: (query) => {
-    state.query = String(query || "");
-    ui.searchInput.value = state.query;
+  setQuery: (queryText) => {
+    state.query = String(queryText || "");
+    if (ui.searchInput) ui.searchInput.value = state.query;
     renderMessages();
   },
-  addMessage: (text) => addMessage(String(text || "")),
-  clearMessages: () => clearMessages()
+  addMessage: async (text) => addMessage(String(text || "")),
+  clearMessages: async () => clearMessages()
 };
+
+const q = query(messagesRef, orderBy("ts", "asc"));
+
+onSnapshot(
+  q,
+  (snapshot) => {
+    state.messages = snapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
+      const ts = Number(data.ts ?? Date.now());
+
+      return normalizeMessage({
+        id: docSnap.id,
+        author: data.author,
+        text: data.text,
+        time: data.time,
+        ts: Number.isFinite(ts) ? ts : Date.now(),
+        mine: true
+      });
+    });
+
+    renderMessages();
+  },
+  (error) => {
+    console.error("Firestore listener error:", error);
+    ui.messagesBox.innerHTML = `
+      <div class="system-message">تعذر الاتصال بقاعدة البيانات. راجع Firestore rules أو الاتصال.</div>
+    `;
+  }
+);
 
 bindEvents();
 renderMessages();
-
-if (window.lucide) {
-  window.lucide.createIcons();
-}
