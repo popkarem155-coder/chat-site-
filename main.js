@@ -1,15 +1,5 @@
-// استيراد قاعدة البيانات من firebase.js
-import { db } from './firebase.js';
+import { db, collection, addDoc, onSnapshot, query, orderBy } from "./firebase.js";
 
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-// اسم المستخدم (مؤقت)
 let username = "زائر";
 
 // عناصر الصفحة
@@ -21,10 +11,11 @@ const form = document.getElementById("msgForm");
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  if (!msgInput.value.trim()) return;
+  const text = msgInput.value.trim();
+  if (!text) return;
 
   await addDoc(collection(db, "messages"), {
-    message: msgInput.value,
+    message: text,
     username: username,
     timestamp: Date.now()
   });
@@ -45,7 +36,7 @@ onSnapshot(q, (snapshot) => {
     div.className = "msg";
 
     div.innerHTML = `
-      <div style="color:#888;font-size:12px">${m.username}</div>
+      <small>${m.username}</small>
       <div>${m.message}</div>
     `;
 
