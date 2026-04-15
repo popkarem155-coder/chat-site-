@@ -1,5 +1,3 @@
-// وضع تجريبي بدون Firebase
-
 let username = "زائر";
 
 // عناصر الصفحة
@@ -7,8 +5,32 @@ const msgInput = document.getElementById("msgInput");
 const msgBox = document.getElementById("messages");
 const form = document.getElementById("msgForm");
 
-// مصفوفة مؤقتة للرسائل
-let messages = [];
+const STORAGE_KEY = "kareem1_messages";
+
+// تحميل الرسائل من المتصفح
+let messages = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+// عرض الرسائل
+function renderMessages() {
+  msgBox.innerHTML = "";
+
+  messages.forEach((m) => {
+    const div = document.createElement("div");
+    div.className = "msg";
+    div.innerHTML = `
+      <small>${m.username} • ${m.time}</small>
+      <div>${m.message}</div>
+    `;
+    msgBox.appendChild(div);
+  });
+
+  msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+// حفظ الرسائل
+function saveMessages() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+}
 
 // إرسال رسالة
 form.addEventListener("submit", (e) => {
@@ -18,7 +40,7 @@ form.addEventListener("submit", (e) => {
   if (!text) return;
 
   const msg = {
-    username: username,
+    username,
     message: text,
     time: new Date().toLocaleTimeString("ar", {
       hour: "2-digit",
@@ -27,45 +49,11 @@ form.addEventListener("submit", (e) => {
   };
 
   messages.push(msg);
+  saveMessages();
   renderMessages();
 
   msgInput.value = "";
 });
 
-// عرض الرسائل
-function renderMessages() {
-  msgBox.innerHTML = "";
-
-  messages.forEach(m => {
-    const div = document.createElement("div");
-    div.className = "msg";
-
-    div.innerHTML = `
-      <small>${m.username} • ${m.time}</small>
-      <div>${m.message}</div>
-    `;
-
-    msgBox.appendChild(div);
-  });
-
-  msgBox.scrollTop = msgBox.scrollHeight;
-}
-
-//////////////////////////////////////////////////
-// 🔥 سحب لتحت لتحديث الصفحة (Pull To Refresh)
-//////////////////////////////////////////////////
-
-let startY = 0;
-
-window.addEventListener("touchstart", (e) => {
-  startY = e.touches[0].clientY;
-});
-
-window.addEventListener("touchend", (e) => {
-  let endY = e.changedTouches[0].clientY;
-
-  // لو سحبت لتحت من فوق
-  if (endY - startY > 100 && window.scrollY === 0) {
-    location.reload(); // إعادة تحميل الصفحة
-  }
-});
+// أول تحميل
+renderMessages();
