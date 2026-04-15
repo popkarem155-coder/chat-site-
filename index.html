@@ -139,20 +139,25 @@
     <main class="main">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="icon-btn mobile-only" id="openSidebarBtn" type="button" aria-label="فتح القائمة">
+          <button class="icon-btn" id="privateMessagesBtn" type="button" aria-label="الرسائل الخاصة" title="الرسائل الخاصة">
+            <i data-lucide="message-circle"></i>
+          </button>
+
+          <button class="icon-btn mobile-only" id="openSidebarBtn" type="button" aria-label="فتح القائمة" title="القائمة">
             <i data-lucide="menu"></i>
           </button>
 
-          <div class="title-block">
-            <h1>الشات العام</h1>
-            <p>واجهة تيليجرام ستايل — بسيطة، سريعة، ومنظمة</p>
-          </div>
-        </div>
-
-        <div class="topbar-right">
-          <button class="icon-btn" type="button" id="scrollTopBtn" aria-label="أعلى الصفحة">
+          <button class="icon-btn" id="scrollTopBtn" type="button" aria-label="السهم للأعلى" title="أعلى الصفحة">
             <i data-lucide="arrow-up"></i>
           </button>
+        </div>
+
+        <button class="title-chip" id="chatTitleBtn" type="button" aria-label="تحديث الصفحة">
+          شات نار
+        </button>
+
+        <div class="topbar-right">
+          <span class="topbar-note">عام</span>
         </div>
       </header>
 
