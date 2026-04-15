@@ -6,6 +6,8 @@ const ui = {
   openSidebarBtn: document.getElementById("openSidebarBtn"),
   closeSidebarBtn: document.getElementById("closeSidebarBtn"),
   scrollTopBtn: document.getElementById("scrollTopBtn"),
+  privateMessagesBtn: document.getElementById("privateMessagesBtn"),
+  chatTitleBtn: document.getElementById("chatTitleBtn"),
   goToChatBtn: document.getElementById("goToChatBtn"),
   goToSearchBtn: document.getElementById("goToSearchBtn"),
   goToToolsBtn: document.getElementById("goToToolsBtn"),
@@ -286,6 +288,14 @@ function bindEvents() {
 
   ui.scrollTopBtn?.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  ui.privateMessagesBtn?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("kareem2:open-private-messages"));
+  });
+
+  ui.chatTitleBtn?.addEventListener("click", () => {
+    window.location.reload();
   });
 
   ui.goToChatBtn?.addEventListener("click", scrollToChat);
