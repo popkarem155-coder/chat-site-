@@ -7,84 +7,91 @@
 
   <style>
     body {
-      margin:0;
-      font-family:tahoma;
-      background:#0f0f1a;
-      color:white;
-      display:flex;
-      flex-direction:column;
-      height:100vh;
+      margin: 0;
+      font-family: tahoma, sans-serif;
+      background: #0f0f1a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
     }
 
     header {
-      padding:15px;
-      background:#1a1a2e;
-      text-align:center;
-      font-weight:bold;
-      border-bottom:1px solid #333;
-      position:sticky;
-      top:0;
-      z-index:10;
+      padding: 15px;
+      background: #1a1a2e;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     #messages {
-      flex:1;
-      overflow:auto;
-      padding:10px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+      flex: 1;
+      overflow: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .msg {
-      background:#1e1e35;
-      padding:10px;
-      border-radius:10px;
-      max-width:70%;
+      background: #1e1e35;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 70%;
+      word-break: break-word;
+    }
+
+    .msg small {
+      display: block;
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 4px;
     }
 
     form {
-      display:flex;
-      gap:10px;
-      padding:10px;
-      background:#1a1a2e;
-      border-top:1px solid #333;
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      background: #1a1a2e;
+      border-top: 1px solid #333;
     }
 
     input {
-      flex:1;
-      padding:10px;
-      border-radius:10px;
-      border:none;
-      background:#0f0f1a;
-      color:white;
-      outline:none;
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #0f0f1a;
+      color: white;
+      outline: none;
     }
 
     button {
-      padding:10px 15px;
-      border:none;
-      border-radius:10px;
-      background:linear-gradient(135deg,#6366f1,#ec4899);
-      color:white;
-      cursor:pointer;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      color: white;
+      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
 
-<header>🔥 شات نار - كريم 1</header>
+  <header>🔥 شات نار - كريم 1</header>
 
-<div id="messages"></div>
+  <div id="messages"></div>
 
-<form id="msgForm">
-  <input id="msgInput" placeholder="اكتب رسالة..." />
-  <button>إرسال</button>
-</form>
+  <form id="msgForm">
+    <input id="msgInput" placeholder="اكتب رسالة..." />
+    <button type="submit">إرسال</button>
+  </form>
 
-<!-- ربط ملف التشغيل -->
-<script type="module" src="main.js"></script>
-
+  <script type="module" src="main.js"></script>
 </body>
 </html>
