@@ -3,229 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>كريم 1 - شات نار</title>
+  <title>كريم 2 - Firestore</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
 <body>
-  <div class="overlay" id="overlay"></div>
-
   <div class="app">
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-top">
-        <div class="brand">
-          <div class="brand-logo">🔥</div>
-          <div>
-            <h1>شات نار</h1>
-            <p>الشات العام</p>
-          </div>
-        </div>
 
-        <button class="icon-btn mobile-only" id="closeSidebarBtn" type="button" aria-label="إغلاق القائمة">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
+    <header class="header">
+      <h1>💬 كريم 2</h1>
+      <span id="status">Firestore Connected</span>
+    </header>
 
-      <div class="sidebar-search">
-        <i data-lucide="search"></i>
-        <input id="searchInput" type="text" placeholder="ابحث في الرسائل..." autocomplete="off" />
-      </div>
+    <main id="messages" class="messages"></main>
 
-      <div class="sidebar-tabs">
-        <button class="tab-btn active" data-tab="chats" type="button">
-          <i data-lucide="messages-square"></i>
-          <span>المحادثة</span>
-        </button>
-        <button class="tab-btn" data-tab="search" type="button">
-          <i data-lucide="search"></i>
-          <span>البحث</span>
-        </button>
-        <button class="tab-btn" data-tab="tools" type="button">
-          <i data-lucide="settings-2"></i>
-          <span>الأدوات</span>
-        </button>
-      </div>
+    <form id="form" class="form">
+      <input id="input" type="text" placeholder="اكتب رسالة..." autocomplete="off"/>
+      <button type="submit">إرسال</button>
+    </form>
 
-      <div class="sidebar-content">
-        <section class="panel active" id="panel-chats">
-          <div class="panel-card">
-            <div class="panel-head">
-              <h2>الغرفة الحالية</h2>
-              <span class="badge">عام</span>
-            </div>
-
-            <div class="chat-list">
-              <button class="chat-item active" type="button" data-room="general">
-                <div class="chat-item-avatar">A</div>
-                <div class="chat-item-text">
-                  <strong>الشات العام</strong>
-                  <span id="chatCountText">0 رسالة</span>
-                </div>
-                <i data-lucide="chevron-left"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="panel-card">
-            <div class="panel-head">
-              <h2>الحفظ</h2>
-              <span class="badge">Local</span>
-            </div>
-            <div class="note">
-              الرسائل محفوظة على هذا الجهاز وتبقى بعد تحديث الصفحة.
-            </div>
-          </div>
-        </section>
-
-        <section class="panel" id="panel-search">
-          <div class="panel-card">
-            <div class="panel-head">
-              <h2>نتائج البحث</h2>
-              <span class="badge" id="searchCountBadge">0</span>
-            </div>
-            <div class="item-list" id="searchResults">
-              <div class="empty-state">اكتب في مربع البحث.</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel" id="panel-tools">
-          <div class="panel-card">
-            <div class="panel-head">
-              <h2>الأدوات</h2>
-              <span class="badge">مفيد</span>
-            </div>
-
-            <div class="item-list">
-              <div class="mini-action">
-                <div>
-                  <strong>مسح الرسائل</strong>
-                  <span>يحذف الرسائل من هذا الجهاز</span>
-                </div>
-                <button class="mini-btn danger" type="button" id="clearBtn">مسح</button>
-              </div>
-
-              <div class="mini-action">
-                <div>
-                  <strong>آخر رسالة</strong>
-                  <span>نسخ آخر رسالة محفوظة</span>
-                </div>
-                <button class="mini-btn" type="button" id="copyLastBtn">نسخ</button>
-              </div>
-
-              <div class="mini-action">
-                <div>
-                  <strong>عدد الرسائل</strong>
-                  <span id="totalCountText">0</span>
-                </div>
-                <span class="mini-pill">Local</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <div class="topbar-side">
-          <button class="icon-btn mobile-only" id="openSidebarBtn" type="button" aria-label="فتح القائمة">
-            <i data-lucide="menu"></i>
-          </button>
-
-          <div class="title-block">
-            <h1 id="roomTitle">الشات العام</h1>
-            <p id="roomSubtitle">اكتب رسالة من الأسفل</p>
-          </div>
-        </div>
-
-        <div class="topbar-actions">
-          <button class="icon-btn" type="button" id="scrollTopBtn" aria-label="أعلى الصفحة">
-            <i data-lucide="arrow-up"></i>
-          </button>
-        </div>
-      </header>
-
-      <section class="hero">
-        <div class="hero-content">
-          <div>
-            <h2>شات نار</h2>
-            <p>
-              الرسائل تظهر هنا، والبحث يفلتر الرسائل، والواجهة متصلة بالملفات بشكل مرتب.
-            </p>
-
-            <div class="hero-actions">
-              <button class="btn btn-primary" id="goToChatBtn" type="button">اذهب للشات</button>
-              <button class="btn btn-secondary" id="goToSearchBtn" type="button">البحث</button>
-              <button class="btn btn-secondary" id="goToToolsBtn" type="button">الأدوات</button>
-            </div>
-          </div>
-
-          <div class="hero-cards">
-            <div class="mini-card">
-              <h3>رسائل محفوظة</h3>
-              <p>تستمر بعد تحديث Chrome.</p>
-            </div>
-            <div class="mini-card">
-              <h3>واجهة جاهزة</h3>
-              <p>ونضيف Firebase لاحقًا.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="stats">
-        <div class="stat">
-          <div class="stat-icon"><i data-lucide="message-circle"></i></div>
-          <div>
-            <strong id="statMessages">0</strong>
-            <span>رسائل محفوظة</span>
-          </div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-icon"><i data-lucide="save"></i></div>
-          <div>
-            <strong>LocalStorage</strong>
-            <span>الحفظ الحالي</span>
-          </div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-icon"><i data-lucide="refresh-cw"></i></div>
-          <div>
-            <strong>Chrome Refresh</strong>
-            <span>الرسائل لا تمسح</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="chat-shell" id="chatShell">
-        <div class="chat-header">
-          <div class="chat-header-left">
-            <div class="chat-avatar">🔥</div>
-            <div>
-              <h2>الشات العام</h2>
-              <p>الرسائل تظهر هنا</p>
-            </div>
-          </div>
-
-          <div class="pill">عام</div>
-        </div>
-
-        <div id="messages" class="messages">
-          <div class="system-message">اكتب أول رسالة من الأسفل.</div>
-        </div>
-
-        <form id="msgForm" class="composer">
-          <input id="msgInput" type="text" placeholder="اكتب رسالة..." autocomplete="off" />
-          <button class="send-btn" type="submit" aria-label="إرسال">
-            <i data-lucide="send"></i>
-          </button>
-        </form>
-      </section>
-    </main>
   </div>
 
   <script type="module" src="main.js"></script>
