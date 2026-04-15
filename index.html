@@ -5,78 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>كريم 1 - شات نار</title>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      onSnapshot,
-      query,
-      orderBy
-    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCNCq5bP_UVdQgXPr40lroIkiti5aMWyvw",
-      authDomain: "chat-nar.firebaseapp.com",
-      projectId: "chat-nar",
-      storageBucket: "chat-nar.firebasestorage.app",
-      messagingSenderId: "199917444253",
-      appId: "1:199917444253:web:aef64b8f6cb812d8f2c874",
-      measurementId: "G-B8LJJ7XJ7W"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    let username = "زائر";
-
-    // عناصر الصفحة
-    const msgInput = document.getElementById("msgInput");
-    const msgBox = document.getElementById("messages");
-    const form = document.getElementById("msgForm");
-
-    // إرسال رسالة
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      if (!msgInput.value.trim()) return;
-
-      await addDoc(collection(db, "messages"), {
-        message: msgInput.value,
-        username: username,
-        timestamp: Date.now()
-      });
-
-      msgInput.value = "";
-    });
-
-    // استقبال الرسائل (Realtime)
-    const q = query(collection(db, "messages"), orderBy("timestamp"));
-
-    onSnapshot(q, (snapshot) => {
-      msgBox.innerHTML = "";
-
-      snapshot.forEach(doc => {
-        const m = doc.data();
-
-        const div = document.createElement("div");
-        div.className = "msg";
-
-        div.innerHTML = `
-          <div style="color:#888;font-size:12px">${m.username}</div>
-          <div>${m.message}</div>
-        `;
-
-        msgBox.appendChild(div);
-      });
-
-      msgBox.scrollTop = msgBox.scrollHeight;
-    });
-
-  </script>
-
   <style>
     body {
       margin:0;
@@ -94,6 +22,9 @@
       text-align:center;
       font-weight:bold;
       border-bottom:1px solid #333;
+      position:sticky;
+      top:0;
+      z-index:10;
     }
 
     #messages {
@@ -151,6 +82,9 @@
   <input id="msgInput" placeholder="اكتب رسالة..." />
   <button>إرسال</button>
 </form>
+
+<!-- ربط ملف التشغيل -->
+<script type="module" src="main.js"></script>
 
 </body>
 </html>
