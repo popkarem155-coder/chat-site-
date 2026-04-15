@@ -110,13 +110,16 @@
     <div id="messages"></div>
 
     <form id="msgForm">
-      <input id="msgInput" type="text" placeholder="اكتب رسالة..." />
+      <input id="msgInput" type="text" placeholder="اكتب رسالة..." autocomplete="off" />
       <button type="submit">إرسال</button>
     </form>
   </div>
 
-  <!-- ربط الجافا سكريبت -->
-  <script type="module" src="main.js"></script>
+  <!-- مهم: تشغيل main.js كـ module -->
+  <script type="module">
+    import "./main.js";
+    console.log("main.js loaded ✔");
+  </script>
 
 </body>
 </html>
