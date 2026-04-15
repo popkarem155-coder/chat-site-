@@ -1,25 +1,87 @@
-const STORAGE_KEY = "kareem1_messages";
-const username = "زائر";
+const STORAGE_KEY = "kareem1_messages_v5";
 
-let messages = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-
-const sidebar = document.getElementById("sidebar");
-const overlay = document.getElementById("overlay");
-const openSidebarBtn = document.getElementById("openSidebarBtn");
-const closeSidebarBtn = document.getElementById("closeSidebarBtn");
-const searchInput = document.getElementById("searchInput");
-const topSearch = document.getElementById("topSearch");
-const memberSearch = document.getElementById("memberSearch");
-const tabButtons = document.querySelectorAll(".tab-btn");
-const panels = {
-  chats: document.getElementById("panel-chats"),
-  private: document.getElementById("panel-private"),
-  alerts: document.getElementById("panel-alerts")
+const ui = {
+  sidebar: document.getElementById("sidebar"),
+  overlay: document.getElementById("overlay"),
+  openSidebarBtn: document.getElementById("openSidebarBtn"),
+  closeSidebarBtn: document.getElementById("closeSidebarBtn"),
+  scrollTopBtn: document.getElementById("scrollTopBtn"),
+  goToChatBtn: document.getElementById("goToChatBtn"),
+  goToSearchBtn: document.getElementById("goToSearchBtn"),
+  goToToolsBtn: document.getElementById("goToToolsBtn"),
+  chatShell: document.getElementById("chatShell"),
+  msgForm: document.getElementById("msgForm"),
+  msgInput: document.getElementById("msgInput"),
+  messagesBox: document.getElementById("messages"),
+  searchInput: document.getElementById("searchInput"),
+  topbarSearch: document.getElementById("searchInput"),
+  searchResults: document.getElementById("searchResults"),
+  searchCountBadge: document.getElementById("searchCountBadge"),
+  totalCountText: document.getElementById("totalCountText"),
+  chatCountText: document.getElementById("chatCountText"),
+  statMessages: document.getElementById("statMessages"),
+  clearBtn: document.getElementById("clearBtn"),
+  copyLastBtn: document.getElementById("copyLastBtn"),
+  tabButtons: [...document.querySelectorAll(".tab-btn")],
+  panels: {
+    chats: document.getElementById("panel-chats"),
+    search: document.getElementById("panel-search"),
+    tools: document.getElementById("panel-tools")
+  }
 };
 
-const msgInput = document.getElementById("msgInput");
-const msgBox = document.getElementById("messages");
-const form = document.getElementById("msgForm");
+const state = {
+  query: "",
+  messages: loadMessages()
+};
+
+function loadMessages() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeMessage);
+  } catch {
+    return [];
+  }
+}
+
+function saveMessages() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.messages));
+  } catch {}
+}
+
+function normalizeMessage(message) {
+  const now = Date.now();
+  return {
+    id: message?.id || cryptoSafeId(),
+    author: String(message?.author || "أنت"),
+    text: String(message?.text || ""),
+    time: String(message?.time || formatTime(now)),
+    ts: Number(message?.ts || now),
+    mine: Boolean(message?.mine ?? true)
+  };
+}
+
+function cryptoSafeId() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+  return `m_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function formatTime(value) {
+  try {
+    return new Date(value).toLocaleTimeString("ar", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  } catch {
+    return "";
+  }
+}
 
 function escapeHtml(text = "") {
   return String(text)
@@ -30,119 +92,195 @@ function escapeHtml(text = "") {
     .replaceAll("'", "&#039;");
 }
 
-function saveMessages() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+function filteredMessages() {
+  const q = state.query.trim().toLowerCase();
+  if (!q) return [...state.messages].sort((a, b) => a.ts - b.ts);
+  return state.messages
+    .filter((m) => {
+      const hay = `${m.author} ${m.text} ${m.time}`.toLowerCase();
+      return hay.includes(q);
+    })
+    .sort((a, b) => a.ts - b.ts);
 }
 
 function renderMessages() {
-  msgBox.innerHTML = "";
+  const messages = filteredMessages();
+  ui.messagesBox.innerHTML = "";
 
   if (!messages.length) {
-    msgBox.innerHTML = `
+    ui.messagesBox.innerHTML = `
       <div class="system-message">
-        لا توجد رسائل بعد. اكتب أول رسالة من الأسفل.
+        لا توجد رسائل. اكتب أول رسالة من الأسفل.
       </div>
+    `;
+  } else {
+    for (const message of messages) {
+      const div = document.createElement("div");
+      div.className = `msg${message.mine ? " me" : ""}`;
+      div.innerHTML = `
+        <small>${escapeHtml(message.author)} • ${escapeHtml(message.time)}</small>
+        <div>${escapeHtml(message.text)}</div>
+      `;
+      ui.messagesBox.appendChild(div);
+    }
+  }
+
+  ui.messagesBox.scrollTop = ui.messagesBox.scrollHeight;
+  updateCounts();
+  renderSearchResults();
+}
+
+function updateCounts() {
+  const total = state.messages.length;
+  ui.totalCountText.textContent = String(total);
+  ui.chatCountText.textContent = `${total} رسالة`;
+  ui.statMessages.textContent = String(total);
+}
+
+function renderSearchResults() {
+  const q = state.query.trim().toLowerCase();
+  const results = q
+    ? state.messages.filter((m) => `${m.author} ${m.text} ${m.time}`.toLowerCase().includes(q))
+    : [];
+
+  ui.searchCountBadge.textContent = String(results.length);
+
+  if (!q) {
+    ui.searchResults.innerHTML = `
+      <div class="empty-state">اكتب في مربع البحث.</div>
     `;
     return;
   }
 
-  messages.forEach((m) => {
-    const div = document.createElement("div");
-    div.className = "msg";
-    div.innerHTML = `
-      <small>${escapeHtml(m.username)} • ${escapeHtml(m.time)}</small>
-      <div>${escapeHtml(m.message)}</div>
+  if (!results.length) {
+    ui.searchResults.innerHTML = `
+      <div class="empty-state">لا توجد نتائج.</div>
     `;
-    msgBox.appendChild(div);
-  });
+    return;
+  }
 
-  msgBox.scrollTop = msgBox.scrollHeight;
+  ui.searchResults.innerHTML = results.slice().reverse().map((m) => `
+    <div class="mini-action">
+      <div>
+        <strong>${escapeHtml(m.author)}</strong>
+        <span>${escapeHtml(m.text)}</span>
+      </div>
+      <span class="mini-pill">${escapeHtml(m.time)}</span>
+    </div>
+  `).join("");
 }
 
-function sendMessage(text) {
-  const msg = {
-    username,
-    message: text,
-    time: new Date().toLocaleTimeString("ar", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })
-  };
-
-  messages.push(msg);
-  saveMessages();
-  renderMessages();
-}
-
-function setPanel(panelName) {
-  Object.entries(panels).forEach(([name, panel]) => {
-    panel.classList.toggle("active", name === panelName);
+function setTab(tabName) {
+  Object.entries(ui.panels).forEach(([name, panel]) => {
+    panel.classList.toggle("active", name === tabName);
   });
 
-  tabButtons.forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.tab === panelName);
+  ui.tabButtons.forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === tabName);
   });
 }
 
 function openSidebar() {
-  sidebar.classList.add("open");
-  overlay.classList.add("show");
+  ui.sidebar.classList.add("open");
+  ui.overlay.classList.add("show");
 }
 
 function closeSidebar() {
-  sidebar.classList.remove("open");
-  overlay.classList.remove("show");
+  ui.sidebar.classList.remove("open");
+  ui.overlay.classList.remove("show");
 }
 
-function filterItems(value) {
-  const q = value.trim().toLowerCase();
+function scrollToChat() {
+  ui.chatShell.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
-  document.querySelectorAll(".chat-item").forEach(item => {
-    const text = item.textContent.toLowerCase();
-    item.style.display = text.includes(q) ? "" : "none";
+function addMessage(text) {
+  const message = normalizeMessage({
+    author: "أنت",
+    text,
+    mine: true
+  });
+
+  state.messages.push(message);
+  saveMessages();
+  renderMessages();
+}
+
+function clearMessages() {
+  const ok = confirm("مسح كل الرسائل من هذا الجهاز؟");
+  if (!ok) return;
+  state.messages = [];
+  saveMessages();
+  renderMessages();
+}
+
+async function copyLastMessage() {
+  const last = state.messages[state.messages.length - 1];
+  if (!last) return;
+  try {
+    await navigator.clipboard.writeText(last.text);
+  } catch {
+    const temp = document.createElement("textarea");
+    temp.value = last.text;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    temp.remove();
+  }
+}
+
+function bindEvents() {
+  ui.openSidebarBtn?.addEventListener("click", openSidebar);
+  ui.closeSidebarBtn?.addEventListener("click", closeSidebar);
+  ui.overlay?.addEventListener("click", closeSidebar);
+
+  ui.scrollTopBtn?.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  ui.goToChatBtn?.addEventListener("click", scrollToChat);
+  ui.goToSearchBtn?.addEventListener("click", () => setTab("search"));
+  ui.goToToolsBtn?.addEventListener("click", () => setTab("tools"));
+
+  ui.tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => setTab(btn.dataset.tab));
+  });
+
+  ui.searchInput?.addEventListener("input", (e) => {
+    state.query = e.target.value;
+    renderMessages();
+  });
+
+  ui.msgForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = ui.msgInput.value.trim();
+    if (!text) return;
+    addMessage(text);
+    ui.msgInput.value = "";
+  });
+
+  ui.clearBtn?.addEventListener("click", clearMessages);
+  ui.copyLastBtn?.addEventListener("click", copyLastMessage);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeSidebar();
   });
 }
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
+window.KAREEM1_CHAT = {
+  getMessages: () => [...state.messages],
+  setQuery: (query) => {
+    state.query = String(query || "");
+    ui.searchInput.value = state.query;
+    renderMessages();
+  },
+  addMessage: (text) => addMessage(String(text || "")),
+  clearMessages: () => clearMessages()
+};
 
-  const text = msgInput.value.trim();
-  if (!text) return;
-
-  sendMessage(text);
-  msgInput.value = "";
-});
-
-openSidebarBtn?.addEventListener("click", openSidebar);
-closeSidebarBtn?.addEventListener("click", closeSidebar);
-overlay?.addEventListener("click", closeSidebar);
-
-tabButtons.forEach(btn => {
-  btn.addEventListener("click", () => setPanel(btn.dataset.tab));
-});
-
-searchInput?.addEventListener("input", (e) => filterItems(e.target.value));
-topSearch?.addEventListener("input", (e) => {
-  searchInput.value = e.target.value;
-  memberSearch.value = e.target.value;
-  filterItems(e.target.value);
-});
-memberSearch?.addEventListener("input", (e) => {
-  searchInput.value = e.target.value;
-  topSearch.value = e.target.value;
-  filterItems(e.target.value);
-});
-
-document.getElementById("goToChatBtn")?.addEventListener("click", () => {
-  document.getElementById("chatShell").scrollIntoView({ behavior: "smooth", block: "start" });
-});
-document.getElementById("goToAlertsBtn")?.addEventListener("click", () => setPanel("alerts"));
-document.getElementById("goToPrivateBtn")?.addEventListener("click", () => setPanel("private"));
-document.getElementById("scrollTopBtn")?.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
-
+bindEvents();
 renderMessages();
+
 if (window.lucide) {
   window.lucide.createIcons();
 }
