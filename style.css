@@ -339,12 +339,12 @@ button{cursor:pointer}
 }
 
 .topbar{
-  height:72px;
-  padding:0 18px;
-  display:flex;
+  height:58px;
+  padding:0 14px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
   align-items:center;
-  justify-content:space-between;
-  gap:14px;
+  gap:10px;
   position:sticky;
   top:0;
   z-index:10;
@@ -352,24 +352,47 @@ button{cursor:pointer}
   backdrop-filter:blur(14px);
   border-bottom:1px solid rgba(255,255,255,.05);
   flex-shrink:0;
+  direction:ltr;
 }
 
 .topbar-left{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:10px;
   min-width:0;
+  direction:ltr;
 }
 
-.title-block{min-width:0}
-.title-block h1{
-  margin:0;
-  font-size:18px;
+.topbar-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  direction:ltr;
 }
-.title-block p{
-  margin:3px 0 0;
+
+.title-chip{
+  justify-self:center;
+  border:none;
+  border-radius:999px;
+  padding:9px 18px;
+  min-height:38px;
+  background:linear-gradient(135deg, rgba(42,171,238,.20), rgba(23,120,200,.16));
+  color:#eef8ff;
+  font-family:"Cairo","Tahoma","Segoe UI",sans-serif;
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:0;
+  box-shadow:0 10px 20px rgba(42,171,238,.12);
+}
+.title-chip:hover{
+  transform:translateY(-1px);
+}
+
+.topbar-note{
   color:var(--muted);
   font-size:12px;
+  padding-inline:4px;
+  direction:rtl;
 }
 
 .hero{
@@ -635,16 +658,25 @@ button{cursor:pointer}
   .chat-shell{margin:0 14px 14px}
   .msg{max-width:92%}
   .hero-copy h2{font-size:26px}
+  .topbar{
+    height:58px;
+    padding:0 12px;
+    gap:8px;
+  }
+  .title-chip{
+    padding:8px 14px;
+    min-height:36px;
+    font-size:15px;
+  }
 }
 
 @media (max-width:560px){
   .topbar{
-    height:auto;
-    padding:12px 14px;
-    flex-wrap:wrap;
+    grid-template-columns:auto minmax(0,1fr) auto;
   }
-  .topbar-left,.topbar-right{width:100%}
-  .title-block h1{font-size:17px}
+  .topbar-note{
+    display:none;
+  }
   .hero{padding:18px}
   .chat-head{padding:14px}
   .composer{padding:12px}
