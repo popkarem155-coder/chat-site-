@@ -6,7 +6,13 @@ function toggleSidebar(side) {
     // إغلاق أي قائمة مفتوحة أخرى أولاً
     closeAllSidebars();
 
-    sidebar.classList.add('active');
+    // ✅ التعديل: استخدام الكلاسات الصحيحة من CSS
+    if (side === 'left') {
+        sidebar.classList.add('active-left');
+    } else {
+        sidebar.classList.add('active-right');
+    }
+
     overlay.style.display = 'block';
     
     // إضافة حركة دخول ناعمة
@@ -14,7 +20,10 @@ function toggleSidebar(side) {
 }
 
 function closeAllSidebars() {
-    document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('active'));
+    // ✅ التعديل: إزالة الكلاسات الصحيحة
+    document.querySelectorAll('.sidebar').forEach(s => 
+        s.classList.remove('active-left', 'active-right')
+    );
     document.getElementById('overlay').style.display = 'none';
 }
 
@@ -25,9 +34,9 @@ function sendMessage() {
     const text = input.value.trim();
 
     if (text !== "") {
-        // إنشاء عنصر الرسالة بتصميم احترافي
+        // إنشاء عنصر الرسالة
         const messageDiv = document.createElement('div');
-        messageDiv.className = 'msg-animate'; // كلاس للحركة
+        messageDiv.className = 'msg-animate';
         messageDiv.style.padding = "10px";
         messageDiv.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
         messageDiv.style.animation = "fadeInUp 0.3s ease forwards";
@@ -45,12 +54,8 @@ function sendMessage() {
 
         chatDisplay.appendChild(messageDiv);
         
-        // تفريغ الحقل والنزول للرسالة الجديدة بسلاسة
         input.value = "";
         chatDisplay.scrollTo({ top: chatDisplay.scrollHeight, behavior: 'smooth' });
-        
-        // نغمة بسيطة اختيارية (تحتاج ملف صوتي)
-        // new Audio('send_sound.mp3').play();
     }
 }
 
@@ -71,6 +76,7 @@ const demoUsers = [
 function loadUsers() {
     const list = document.getElementById('usersList');
     if(!list) return;
+
     list.innerHTML = demoUsers.map(user => `
         <div class="user-card" onclick="alert('فتح محادثة مع ${user.name}')">
             <img src="${user.img}" class="avatar" alt="user">
