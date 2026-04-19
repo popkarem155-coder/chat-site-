@@ -24,7 +24,8 @@ body{
   overflow:hidden;
 }
 
-.app{
+/* مطابق لـ app-wrapper */
+.app-wrapper{
   max-width:520px;
   margin:auto;
   height:100vh;
@@ -34,7 +35,7 @@ body{
 }
 
 /* HEADER */
-.header{
+.main-header{
   height:60px;
   display:flex;
   align-items:center;
@@ -44,12 +45,12 @@ body{
   border-bottom:1px solid var(--border);
 }
 
-.header .title{
+.logo{
   font-weight:bold;
   color:var(--gold);
 }
 
-.icon{
+.icon-btn{
   width:40px;
   height:40px;
   display:grid;
@@ -59,12 +60,12 @@ body{
   cursor:pointer;
 }
 
-/* SEARCH */
-.search{
+/* SEARCH (لو موجود) */
+.search-area{
   padding:10px;
 }
 
-.search input{
+.search-area input{
   width:100%;
   padding:10px 12px;
   border-radius:20px;
@@ -75,13 +76,13 @@ body{
 }
 
 /* CONTENT */
-.content{
+.chat-body{
   flex:1;
   overflow-y:auto;
   padding:10px;
 }
 
-.card{
+.section-block{
   background:var(--glass);
   border:1px solid var(--border);
   border-radius:14px;
@@ -89,14 +90,14 @@ body{
   overflow:hidden;
 }
 
-.card h3{
+.section-header{
   padding:8px 10px;
   font-size:13px;
   color:var(--gold);
   background:rgba(0,0,0,0.2);
 }
 
-.user{
+.user-card{
   display:flex;
   align-items:center;
   gap:10px;
@@ -112,13 +113,9 @@ body{
   border:2px solid var(--accent);
 }
 
-.status{
-  font-size:11px;
-  color:#3dff7a;
-}
-
-/* CHAT */
-.chat{
+/* CHAT DISPLAY */
+#chatDisplay,
+#chatMessages{
   padding:10px;
 }
 
@@ -130,7 +127,7 @@ body{
 }
 
 /* INPUT */
-.footer{
+.input-area{
   display:flex;
   gap:10px;
   padding:10px;
@@ -138,7 +135,14 @@ body{
   border-top:1px solid var(--border);
 }
 
-.footer input{
+.input-wrapper{
+  display:flex;
+  width:100%;
+  gap:10px;
+}
+
+#mainInput,
+#msgInput{
   flex:1;
   padding:10px;
   border-radius:20px;
@@ -148,7 +152,7 @@ body{
   outline:none;
 }
 
-.send{
+.send-btn{
   width:42px;
   height:42px;
   border-radius:50%;
@@ -158,7 +162,7 @@ body{
   cursor:pointer;
 }
 
-/* SIDEBAR */
+/* SIDEBAR (متوافق مع JS بتاعك) */
 .sidebar{
   position:absolute;
   top:0;
@@ -170,12 +174,18 @@ body{
   box-shadow:0 0 20px rgba(0,0,0,0.6);
 }
 
-.left{right:-260px;}
-.right{left:-260px;}
+.left-side{ right:-260px; }
+.right-side{ left:-260px; }
 
-.active-left{right:0;}
-.active-right{left:0;}
+.sidebar.active{
+  right:0;
+}
 
+.right-side.active{
+  left:0;
+}
+
+/* OVERLAY */
 .overlay{
   position:absolute;
   inset:0;
