@@ -64,7 +64,7 @@ body{
   z-index:2;
 }
 
-/* SEARCH (لو موجود) */
+/* SEARCH */
 .search-area{
   padding:10px;
 }
@@ -204,59 +204,4 @@ body{
   background:rgba(0,0,0,0.6);
   display:none;
   z-index:999;
-}
-
-/* overlay */
-.overlay{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  display:none;
-  z-index:999;
-}
-
-/* الوضع الافتراضي (مقفول) */
-.left-side{
-  right:-260px;
-}
-
-.right-side{
-  left:-260px;
-}
-
-/* حالة الفتح */
-.active-left{
-  right:0;
-}
-
-.active-right{
-  left:0;
-}
-
-/* Overlay */
-.overlay{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  display:none;
-  z-index:999;
-}
-
-.left-side{ right:-260px; }
-.right-side{ left:-260px; }
-
-.sidebar.active{
-  right:0;
-}
-
-.right-side.active{
-  left:0;
-}
-
-/* OVERLAY */
-.overlay{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  display:none;
 }
