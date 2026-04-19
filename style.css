@@ -179,6 +179,33 @@ body{
   z-index:1000;
 }
 
+/* الوضع المغلق */
+.left-side{
+  right:-260px;
+}
+
+.right-side{
+  left:-260px;
+}
+
+/* الفتح */
+.active-left{
+  right:0;
+}
+
+.active-right{
+  left:0;
+}
+
+/* overlay */
+.overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  z-index:999;
+}
+
 /* الوضع الافتراضي (مقفول) */
 .left-side{
   right:-260px;
