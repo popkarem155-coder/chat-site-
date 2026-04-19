@@ -166,15 +166,44 @@ body{
   cursor:pointer;
 }
 
+/* SIDEBAR */
 .sidebar{
   position:absolute;
   top:0;
   width:260px;
   height:100%;
   background:var(--panel);
-  transition:0.3s;
+  transition:0.3s ease;
   padding:15px;
   box-shadow:0 0 20px rgba(0,0,0,0.6);
+  z-index:1000;
+}
+
+/* الوضع الافتراضي (مقفول) */
+.left-side{
+  right:-260px;
+}
+
+.right-side{
+  left:-260px;
+}
+
+/* حالة الفتح */
+.active-left{
+  right:0;
+}
+
+.active-right{
+  left:0;
+}
+
+/* Overlay */
+.overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  z-index:999;
 }
 
 .left-side{ right:-260px; }
