@@ -37,6 +37,7 @@ body{
   display:flex;
   flex-direction:column;
   background:linear-gradient(180deg,#2a003b,#120018);
+  position:relative;
 }
 
 /* HEADER */
@@ -48,16 +49,20 @@ body{
   padding:0 12px;
   background:var(--panel2);
   border-bottom:1px solid var(--border);
+  position:relative;
 }
 
 .title{color:var(--gold);font-weight:bold}
 
 .icon{
-  width:40px;height:40px;
-  display:grid;place-items:center;
+  width:40px;
+  height:40px;
+  display:grid;
+  place-items:center;
   background:var(--glass);
   border-radius:12px;
   cursor:pointer;
+  z-index:2;
 }
 
 /* SEARCH */
@@ -100,7 +105,8 @@ body{
 }
 
 .avatar{
-  width:40px;height:40px;
+  width:40px;
+  height:40px;
   border-radius:10px;
   background:#333;
   border:2px solid var(--accent);
@@ -137,7 +143,8 @@ body{
 }
 
 .send{
-  width:42px;height:42px;
+  width:42px;
+  height:42px;
   border-radius:50%;
   background:var(--accent);
   border:none;
@@ -153,8 +160,9 @@ body{
   height:100%;
   background:var(--panel);
   padding:15px;
-  transition:0.3s;
+  transition:0.3s ease;
   box-shadow:0 0 20px rgba(0,0,0,0.6);
+  z-index:1000;
 }
 
 .left{right:-260px}
@@ -168,6 +176,7 @@ body{
   inset:0;
   background:rgba(0,0,0,0.6);
   display:none;
+  z-index:999;
 }
 </style>
 </head>
@@ -177,34 +186,28 @@ body{
 <div class="app">
 
   <div class="header">
-  <div class="icon" onclick="toggleSidebar('private-sidebar')">
-    <i class="fa fa-envelope"></i>
-  </div>
+    <div class="icon" onclick="toggleSidebar('private-sidebar')">
+      <i class="fa fa-envelope"></i>
+    </div>
 
-  <div class="title">🔥 شات نار</div>
+    <div class="title">🔥 شات نار</div>
 
-  <div class="icon" onclick="toggleSidebar('profile-sidebar')">
-    <i class="fa fa-user"></i>
+    <div class="icon" onclick="toggleSidebar('profile-sidebar')">
+      <i class="fa fa-user"></i>
+    </div>
   </div>
-  </div>
-    
-    
-    
-  
 
   <div class="search">
     <input placeholder="ابحث...">
   </div>
 
   <div class="content">
-
     <div class="card">
       <h3>المتصلين</h3>
       <div id="usersList"></div>
     </div>
 
     <div id="chatDisplay" class="chat"></div>
-
   </div>
 
   <div class="footer">
@@ -212,36 +215,43 @@ body{
     <button class="send" onclick="sendMessage()"><i class="fa fa-paper-plane"></i></button>
   </div>
 
-</div>
+  <!-- SIDEBARS -->
+  <div id="private-sidebar" class="sidebar left">
+    <h3 style="color:var(--gold)">الرسائل</h3>
+  </div>
 
-<!-- SIDEBARS -->
-<div id="private-sidebar" class="sidebar left">
-  <h3 style="color:var(--gold)">الرسائل</h3>
-</div>
+  <div id="profile-sidebar" class="sidebar right">
+    <h3 style="color:var(--gold)">الملف الشخصي</h3>
+  </div>
 
-<div id="profile-sidebar" class="sidebar right">
-  <h3 style="color:var(--gold)">الملف الشخصي</h3>
+  <div id="overlay" class="overlay" onclick="closeAllSidebars()"></div>
 </div>
-
-<div id="overlay" class="overlay" onclick="closeAllSidebars()"></div>
 
 <script>
-
 // SIDEBARS
-function toggleSidebar(side){
+function toggleSidebar(id){
+  const sidebar = document.getElementById(id);
+  const overlay = document.getElementById('overlay');
+  if (!sidebar || !overlay) return;
+
   closeAllSidebars();
 
-  const sidebar = document.getElementById(side === 'left' ? 'private-sidebar' : 'profile-sidebar');
-  sidebar.classList.add(side === 'left' ? 'active-left' : 'active-right');
+  if (id === 'private-sidebar') {
+    sidebar.classList.add('active-left');
+  } else if (id === 'profile-sidebar') {
+    sidebar.classList.add('active-right');
+  }
 
-  document.getElementById('overlay').style.display='block';
+  overlay.style.display = 'block';
 }
 
 function closeAllSidebars(){
-  document.querySelectorAll('.sidebar').forEach(s=>{
-    s.classList.remove('active-left','active-right');
+  document.querySelectorAll('.sidebar').forEach(s => {
+    s.classList.remove('active-left', 'active-right');
   });
-  document.getElementById('overlay').style.display='none';
+
+  const overlay = document.getElementById('overlay');
+  if (overlay) overlay.style.display = 'none';
 }
 
 // CHAT
@@ -249,23 +259,23 @@ function sendMessage(){
   const input = document.getElementById('mainInput');
   const chat = document.getElementById('chatDisplay');
 
-  if(input.value.trim()!==""){
+  if(input.value.trim() !== ""){
     chat.innerHTML += `<div class="msg">أنت: ${input.value}</div>`;
-    input.value="";
+    input.value = "";
     chat.scrollTop = chat.scrollHeight;
   }
 }
 
 // USERS
-const users=[
-  {name:"أحمد علي",status:"متصل"},
-  {name:"سارة",status:"متصل"},
-  {name:"كريم",status:"بعيد"}
+const users = [
+  {name:"أحمد علي", status:"متصل"},
+  {name:"سارة", status:"متصل"},
+  {name:"كريم", status:"بعيد"}
 ];
 
-const list=document.getElementById("usersList");
+const list = document.getElementById("usersList");
 
-users.forEach(u=>{
+users.forEach(u => {
   list.innerHTML += `
     <div class="user">
       <div class="avatar"></div>
@@ -277,11 +287,9 @@ users.forEach(u=>{
   `;
 });
 
-document.getElementById('mainInput')
-?.addEventListener('keypress',e=>{
-  if(e.key==='Enter') sendMessage();
+document.getElementById('mainInput')?.addEventListener('keypress', e => {
+  if(e.key === 'Enter') sendMessage();
 });
-
 </script>
 
 </body>
