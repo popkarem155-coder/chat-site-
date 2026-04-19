@@ -179,7 +179,7 @@ body{
   z-index:1000;
 }
 
-/* الحالة المقفولة */
+/* مقفول */
 .left-side{
   right:-260px;
 }
@@ -188,7 +188,7 @@ body{
   left:-260px;
 }
 
-/* الحالة المفتوحة */
+/* مفتوح */
 .active-left{
   right:0;
 }
@@ -197,6 +197,14 @@ body{
   left:0;
 }
 
+/* OVERLAY */
+.overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  z-index:999;
+}
 /* OVERLAY */
 .overlay{
   position:absolute;
