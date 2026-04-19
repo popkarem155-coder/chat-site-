@@ -1,6 +1,6 @@
 // ===============================
 // K3-Z | main.js
-// الإصدار الجديد - K3-Z
+// Version: Point Zero + BDR1 UI
 // ===============================
 
 (function () {
@@ -16,29 +16,14 @@
     },
     notifications: 0,
     visitedCount: 0,
-    onlineUsers: [
-      { id: 1, name: "Ahmed", status: "متصل الآن" }
-    ],
-    featuredUsers: [
-      { id: 1, name: "Nour", score: 92 },
-      { id: 2, name: "Omar", score: 86 }
-    ],
-    privateChats: [
-      { id: 1, name: "أحمد", lastMessage: "آخر رسالة", time: "منذ قليل" }
-    ],
-    messages: [
-      {
-        id: 1,
-        sender: "K3-Z",
-        text: "أهلاً بك في شات نار.",
-        time: "الآن",
-        mine: false
-      }
-    ]
+    onlineUsers: [],
+    featuredUsers: [],
+    privateChats: [],
+    messages: []
   };
 
   let state = loadState();
-  let drawerOpen = false;
+  let rightDrawerOpen = false;
   let leftDrawerOpen = false;
   const refs = {};
 
@@ -61,25 +46,19 @@
       visitedCount: Number.isFinite(Number(safe.visitedCount))
         ? Number(safe.visitedCount)
         : 0,
-      onlineUsers: Array.isArray(safe.onlineUsers)
-        ? safe.onlineUsers
-        : deepClone(DEFAULT_DATA.onlineUsers),
-      featuredUsers: Array.isArray(safe.featuredUsers)
-        ? safe.featuredUsers
-        : deepClone(DEFAULT_DATA.featuredUsers),
-      privateChats: Array.isArray(safe.privateChats)
-        ? safe.privateChats
-        : deepClone(DEFAULT_DATA.privateChats),
-      messages: Array.isArray(safe.messages)
-        ? safe.messages
-        : deepClone(DEFAULT_DATA.messages)
+      onlineUsers: Array.isArray(safe.onlineUsers) ? safe.onlineUsers : [],
+      featuredUsers: Array.isArray(safe.featuredUsers) ? safe.featuredUsers : [],
+      privateChats: Array.isArray(safe.privateChats) ? safe.privateChats : [],
+      messages: Array.isArray(safe.messages) ? safe.messages : []
     };
   }
 
   function loadState() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return normalizeState(JSON.parse(saved));
+      if (saved) {
+        return normalizeState(JSON.parse(saved));
+      }
     } catch (err) {
       console.warn("Failed to load K3-Z UI state:", err);
     }
@@ -115,6 +94,7 @@
       if (window.K3_HEALTH && typeof window.K3_HEALTH === "object") {
         window.K3_HEALTH.main = true;
       }
+
       if (window.K3_HEALTH_API && typeof window.K3_HEALTH_API.mark === "function") {
         window.K3_HEALTH_API.mark("main");
       }
@@ -125,7 +105,12 @@
         window.K3_STATE.update({
           notifications_count: snapshot.notifications,
           users_online: snapshot.onlineUsers.length,
-          ui_state: drawerOpen ? "right_drawer_open" : "home_chat",
+          ui_state: rightDrawerOpen
+            ? "right_drawer_open"
+            : leftDrawerOpen
+              ? "left_drawer_open"
+              : "home_chat",
+          auto_focus: false,
           last_update: Date.now()
         });
       }
@@ -136,7 +121,12 @@
         window.K3Z_STATE.update({
           notifications_count: snapshot.notifications,
           users_online: snapshot.onlineUsers.length,
-          ui_state: drawerOpen ? "right_drawer_open" : "home_chat",
+          ui_state: rightDrawerOpen
+            ? "right_drawer_open"
+            : leftDrawerOpen
+              ? "left_drawer_open"
+              : "home_chat",
+          auto_focus: false,
           last_update: Date.now()
         });
       }
@@ -155,8 +145,8 @@
 
     refs.onlineUsersList = document.getElementById("onlineUsersList");
     refs.featuredUsersList = document.getElementById("featuredUsersList");
-    refs.chatMessages = document.getElementById("chatMessages");
     refs.privateConversations = document.getElementById("privateConversations");
+    refs.chatMessages = document.getElementById("chatMessages");
 
     refs.messageInput = document.getElementById("messageInput");
     refs.sendBtn = document.getElementById("sendBtn");
@@ -173,15 +163,11 @@
 
   function bindEvents() {
     if (refs.menuBtn) {
-      refs.menuBtn.addEventListener("click", () => {
-        toggleRightDrawer();
-      });
+      refs.menuBtn.addEventListener("click", toggleRightDrawer);
     }
 
     if (refs.privateChatBtn) {
-      refs.privateChatBtn.addEventListener("click", () => {
-        toggleLeftDrawer();
-      });
+      refs.privateChatBtn.addEventListener("click", toggleLeftDrawer);
     }
 
     if (refs.drawerOverlay) {
@@ -204,10 +190,9 @@
     }
 
     if (refs.messageInput) {
-      // مهم: لا يوجد autofocus
-      refs.messageInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
+      refs.messageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
           sendMessageFromInput();
         }
       });
@@ -222,7 +207,7 @@
 
     if (refs.appSettingsBtn) {
       refs.appSettingsBtn.addEventListener("click", () => {
-        alert("إعدادات التطبيق ستُربط لاحقًا.");
+        alert("إعدادات التطبيق سيتم تفعيلها لاحقًا.");
       });
     }
 
@@ -246,6 +231,24 @@
         window.K3_SYSTEM.on("profile:visited", () => {
           incrementVisitedCount();
         });
+
+        window.K3_SYSTEM.on("users:online", (users) => {
+          if (Array.isArray(users)) {
+            setOnlineUsers(users);
+          }
+        });
+
+        window.K3_SYSTEM.on("users:featured", (users) => {
+          if (Array.isArray(users)) {
+            setFeaturedUsers(users);
+          }
+        });
+
+        window.K3_SYSTEM.on("private:chats", (items) => {
+          if (Array.isArray(items)) {
+            setPrivateChats(items);
+          }
+        });
       } catch (err) {
         console.warn("K3_SYSTEM hook failed:", err);
       }
@@ -261,21 +264,39 @@
   }
 
   function toggleRightDrawer() {
-    drawerOpen = !drawerOpen;
-    if (drawerOpen) leftDrawerOpen = false;
+    rightDrawerOpen = !rightDrawerOpen;
+    if (rightDrawerOpen) {
+      leftDrawerOpen = false;
+    }
     updateDrawerUI();
     syncExternalSystems();
   }
 
   function toggleLeftDrawer() {
     leftDrawerOpen = !leftDrawerOpen;
-    if (leftDrawerOpen) drawerOpen = false;
+    if (leftDrawerOpen) {
+      rightDrawerOpen = false;
+    }
+    updateDrawerUI();
+    syncExternalSystems();
+  }
+
+  function openRightDrawer() {
+    rightDrawerOpen = true;
+    leftDrawerOpen = false;
+    updateDrawerUI();
+    syncExternalSystems();
+  }
+
+  function openLeftDrawer() {
+    leftDrawerOpen = true;
+    rightDrawerOpen = false;
     updateDrawerUI();
     syncExternalSystems();
   }
 
   function closeRightDrawer() {
-    drawerOpen = false;
+    rightDrawerOpen = false;
     updateDrawerUI();
     syncExternalSystems();
   }
@@ -288,8 +309,8 @@
 
   function updateDrawerUI() {
     if (refs.rightDrawer) {
-      refs.rightDrawer.classList.toggle("open", drawerOpen);
-      refs.rightDrawer.setAttribute("aria-hidden", String(!drawerOpen));
+      refs.rightDrawer.classList.toggle("open", rightDrawerOpen);
+      refs.rightDrawer.setAttribute("aria-hidden", String(!rightDrawerOpen));
     }
 
     if (refs.leftDrawer) {
@@ -298,7 +319,7 @@
     }
 
     if (refs.drawerOverlay) {
-      refs.drawerOverlay.classList.toggle("active", drawerOpen || leftDrawerOpen);
+      refs.drawerOverlay.classList.toggle("active", rightDrawerOpen || leftDrawerOpen);
     }
   }
 
@@ -312,7 +333,7 @@
       if (refs.messageInput && typeof refs.messageInput.focus === "function") {
         refs.messageInput.focus();
       }
-    }, 140);
+    }, 120);
   }
 
   function incrementNotifications() {
@@ -410,104 +431,105 @@
     if (!refs.onlineUsersList) return;
 
     const q = getSearchValue();
-    const items = state.onlineUsers.filter((u) => {
-      const name = String(u.name || "").toLowerCase();
-      const status = String(u.status || "").toLowerCase();
+    const items = state.onlineUsers.filter((user) => {
+      const name = String(user.name || "").toLowerCase();
+      const status = String(user.status || "").toLowerCase();
       return !q || name.includes(q) || status.includes(q);
     });
 
     refs.onlineUsersList.innerHTML = items.length
       ? items
           .map(
-            (u) => `
-              <div class="status-pill user-chip" data-user-id="${u.id}">
-                <strong>${escapeHtml(u.name)}</strong>
-                <span>${escapeHtml(u.status || "متصل الآن")}</span>
+            (user) => `
+              <div class="status-pill user-chip" data-user-id="${escapeHtml(user.id)}">
+                <strong>${escapeHtml(user.name || "مستخدم")}</strong>
+                <span>${escapeHtml(user.status || "متصل الآن")}</span>
               </div>
             `
           )
           .join("")
-      : `<div class="status-pill user-chip">لا توجد نتائج</div>`;
+      : `<div class="empty-state">لا يوجد مستخدمون متصلون حاليًا</div>`;
   }
 
   function renderFeaturedUsers() {
     if (!refs.featuredUsersList) return;
 
     const q = getSearchValue();
-    const items = state.featuredUsers.filter((u) => {
-      const name = String(u.name || "").toLowerCase();
+    const items = state.featuredUsers.filter((user) => {
+      const name = String(user.name || "").toLowerCase();
       return !q || name.includes(q);
     });
 
     refs.featuredUsersList.innerHTML = items.length
       ? items
           .map(
-            (u) => `
-              <div class="status-pill user-chip" data-featured-id="${u.id}">
-                <strong>${escapeHtml(u.name)}</strong>
-                <span>النقاط: ${Number(u.score || 0)}</span>
+            (user) => `
+              <div class="status-pill user-chip" data-featured-id="${escapeHtml(user.id)}">
+                <strong>${escapeHtml(user.name || "مستخدم")}</strong>
+                <span>النقاط: ${Number(user.score || 0)}</span>
               </div>
             `
           )
           .join("")
-      : `<div class="status-pill user-chip">لا توجد نتائج</div>`;
+      : `<div class="empty-state">لا يوجد مستخدمون مميزون حاليًا</div>`;
   }
 
   function renderPrivateChats() {
     if (!refs.privateConversations) return;
 
     const q = getPrivateSearchValue();
-    const items = state.privateChats.filter((c) => {
-      const name = String(c.name || "").toLowerCase();
-      const lastMessage = String(c.lastMessage || "").toLowerCase();
-      return !q || name.includes(q) || lastMessage.includes(q);
-    });
+    const items = state.privateChats
+      .filter((chat) => {
+        const name = String(chat.name || "").toLowerCase();
+        const lastMessage = String(chat.lastMessage || "").toLowerCase();
+        return !q || name.includes(q) || lastMessage.includes(q);
+      })
+      .slice()
+      .reverse();
 
     refs.privateConversations.innerHTML = items.length
       ? items
-          .slice()
-          .reverse()
           .map(
-            (c) => `
-              <div class="private-item" data-private-id="${c.id}">
-                <div class="private-avatar">${escapeHtml((c.name || "?").slice(0, 1))}</div>
+            (chat) => `
+              <div class="private-item" data-private-id="${escapeHtml(chat.id)}">
+                <div class="private-avatar">${escapeHtml((chat.name || "?").slice(0, 1))}</div>
                 <div class="private-meta">
-                  <strong>${escapeHtml(c.name || "مستخدم")}</strong>
-                  <span>${escapeHtml(c.lastMessage || "لا توجد محادثة")}</span>
+                  <strong>${escapeHtml(chat.name || "مستخدم")}</strong>
+                  <span>${escapeHtml(chat.lastMessage || "لا توجد محادثة")}</span>
                 </div>
-                <div class="private-time">${escapeHtml(c.time || "")}</div>
+                <div class="private-time">${escapeHtml(chat.time || "")}</div>
               </div>
             `
           )
           .join("")
-      : `<div class="private-item"><div class="private-meta"><strong>لا توجد نتائج</strong></div></div>`;
+      : `<div class="empty-state">لا توجد محادثات خاصة حاليًا</div>`;
   }
 
   function renderMessages() {
     if (!refs.chatMessages) return;
 
     const q = getSearchValue();
-    const items = state.messages.filter((m) => {
-      const text = String(m.text || "").toLowerCase();
-      const sender = String(m.sender || "").toLowerCase();
+    const items = state.messages.filter((message) => {
+      const text = String(message.text || "").toLowerCase();
+      const sender = String(message.sender || "").toLowerCase();
       return !q || text.includes(q) || sender.includes(q);
     });
 
     refs.chatMessages.innerHTML = items.length
       ? items
           .map(
-            (m) => `
-              <div class="message-bubble ${m.mine ? "mine" : "other"}" data-message-id="${m.id}">
+            (message) => `
+              <div class="message-bubble ${message.mine ? "mine" : "other"}" data-message-id="${escapeHtml(message.id)}">
                 <div class="message-meta">
-                  <strong>${escapeHtml(m.sender || "مستخدم")}</strong>
-                  <small>${escapeHtml(m.time || "")}</small>
+                  <strong>${escapeHtml(message.sender || "مستخدم")}</strong>
+                  <small>${escapeHtml(message.time || "")}</small>
                 </div>
-                <div class="message-text">${escapeHtml(m.text || "")}</div>
+                <div class="message-text">${escapeHtml(message.text || "")}</div>
               </div>
             `
           )
           .join("")
-      : `<div class="message-bubble other">لا توجد نتائج</div>`;
+      : `<div class="empty-state">ابدأ أول رسالة في الشات العام</div>`;
   }
 
   function renderAll() {
@@ -516,6 +538,21 @@
     renderFeaturedUsers();
     renderPrivateChats();
     renderMessages();
+  }
+
+  function setOnlineUsers(users) {
+    state.onlineUsers = Array.isArray(users) ? deepClone(users) : [];
+    saveState(state);
+  }
+
+  function setFeaturedUsers(users) {
+    state.featuredUsers = Array.isArray(users) ? deepClone(users) : [];
+    saveState(state);
+  }
+
+  function setPrivateChats(items) {
+    state.privateChats = Array.isArray(items) ? deepClone(items) : [];
+    saveState(state);
   }
 
   function escapeHtml(value) {
@@ -545,25 +582,18 @@
     getState: () => deepClone(state),
     saveState,
     patchState,
-    openRightDrawer: () => {
-      drawerOpen = true;
-      leftDrawerOpen = false;
-      updateDrawerUI();
-      syncExternalSystems();
-    },
+    openRightDrawer,
     closeRightDrawer,
     toggleRightDrawer,
-    openLeftDrawer: () => {
-      leftDrawerOpen = true;
-      drawerOpen = false;
-      updateDrawerUI();
-      syncExternalSystems();
-    },
+    openLeftDrawer,
     closeLeftDrawer,
     toggleLeftDrawer,
     incrementNotifications,
     resetNotifications,
     addMessage,
-    addIncomingMessage
+    addIncomingMessage,
+    setOnlineUsers,
+    setFeaturedUsers,
+    setPrivateChats
   };
 })();
