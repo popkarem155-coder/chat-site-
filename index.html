@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>K3-Z</title>
+  <title>شات نار | K3-Z</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,34 +12,40 @@
     <!-- الهيدر -->
     <header class="app-header" id="appHeader">
       <div class="header-side header-left">
-        <button id="messagesBtn" class="icon-btn" aria-label="الرسائل" title="الرسائل">
-          ☰
-        </button>
-      </div>
-
-      <div class="header-title">
-        <h1>K3-Z</h1>
-      </div>
-
-      <div class="header-side header-right">
         <button id="menuBtn" class="icon-btn" aria-label="القائمة" title="القائمة">
           ☰
         </button>
       </div>
+
+      <div class="header-center">
+        <button id="privateChatBtn" class="icon-btn icon-btn-wide" aria-label="الشات الخاص" title="الشات الخاص">
+          الشات الخاص
+        </button>
+      </div>
+
+      <div class="header-side header-right">
+        <span class="header-spacer" aria-hidden="true"></span>
+      </div>
     </header>
 
-    <!-- البحث تحت الهيدر مباشرة -->
+    <!-- اسم المشروع تحت الهيدر -->
+    <section class="brand-strip" id="brandStrip">
+      <h1 class="brand-title">شات نار</h1>
+      <p class="brand-subtitle">المحادثة الخاصة والعامة في مكان واحد</p>
+    </section>
+
+    <!-- شريط البحث -->
     <section class="search-row" id="searchRow">
       <input
         type="search"
         id="searchInput"
         class="search-input"
-        placeholder="ابحث هنا..."
+        placeholder="ابحث عن شخص أو رسالة..."
         autocomplete="off"
       />
     </section>
 
-    <!-- المحتوى -->
+    <!-- المحتوى الرئيسي -->
     <main class="app-main" id="appMain">
 
       <!-- المتصلون الآن -->
@@ -47,7 +53,12 @@
         <div class="panel-header">
           <h2>المتصلون الآن</h2>
         </div>
-        <div class="panel-body" id="onlineUsersList"></div>
+        <div class="panel-body" id="onlineUsersList">
+          <div class="status-pill user-chip">
+            <strong>مستخدم تجريبي</strong>
+            <span>متصل الآن</span>
+          </div>
+        </div>
       </section>
 
       <!-- المستخدمون المميزون -->
@@ -64,7 +75,15 @@
           <h2>الشات العام</h2>
         </div>
 
-        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="message-bubble other">
+            <div class="message-meta">
+              <strong>شات نار</strong>
+              <small>الآن</small>
+            </div>
+            <div class="message-text">أهلاً بك في الشات العام.</div>
+          </div>
+        </div>
 
         <div class="chat-composer">
           <input
@@ -79,7 +98,7 @@
       </section>
     </main>
 
-    <!-- القائمة اليمين -->
+    <!-- القائمة اليمنى -->
     <aside class="right-drawer" id="rightDrawer" aria-hidden="true">
       <div class="drawer-profile" id="drawerProfile">
         <div class="profile-avatar" id="profileAvatar">K</div>
@@ -107,6 +126,34 @@
           <span>تسجيل الخروج</span>
         </button>
       </nav>
+    </aside>
+
+    <!-- القائمة اليسرى: الشات الخاص -->
+    <aside class="left-drawer" id="leftDrawer" aria-hidden="true">
+      <div class="private-header">
+        <span class="private-tag">شات نار</span>
+        <h2 class="private-title">المحادثات الخاصة</h2>
+      </div>
+
+      <div class="private-conversations" id="privateConversations">
+        <div class="private-item">
+          <div class="private-avatar">A</div>
+          <div class="private-meta">
+            <strong>أحمد</strong>
+            <span>آخر رسالة: منذ قليل</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="private-search-wrap">
+        <input
+          type="search"
+          id="privateSearchInput"
+          class="private-search-input"
+          placeholder="ابحث عن شخص..."
+          autocomplete="off"
+        />
+      </div>
     </aside>
 
     <!-- طبقة الإغلاق -->
