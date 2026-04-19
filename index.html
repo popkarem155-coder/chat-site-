@@ -1,157 +1,93 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>شات نار | K3-Z</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شات نار | الشات العربي الأول</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- أيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cloudflare.com">
 </head>
 <body>
-  <div id="app" class="app-shell">
 
-    <header class="app-header" id="appHeader">
-      <div class="header-side header-left">
-        <button id="menuBtn" class="icon-btn" aria-label="القائمة" title="القائمة">
-          ☰
-        </button>
-      </div>
-
-      <div class="header-center">
-        <button id="privateChatBtn" class="icon-btn icon-btn-wide" aria-label="الشات الخاص" title="الشات الخاص">
-          الشات الخاص
-        </button>
-      </div>
-
-      <div class="header-side header-right">
-        <span class="header-spacer" aria-hidden="true"></span>
-      </div>
-    </header>
-
-    <section class="brand-strip" id="brandStrip">
-      <h1 class="brand-title">شات نار</h1>
-      <p class="brand-subtitle">المحادثة الخاصة والعامة في مكان واحد</p>
-    </section>
-
-    <section class="search-row" id="searchRow">
-      <input
-        type="search"
-        id="searchInput"
-        class="search-input"
-        placeholder="ابحث هنا..."
-        autocomplete="off"
-      />
-    </section>
-
-    <main class="app-main" id="appMain">
-
-      <section class="panel panel-online" id="onlinePanel">
-        <div class="panel-header">
-          <h2>المتصلون الآن</h2>
-        </div>
-        <div class="panel-body" id="onlineUsersList">
-          <div class="empty-state">
-            لا يوجد مستخدمون متصلون حاليًا
-          </div>
-        </div>
-      </section>
-
-      <section class="panel panel-featured" id="featuredPanel">
-        <div class="panel-header">
-          <h2>المستخدمون المميزون</h2>
-        </div>
-        <div class="panel-body" id="featuredUsersList">
-          <div class="empty-state">
-            لا يوجد مستخدمون مميزون حاليًا
-          </div>
-        </div>
-      </section>
-
-      <section class="panel panel-chat" id="publicChatPanel">
-        <div class="panel-header">
-          <h2>الشات العام</h2>
-        </div>
-
-        <div class="chat-messages" id="chatMessages">
-          <div class="message-bubble other">
-            <div class="message-meta">
-              <strong>شات نار</strong>
-              <small>الآن</small>
+    <div class="app-wrapper">
+        <!-- الهيدر الاحترافي -->
+        <header class="main-header">
+            <div class="icon-btn left" onclick="toggleSidebar('private-sidebar')">
+                <i class="fas fa-envelope"></i>
+                <span class="badge">3</span>
             </div>
-            <div class="message-text">أهلاً بك في الشات العام.</div>
-          </div>
+            <div class="logo">
+                <img src="https://ibb.co" alt="logo" class="fire-icon">
+                <span>شات نار</span>
+            </div>
+            <div class="icon-btn right" onclick="toggleSidebar('profile-sidebar')">
+                <i class="fas fa-user-circle"></i>
+            </div>
+        </header>
+
+        <!-- منطقة البحث -->
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" placeholder="ابحث هنا ...">
+                <i class="fas fa-search"></i>
+            </div>
         </div>
 
-        <div class="chat-composer">
-          <input
-            type="text"
-            id="messageInput"
-            class="message-input"
-            placeholder="اكتب رسالة..."
-            autocomplete="off"
-          />
-          <button id="sendBtn" class="send-btn">إرسال</button>
+        <!-- المحتوى الرئيسي (Scrollable) -->
+        <main class="chat-body">
+            <section class="section-block">
+                <div class="section-header">
+                    <span>المتصلين الآن</span>
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="users-list" id="usersList">
+                    <!-- سيتم ملؤه بالبرمجة أو يدوياً -->
+                </div>
+            </section>
+
+            <section class="section-block vip-section">
+                <div class="section-header">
+                    <span>المستخدمين المميزين</span>
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="vip-grid" id="vipGrid">
+                    <!-- صور المميزين -->
+                </div>
+            </section>
+
+            <div class="public-chat-area" id="chatDisplay">
+                <!-- الرسائل العامة تظهر هنا -->
+            </div>
+        </main>
+
+        <!-- منطقة الكتابة (تكملة الصورة) -->
+        <footer class="input-area">
+            <div class="input-wrapper">
+                <button class="action-btn"><i class="fas fa-plus"></i></button>
+                <input type="text" id="mainInput" placeholder="اكتب رسالتك العامة...">
+                <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </footer>
+
+        <!-- القوائم الجانبية (تفتح عند الطلب) -->
+        <div id="private-sidebar" class="sidebar left-side">
+            <div class="sidebar-header">الرسائل الخاصة <i class="fas fa-times" onclick="toggleSidebar('private-sidebar')"></i></div>
+            <div class="sidebar-content">لا توجد رسائل جديدة</div>
         </div>
-      </section>
-    </main>
 
-    <aside class="right-drawer" id="rightDrawer" aria-hidden="true">
-      <div class="drawer-profile" id="drawerProfile">
-        <div class="profile-avatar" id="profileAvatar">K</div>
-
-        <div class="profile-meta">
-          <div class="profile-name" id="profileName">K3-Z User</div>
-          <div class="profile-sub" id="profileSub">الملف الشخصي</div>
+        <div id="profile-sidebar" class="sidebar right-side">
+            <div class="sidebar-header">الملف الشخصي <i class="fas fa-times" onclick="toggleSidebar('profile-sidebar')"></i></div>
+            <div class="sidebar-content profile-info">
+                <img src="https://placeholder.com" class="profile-img">
+                <h4>زائر ملك</h4>
+                <button class="edit-btn">تعديل البيانات</button>
+            </div>
         </div>
+        
+        <div class="overlay" id="overlay" onclick="closeAllSidebars()"></div>
+    </div>
 
-        <div class="profile-badge-wrap">
-          <span class="profile-badge" id="profileBadge">0</span>
-        </div>
-      </div>
-
-      <nav class="drawer-menu" id="drawerMenu">
-        <button class="drawer-item" id="visitedMeBtn">
-          <span>من زار ملفك</span>
-        </button>
-
-        <button class="drawer-item" id="appSettingsBtn">
-          <span>إعدادات التطبيق</span>
-        </button>
-
-        <button class="drawer-item" id="logoutBtn">
-          <span>تسجيل الخروج</span>
-        </button>
-      </nav>
-    </aside>
-
-    <aside class="left-drawer" id="leftDrawer" aria-hidden="true">
-      <div class="private-header">
-        <span class="private-tag">شات نار</span>
-        <h2 class="private-title">المحادثات الخاصة</h2>
-      </div>
-
-      <div class="private-conversations" id="privateConversations">
-        <div class="empty-state">
-          لا توجد محادثات خاصة حاليًا
-        </div>
-      </div>
-
-      <div class="private-search-wrap">
-        <input
-          type="search"
-          id="privateSearchInput"
-          class="private-search-input"
-          placeholder="ابحث عن شخص..."
-          autocomplete="off"
-        />
-      </div>
-    </aside>
-
-    <div class="drawer-overlay" id="drawerOverlay"></div>
-  </div>
-
-  <script src="stateManager.js" defer></script>
-  <script src="k3-event-system.js" defer></script>
-  <script src="firebase.js" defer></script>
-  <script src="main.js" defer></script>
+    <script src="script.js"></script>
 </body>
 </html>
