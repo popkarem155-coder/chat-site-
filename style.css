@@ -1,83 +1,61 @@
-:root {
-    --bg-dark: #1a0129;
-    --primary-purple: #4e1175;
-    --accent-purple: #9d2ec5;
-    --gold: #ffcf40;
-    --glass: rgba(255, 255, 255, 0.1);
+// بيانات تجريبية (بدل الصور الوهمية)
+const users = [
+    { name: 'محمد', status: 'متصل الآن', img: 'https://randomuser.me' },
+    { name: 'ليلى', status: 'متصل الآن', img: 'https://randomuser.me' },
+    { name: 'كريم', status: 'متصل الآن', img: 'https://randomuser.me' }
+];
+
+// تحميل البيانات عند تشغيل الموقع
+window.onload = () => {
+    const list = document.getElementById('usersList');
+    users.forEach(user => {
+        list.innerHTML += `
+            <div class="user-card">
+                <img src="${user.img}" class="avatar">
+                <div class="user-info">
+                    <div style="font-weight:bold">${user.name}</div>
+                    <div class="status-dot">● ${user.status}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    // ملء شبكة المميزين
+    const grid = document.getElementById('vipGrid');
+    for(let i=1; i<=4; i++) {
+        grid.innerHTML += `<img src="https://randomuser.me{i+10}.jpg">`;
+    }
+};
+
+// وظيفة فتح/إغلاق القوائم الجانبية
+function toggleSidebar(id) {
+    const sidebar = document.getElementById(id);
+    const overlay = document.getElementById('overlay');
+    
+    sidebar.classList.toggle('active');
+    if (sidebar.classList.contains('active')) {
+        overlay.style.display = 'block';
+    } else {
+        overlay.style.display = 'none';
+    }
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { 
-    background-color: var(--bg-dark); 
-    color: white; 
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    overflow: hidden;
+function closeAllSidebars() {
+    document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('active'));
+    document.getElementById('overlay').style.display = 'none';
 }
 
-.app-wrapper {
-    max-width: 500px;
-    margin: 0 auto;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(180deg, #32054a 0%, #1a0129 100%);
-    position: relative;
+// وظيفة الإرسال
+function sendMessage() {
+    const input = document.getElementById('mainInput');
+    const chatDisplay = document.getElementById('chatDisplay');
+    if (input.value.trim() !== "") {
+        const msg = document.createElement('div');
+        msg.style.padding = "8px";
+        msg.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+        msg.innerHTML = `<span style="color:#ffcf40; font-weight:bold">أنت: </span> ${input.value}`;
+        chatDisplay.appendChild(msg);
+        input.value = "";
+        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    }
 }
-
-/* Header */
-.main-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 15px; background: var(--primary-purple);
-    border-bottom: 2px solid var(--accent-purple);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
-.logo { font-size: 22px; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
-.fire-icon { width: 30px; }
-.icon-btn { font-size: 24px; cursor: pointer; position: relative; }
-.badge { position: absolute; top: -5px; right: -10px; background: red; font-size: 10px; padding: 2px 6px; border-radius: 50%; }
-
-/* Search */
-.search-container { padding: 10px 15px; }
-.search-box { 
-    background: var(--glass); border-radius: 20px; display: flex; align-items: center; padding: 5px 15px;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-.search-box input { background: none; border: none; color: white; flex: 1; padding: 8px; outline: none; }
-
-/* Sections */
-.chat-body { flex: 1; overflow-y: auto; padding: 10px; padding-bottom: 80px; }
-.section-block { background: var(--glass); border-radius: 15px; margin-bottom: 15px; overflow: hidden; }
-.section-header { background: rgba(0,0,0,0.3); padding: 8px 15px; display: flex; justify-content: space-between; font-size: 14px; color: var(--gold); }
-
-/* Users & VIP */
-.user-card { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.avatar { width: 45px; height: 45px; border-radius: 10px; margin-left: 12px; border: 2px solid var(--accent-purple); }
-.status-dot { color: #4eff4e; font-size: 11px; }
-
-.vip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px; }
-.vip-grid img { width: 100%; border-radius: 10px; border: 2px solid var(--gold); }
-
-/* Input Area (New) */
-.input-area {
-    position: absolute; bottom: 0; width: 100%; padding: 15px;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-}
-.input-wrapper { display: flex; gap: 10px; align-items: center; }
-.input-wrapper input { 
-    flex: 1; background: var(--glass); border: 1px solid var(--accent-purple); 
-    border-radius: 25px; padding: 12px 20px; color: white; outline: none;
-}
-.action-btn, .send-btn { background: var(--accent-purple); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
-
-/* Sidebars */
-.sidebar {
-    position: absolute; top: 0; width: 280px; height: 100%; background: #25033d; 
-    z-index: 100; transition: 0.3s; padding: 20px;
-}
-.left-side { left: -280px; }
-.right-side { right: -280px; }
-.sidebar.active { left: 0; }
-.right-side.active { right: 0; }
-.sidebar-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--glass); padding-bottom: 10px; margin-bottom: 20px; color: var(--gold); }
-
-.overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 50; }
