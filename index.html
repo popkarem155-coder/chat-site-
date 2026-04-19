@@ -3,91 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شات نار | الشات العربي الأول</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- أيقونات FontAwesome -->
+    <title>شات نار - التصميم الكامل</title>
+    <!-- ربط مكتبة الأيقونات من الإنترنت مباشرة -->
     <link rel="stylesheet" href="https://cloudflare.com">
+    
+    <style>
+        /* هنا نربط التصميم بالهيكل في ملف واحد */
+        :root {
+            --main-bg: #1a0129;
+            --header-bg: #4e1175;
+            --accent: #9d2ec5;
+            --gold: #ffcf40;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background-color: var(--main-bg);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: white; overflow: hidden;
+        }
+
+        .app-container {
+            max-width: 500px; margin: 0 auto;
+            height: 100vh; display: flex; flex-direction: column;
+            background: linear-gradient(180deg, #32054a 0%, #1a0129 100%);
+            position: relative; border: 1px solid var(--accent);
+        }
+
+        /* الهيدر مع الأزرار المطلوبة */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background: var(--header-bg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000;
+        }
+        .header .logo { font-size: 22px; font-weight: bold; color: var(--gold); }
+        .nav-icon { font-size: 24px; cursor: pointer; color: white; transition: 0.3s; }
+        .nav-icon:hover { color: var(--gold); }
+
+        /* منطقة البحث */
+        .search-area { padding: 10px 15px; }
+        .search-box {
+            background: var(--glass); border-radius: 20px;
+            display: flex; align-items: center; padding: 5px 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .search-box input {
+            background: none; border: none; color: white;
+            flex: 1; padding: 8px; outline: none; text-align: right;
+        }
+
+        /* المحتوى والرسائل */
+        .content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px; }
+        .card {
+            background: var(--glass); border-radius: 15px;
+            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        .card-title { background: rgba(0,0,0,0.3); padding: 8px 15px; color: var(--gold); font-size: 14px; }
+        
+        .user-row { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .avatar { width: 45px; height: 45px; border-radius: 10px; margin-left: 12px; border: 2px solid var(--accent); }
+        .online-tag { color: #4eff4e; font-size: 11px; }
+
+        /* منطقة الكتابة - تكملة الصورة */
+        .footer-input {
+            position: absolute; bottom: 0; width: 100%;
+            padding: 15px; background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px); border-top: 1px solid var(--accent);
+        }
+        .input-group { display: flex; gap: 10px; align-items: center; }
+        .input-group input {
+            flex: 1; background: var(--glass); border: 1px solid var(--accent);
+            border-radius: 25px; padding: 12px 15px; color: white; outline: none;
+        }
+        .btn-send {
+            background: var(--accent); border: none; color: white;
+            width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
+        }
+
+        /* القوائم الجانبية الاحترافية */
+        .sidebar {
+            position: absolute; top: 0; width: 280px; height: 100%;
+            background: #25033d; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+        .side-left { right: -300px; } /* قائمة الرسائل */
+        .side-right { left: -300px; }  /* قائمة البروفايل */
+        .sidebar.active { right: 0; left: auto; }
+        .side-right.active { left: 0; right: auto; }
+        
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: none; z-index: 1500;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="app-wrapper">
-        <!-- الهيدر الاحترافي -->
-        <header class="main-header">
-            <div class="icon-btn left" onclick="toggleSidebar('private-sidebar')">
-                <i class="fas fa-envelope"></i>
-                <span class="badge">3</span>
-            </div>
-            <div class="logo">
-                <img src="https://ibb.co" alt="logo" class="fire-icon">
-                <span>شات نار</span>
-            </div>
-            <div class="icon-btn right" onclick="toggleSidebar('profile-sidebar')">
-                <i class="fas fa-user-circle"></i>
-            </div>
+    <div class="app-container">
+        <!-- الهيدر -->
+        <header class="header">
+            <div class="nav-icon" onclick="openSidebar('side-msgs')"><i class="fas fa-comments"></i></div>
+            <div class="logo">🔥 شات نار</div>
+            <div class="nav-icon" onclick="openSidebar('side-prof')"><i class="fas fa-user-shield"></i></div>
         </header>
 
-        <!-- منطقة البحث -->
-        <div class="search-container">
+        <!-- البحث -->
+        <div class="search-area">
             <div class="search-box">
-                <input type="text" placeholder="ابحث هنا ...">
+                <input type="text" placeholder="ابحث عن صديق...">
                 <i class="fas fa-search"></i>
             </div>
         </div>
 
-        <!-- المحتوى الرئيسي (Scrollable) -->
-        <main class="chat-body">
-            <section class="section-block">
-                <div class="section-header">
-                    <span>المتصلين الآن</span>
-                    <i class="fas fa-users"></i>
+        <!-- المحتوى -->
+        <main class="content">
+            <div class="card">
+                <div class="card-title">المتصلين الآن 👥</div>
+                <div id="usersContainer">
+                    <!-- سيتم توليد المستخدمين هنا -->
                 </div>
-                <div class="users-list" id="usersList">
-                    <!-- سيتم ملؤه بالبرمجة أو يدوياً -->
-                </div>
-            </section>
+            </div>
 
-            <section class="section-block vip-section">
-                <div class="section-header">
-                    <span>المستخدمين المميزين</span>
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="vip-grid" id="vipGrid">
-                    <!-- صور المميزين -->
-                </div>
-            </section>
-
-            <div class="public-chat-area" id="chatDisplay">
-                <!-- الرسائل العامة تظهر هنا -->
+            <div id="chatBox">
+                <!-- الرسائل ستظهر هنا -->
             </div>
         </main>
 
-        <!-- منطقة الكتابة (تكملة الصورة) -->
-        <footer class="input-area">
-            <div class="input-wrapper">
-                <button class="action-btn"><i class="fas fa-plus"></i></button>
-                <input type="text" id="mainInput" placeholder="اكتب رسالتك العامة...">
-                <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        <!-- منطقة الكتابة -->
+        <footer class="footer-input">
+            <div class="input-group">
+                <button class="btn-send" style="background: #555;"><i class="fas fa-plus"></i></button>
+                <input type="text" id="mainMsg" placeholder="اكتب رسالتك العامة...">
+                <button class="btn-send" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </footer>
 
-        <!-- القوائم الجانبية (تفتح عند الطلب) -->
-        <div id="private-sidebar" class="sidebar left-side">
-            <div class="sidebar-header">الرسائل الخاصة <i class="fas fa-times" onclick="toggleSidebar('private-sidebar')"></i></div>
-            <div class="sidebar-content">لا توجد رسائل جديدة</div>
+        <!-- القوائم المخفية -->
+        <div id="side-msgs" class="sidebar side-left">
+            <h2 style="color:var(--gold)">الرسائل الخاصة</h2>
+            <hr style="opacity:0.1; margin:15px 0">
+            <p>لا توجد محادثات خاصة حالياً.</p>
         </div>
 
-        <div id="profile-sidebar" class="sidebar right-side">
-            <div class="sidebar-header">الملف الشخصي <i class="fas fa-times" onclick="toggleSidebar('profile-sidebar')"></i></div>
-            <div class="sidebar-content profile-info">
-                <img src="https://placeholder.com" class="profile-img">
-                <h4>زائر ملك</h4>
-                <button class="edit-btn">تعديل البيانات</button>
+        <div id="side-prof" class="sidebar side-right">
+            <h2 style="color:var(--gold)">الملف الشخصي</h2>
+            <div style="text-align:center; margin-top:30px">
+                <img src="https://placeholder.com" style="border-radius:50%; border:4px solid var(--gold)">
+                <h3>زائر ملك</h3>
+                <button style="margin-top:20px; background:var(--accent); color:white; border:none; padding:10px 20px; border-radius:5px">تعديل البيانات</button>
             </div>
         </div>
-        
-        <div class="overlay" id="overlay" onclick="closeAllSidebars()"></div>
+
+        <div class="overlay" id="overlay" onclick="closeSidebars()"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // توليد مستخدمين وهميين للتحقق من الشكل
+        const users = [
+            {n: 'أحمد المصرى', s: 'متصل'},
+            {n: 'سارة خالد', s: 'متصل'},
+            {n: 'كريم البرنس', s: 'بعيد'}
+        ];
+        
+        const container = document.getElementById('usersContainer');
+        users.forEach(u => {
+            container.innerHTML += `
+                <div class="user-row">
+                    <img src="https://pravatar.cc{u.n}" class="avatar">
+                    <div>
+                        <div style="font-weight:bold">${u.n}</div>
+                        <div class="online-tag">● ${u.s}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // وظائف القوائم الجانبية
+        function openSidebar(id) {
+            document.getElementById(id).classList.add('active');
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closeSidebars() {
+            document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('active'));
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // وظيفة الإرسال
+        function sendMsg() {
+            const input = document.getElementById('mainMsg');
+            const box = document.getElementById('chatBox');
+            if(input.value.trim() !== "") {
+                const d = document.createElement('div');
+                d.style.margin = "10px 0";
+                d.innerHTML = `<span style="color:var(--gold)">أنت:</span> ${input.value}`;
+                box.appendChild(d);
+                input.value = "";
+                document.querySelector('.content').scrollTop = box.scrollHeight;
+            }
+        }
+    </script>
 </body>
 </html>
