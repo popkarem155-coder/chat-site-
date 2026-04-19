@@ -205,14 +205,6 @@ body{
   display:none;
   z-index:999;
 }
-/* OVERLAY */
-.overlay{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  display:none;
-  z-index:999;
-    }
 
 /* overlay */
 .overlay{
