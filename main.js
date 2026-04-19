@@ -1,6 +1,6 @@
 // ===============================
 // K3-Z | main.js
-// الإصدار الجديد - BDR1
+// الإصدار الجديد - K3-Z
 // ===============================
 
 (function () {
@@ -17,20 +17,20 @@
     notifications: 0,
     visitedCount: 0,
     onlineUsers: [
-      { id: 1, name: "Ahmed", status: "متصل الآن" },
-      { id: 2, name: "Mina", status: "متصل الآن" },
-      { id: 3, name: "Sara", status: "متصل الآن" }
+      { id: 1, name: "Ahmed", status: "متصل الآن" }
     ],
     featuredUsers: [
       { id: 1, name: "Nour", score: 92 },
-      { id: 2, name: "Omar", score: 86 },
-      { id: 3, name: "Hana", score: 79 }
+      { id: 2, name: "Omar", score: 86 }
+    ],
+    privateChats: [
+      { id: 1, name: "أحمد", lastMessage: "آخر رسالة", time: "منذ قليل" }
     ],
     messages: [
       {
         id: 1,
         sender: "K3-Z",
-        text: "أهلاً بك في الشات العام.",
+        text: "أهلاً بك في شات نار.",
         time: "الآن",
         mine: false
       }
@@ -39,6 +39,7 @@
 
   let state = loadState();
   let drawerOpen = false;
+  let leftDrawerOpen = false;
   const refs = {};
 
   function deepClone(value) {
@@ -66,6 +67,9 @@
       featuredUsers: Array.isArray(safe.featuredUsers)
         ? safe.featuredUsers
         : deepClone(DEFAULT_DATA.featuredUsers),
+      privateChats: Array.isArray(safe.privateChats)
+        ? safe.privateChats
+        : deepClone(DEFAULT_DATA.privateChats),
       messages: Array.isArray(safe.messages)
         ? safe.messages
         : deepClone(DEFAULT_DATA.messages)
@@ -107,7 +111,6 @@
   function syncExternalSystems() {
     const snapshot = getState();
 
-    // Optional health monitor
     try {
       if (window.K3_HEALTH && typeof window.K3_HEALTH === "object") {
         window.K3_HEALTH.main = true;
@@ -117,13 +120,12 @@
       }
     } catch (_) {}
 
-    // Optional centralized state manager compatibility
     try {
       if (window.K3_STATE && typeof window.K3_STATE.update === "function") {
         window.K3_STATE.update({
           notifications_count: snapshot.notifications,
           users_online: snapshot.onlineUsers.length,
-          ui_state: drawerOpen ? "drawer_open" : "home_chat",
+          ui_state: drawerOpen ? "right_drawer_open" : "home_chat",
           last_update: Date.now()
         });
       }
@@ -134,7 +136,7 @@
         window.K3Z_STATE.update({
           notifications_count: snapshot.notifications,
           users_online: snapshot.onlineUsers.length,
-          ui_state: drawerOpen ? "drawer_open" : "home_chat",
+          ui_state: drawerOpen ? "right_drawer_open" : "home_chat",
           last_update: Date.now()
         });
       }
@@ -143,14 +145,18 @@
 
   function cacheRefs() {
     refs.menuBtn = document.getElementById("menuBtn");
-    refs.messagesBtn = document.getElementById("messagesBtn");
+    refs.privateChatBtn = document.getElementById("privateChatBtn");
     refs.rightDrawer = document.getElementById("rightDrawer");
+    refs.leftDrawer = document.getElementById("leftDrawer");
     refs.drawerOverlay = document.getElementById("drawerOverlay");
 
     refs.searchInput = document.getElementById("searchInput");
+    refs.privateSearchInput = document.getElementById("privateSearchInput");
+
     refs.onlineUsersList = document.getElementById("onlineUsersList");
     refs.featuredUsersList = document.getElementById("featuredUsersList");
     refs.chatMessages = document.getElementById("chatMessages");
+    refs.privateConversations = document.getElementById("privateConversations");
 
     refs.messageInput = document.getElementById("messageInput");
     refs.sendBtn = document.getElementById("sendBtn");
@@ -168,22 +174,29 @@
   function bindEvents() {
     if (refs.menuBtn) {
       refs.menuBtn.addEventListener("click", () => {
-        toggleDrawer();
+        toggleRightDrawer();
       });
     }
 
-    if (refs.messagesBtn) {
-      refs.messagesBtn.addEventListener("click", () => {
-        scrollToChat();
+    if (refs.privateChatBtn) {
+      refs.privateChatBtn.addEventListener("click", () => {
+        toggleLeftDrawer();
       });
     }
 
     if (refs.drawerOverlay) {
-      refs.drawerOverlay.addEventListener("click", closeDrawer);
+      refs.drawerOverlay.addEventListener("click", () => {
+        closeRightDrawer();
+        closeLeftDrawer();
+      });
     }
 
     if (refs.searchInput) {
       refs.searchInput.addEventListener("input", renderAll);
+    }
+
+    if (refs.privateSearchInput) {
+      refs.privateSearchInput.addEventListener("input", renderPrivateChats);
     }
 
     if (refs.sendBtn) {
@@ -191,7 +204,7 @@
     }
 
     if (refs.messageInput) {
-      // مهم: لا يوجد autofocus عند التحميل
+      // مهم: لا يوجد autofocus
       refs.messageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
@@ -203,13 +216,13 @@
     if (refs.visitedMeBtn) {
       refs.visitedMeBtn.addEventListener("click", () => {
         incrementVisitedCount();
-        closeDrawer();
+        closeRightDrawer();
       });
     }
 
     if (refs.appSettingsBtn) {
       refs.appSettingsBtn.addEventListener("click", () => {
-        alert("إعدادات التطبيق سيتم ربطها لاحقًا.");
+        alert("إعدادات التطبيق ستُربط لاحقًا.");
       });
     }
 
@@ -219,7 +232,6 @@
       });
     }
 
-    // Event system hooks (اختياري وآمن)
     if (window.K3_SYSTEM && typeof window.K3_SYSTEM.on === "function") {
       try {
         window.K3_SYSTEM.on("message:new", (payload) => {
@@ -234,19 +246,6 @@
         window.K3_SYSTEM.on("profile:visited", () => {
           incrementVisitedCount();
         });
-
-        window.K3_SYSTEM.on("state:changed", (nextState) => {
-          if (nextState && typeof nextState === "object") {
-            // لا نكسر الحالة المحلية، فقط نحدث الأرقام الأساسية
-            if (Number.isFinite(Number(nextState.notifications_count))) {
-              state.notifications = Number(nextState.notifications_count);
-            }
-            if (Number.isFinite(Number(nextState.users_online))) {
-              // لا نعيد توليد المستخدمين، فقط نربط العداد
-            }
-            renderProfile();
-          }
-        });
       } catch (err) {
         console.warn("K3_SYSTEM hook failed:", err);
       }
@@ -257,20 +256,32 @@
     return (refs.searchInput?.value || "").trim().toLowerCase();
   }
 
-  function toggleDrawer() {
+  function getPrivateSearchValue() {
+    return (refs.privateSearchInput?.value || "").trim().toLowerCase();
+  }
+
+  function toggleRightDrawer() {
     drawerOpen = !drawerOpen;
+    if (drawerOpen) leftDrawerOpen = false;
     updateDrawerUI();
     syncExternalSystems();
   }
 
-  function openDrawer() {
-    drawerOpen = true;
+  function toggleLeftDrawer() {
+    leftDrawerOpen = !leftDrawerOpen;
+    if (leftDrawerOpen) drawerOpen = false;
     updateDrawerUI();
     syncExternalSystems();
   }
 
-  function closeDrawer() {
+  function closeRightDrawer() {
     drawerOpen = false;
+    updateDrawerUI();
+    syncExternalSystems();
+  }
+
+  function closeLeftDrawer() {
+    leftDrawerOpen = false;
     updateDrawerUI();
     syncExternalSystems();
   }
@@ -281,8 +292,13 @@
       refs.rightDrawer.setAttribute("aria-hidden", String(!drawerOpen));
     }
 
+    if (refs.leftDrawer) {
+      refs.leftDrawer.classList.toggle("open", leftDrawerOpen);
+      refs.leftDrawer.setAttribute("aria-hidden", String(!leftDrawerOpen));
+    }
+
     if (refs.drawerOverlay) {
-      refs.drawerOverlay.classList.toggle("active", drawerOpen);
+      refs.drawerOverlay.classList.toggle("active", drawerOpen || leftDrawerOpen);
     }
   }
 
@@ -292,7 +308,6 @@
       chatPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    // فقط عند الضغط، وليس تلقائيًا
     setTimeout(() => {
       if (refs.messageInput && typeof refs.messageInput.focus === "function") {
         refs.messageInput.focus();
@@ -353,7 +368,6 @@
     addMessage(message);
     refs.messageInput.value = "";
 
-    // Optional event system broadcast
     if (window.K3_SYSTEM && typeof window.K3_SYSTEM.emit === "function") {
       try {
         window.K3_SYSTEM.emit("message:send", message);
@@ -362,7 +376,6 @@
       }
     }
 
-    // Optional Firebase adapter hook
     if (window.K3_FIREBASE && typeof window.K3_FIREBASE.sendMessage === "function") {
       try {
         window.K3_FIREBASE.sendMessage(message);
@@ -440,6 +453,36 @@
       : `<div class="status-pill user-chip">لا توجد نتائج</div>`;
   }
 
+  function renderPrivateChats() {
+    if (!refs.privateConversations) return;
+
+    const q = getPrivateSearchValue();
+    const items = state.privateChats.filter((c) => {
+      const name = String(c.name || "").toLowerCase();
+      const lastMessage = String(c.lastMessage || "").toLowerCase();
+      return !q || name.includes(q) || lastMessage.includes(q);
+    });
+
+    refs.privateConversations.innerHTML = items.length
+      ? items
+          .slice()
+          .reverse()
+          .map(
+            (c) => `
+              <div class="private-item" data-private-id="${c.id}">
+                <div class="private-avatar">${escapeHtml((c.name || "?").slice(0, 1))}</div>
+                <div class="private-meta">
+                  <strong>${escapeHtml(c.name || "مستخدم")}</strong>
+                  <span>${escapeHtml(c.lastMessage || "لا توجد محادثة")}</span>
+                </div>
+                <div class="private-time">${escapeHtml(c.time || "")}</div>
+              </div>
+            `
+          )
+          .join("")
+      : `<div class="private-item"><div class="private-meta"><strong>لا توجد نتائج</strong></div></div>`;
+  }
+
   function renderMessages() {
     if (!refs.chatMessages) return;
 
@@ -471,6 +514,7 @@
     renderProfile();
     renderOnlineUsers();
     renderFeaturedUsers();
+    renderPrivateChats();
     renderMessages();
   }
 
@@ -490,7 +534,6 @@
     renderAll();
     syncExternalSystems();
 
-    // حفظ الحالة الأولية لو لم توجد
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (_) {}
@@ -498,14 +541,26 @@
 
   document.addEventListener("DOMContentLoaded", bootstrap);
 
-  // واجهة عامة اختيارية
   window.K3Z_MAIN = {
     getState: () => deepClone(state),
     saveState,
     patchState,
-    openDrawer,
-    closeDrawer,
-    toggleDrawer,
+    openRightDrawer: () => {
+      drawerOpen = true;
+      leftDrawerOpen = false;
+      updateDrawerUI();
+      syncExternalSystems();
+    },
+    closeRightDrawer,
+    toggleRightDrawer,
+    openLeftDrawer: () => {
+      leftDrawerOpen = true;
+      drawerOpen = false;
+      updateDrawerUI();
+      syncExternalSystems();
+    },
+    closeLeftDrawer,
+    toggleLeftDrawer,
     incrementNotifications,
     resetNotifications,
     addMessage,
