@@ -9,7 +9,6 @@
 <body>
   <div id="app" class="app-shell">
 
-    <!-- الهيدر -->
     <header class="app-header" id="appHeader">
       <div class="header-side header-left">
         <button id="menuBtn" class="icon-btn" aria-label="القائمة" title="القائمة">
@@ -28,48 +27,45 @@
       </div>
     </header>
 
-    <!-- اسم المشروع تحت الهيدر -->
     <section class="brand-strip" id="brandStrip">
       <h1 class="brand-title">شات نار</h1>
       <p class="brand-subtitle">المحادثة الخاصة والعامة في مكان واحد</p>
     </section>
 
-    <!-- شريط البحث -->
     <section class="search-row" id="searchRow">
       <input
         type="search"
         id="searchInput"
         class="search-input"
-        placeholder="ابحث عن شخص أو رسالة..."
+        placeholder="ابحث هنا..."
         autocomplete="off"
       />
     </section>
 
-    <!-- المحتوى الرئيسي -->
     <main class="app-main" id="appMain">
 
-      <!-- المتصلون الآن -->
       <section class="panel panel-online" id="onlinePanel">
         <div class="panel-header">
           <h2>المتصلون الآن</h2>
         </div>
         <div class="panel-body" id="onlineUsersList">
-          <div class="status-pill user-chip">
-            <strong>مستخدم تجريبي</strong>
-            <span>متصل الآن</span>
+          <div class="empty-state">
+            لا يوجد مستخدمون متصلون حاليًا
           </div>
         </div>
       </section>
 
-      <!-- المستخدمون المميزون -->
       <section class="panel panel-featured" id="featuredPanel">
         <div class="panel-header">
           <h2>المستخدمون المميزون</h2>
         </div>
-        <div class="panel-body" id="featuredUsersList"></div>
+        <div class="panel-body" id="featuredUsersList">
+          <div class="empty-state">
+            لا يوجد مستخدمون مميزون حاليًا
+          </div>
+        </div>
       </section>
 
-      <!-- الشات العام -->
       <section class="panel panel-chat" id="publicChatPanel">
         <div class="panel-header">
           <h2>الشات العام</h2>
@@ -98,7 +94,6 @@
       </section>
     </main>
 
-    <!-- القائمة اليمنى -->
     <aside class="right-drawer" id="rightDrawer" aria-hidden="true">
       <div class="drawer-profile" id="drawerProfile">
         <div class="profile-avatar" id="profileAvatar">K</div>
@@ -128,7 +123,6 @@
       </nav>
     </aside>
 
-    <!-- القائمة اليسرى: الشات الخاص -->
     <aside class="left-drawer" id="leftDrawer" aria-hidden="true">
       <div class="private-header">
         <span class="private-tag">شات نار</span>
@@ -136,12 +130,8 @@
       </div>
 
       <div class="private-conversations" id="privateConversations">
-        <div class="private-item">
-          <div class="private-avatar">A</div>
-          <div class="private-meta">
-            <strong>أحمد</strong>
-            <span>آخر رسالة: منذ قليل</span>
-          </div>
+        <div class="empty-state">
+          لا توجد محادثات خاصة حاليًا
         </div>
       </div>
 
@@ -156,11 +146,9 @@
       </div>
     </aside>
 
-    <!-- طبقة الإغلاق -->
     <div class="drawer-overlay" id="drawerOverlay"></div>
   </div>
 
-  <!-- ترتيب التحميل -->
   <script src="stateManager.js" defer></script>
   <script src="k3-event-system.js" defer></script>
   <script src="firebase.js" defer></script>
