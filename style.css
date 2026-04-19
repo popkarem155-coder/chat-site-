@@ -1,6 +1,6 @@
 /* ===============================
    K3-Z | style.css
-   Original Theme: Dark Pink + Purple
+   Dark Pink + Purple
    =============================== */
 
 :root {
@@ -71,6 +71,7 @@ body {
   flex-direction: column;
   gap: 14px;
   padding: 14px;
+  position: relative;
 }
 
 /* ===============================
@@ -88,6 +89,8 @@ body {
   background: linear-gradient(180deg, rgba(23, 28, 40, 0.96), rgba(17, 20, 30, 0.96));
   box-shadow: var(--shadow);
   backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 50;
 }
 
 .header-side {
@@ -103,6 +106,12 @@ body {
   justify-content: flex-end;
 }
 
+.header-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .header-title {
   text-align: center;
   pointer-events: none;
@@ -115,8 +124,13 @@ body {
   color: var(--text);
 }
 
-.icon-btn {
+.header-spacer {
   width: 42px;
+  height: 42px;
+}
+
+.icon-btn {
+  min-width: 42px;
   height: 42px;
   display: grid;
   place-items: center;
@@ -124,7 +138,7 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid transparent;
   color: var(--text);
-  transition: transform var(--transition), background var(--transition), border-color var(--transition);
+  transition: transform var(--transition), background var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
 .icon-btn:hover {
@@ -135,6 +149,39 @@ body {
 
 .icon-btn:active {
   transform: translateY(0);
+}
+
+.icon-btn-wide {
+  min-width: 120px;
+  padding: 0 16px;
+  font-weight: 800;
+  background: linear-gradient(135deg, rgba(255, 46, 136, 0.16), rgba(124, 92, 255, 0.16));
+  border-color: rgba(255, 46, 136, 0.18);
+}
+
+/* ===============================
+   Brand strip
+   =============================== */
+
+.brand-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 4px 6px 2px;
+}
+
+.brand-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.2;
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+.brand-subtitle {
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 /* ===============================
@@ -161,7 +208,8 @@ body {
   transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
 }
 
-.search-input::placeholder {
+.search-input::placeholder,
+.private-search-input::placeholder {
   color: #8f97aa;
 }
 
@@ -181,6 +229,8 @@ body {
   grid-template-columns: 1fr;
   gap: 14px;
   padding-bottom: 8px;
+  position: relative;
+  z-index: 2;
 }
 
 .panel {
@@ -477,6 +527,128 @@ body {
 }
 
 /* ===============================
+   Left Drawer
+   =============================== */
+
+.left-drawer {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  width: min(340px, calc(100vw - 28px));
+  height: calc(100vh - 28px);
+  padding: 16px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(20, 24, 35, 0.99), rgba(13, 15, 22, 0.99));
+  box-shadow: var(--shadow);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  transform: translateX(-115%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+.left-drawer.open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.private-header {
+  padding: 10px 6px 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.private-tag {
+  font-size: 0.82rem;
+  color: var(--pink-2);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.private-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.private-conversations {
+  display: grid;
+  gap: 10px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 2px;
+}
+
+.private-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.private-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  flex: 0 0 auto;
+}
+
+.private-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.private-meta strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.private-meta span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.private-search-wrap {
+  padding-top: 2px;
+}
+
+.private-search-input {
+  width: 100%;
+  height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-3);
+  color: var(--text);
+  padding: 0 14px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+.private-search-input:focus {
+  border-color: rgba(255, 46, 136, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 46, 136, 0.12);
+  background: #1c2233;
+}
+
+/* ===============================
    Overlay
    =============================== */
 
@@ -497,7 +669,7 @@ body {
 }
 
 /* ===============================
-   Small utility styles
+   Utilities
    =============================== */
 
 .status-pill,
@@ -570,9 +742,15 @@ body {
   }
 
   .icon-btn {
-    width: 40px;
+    min-width: 40px;
     height: 40px;
     border-radius: 13px;
+  }
+
+  .icon-btn-wide {
+    min-width: 104px;
+    padding: 0 12px;
+    font-size: 0.92rem;
   }
 
   .search-row {
@@ -595,7 +773,18 @@ body {
     height: calc(100vh - 18px);
   }
 
+  .left-drawer {
+    width: calc(100vw - 18px);
+    top: 9px;
+    left: 9px;
+    height: calc(100vh - 18px);
+  }
+
   .message-bubble {
     max-width: 96%;
+  }
+
+  .brand-title {
+    font-size: 1.18rem;
   }
 }
