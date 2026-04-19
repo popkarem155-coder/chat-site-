@@ -1,5 +1,5 @@
 (() => {
-  'استخدام صارم'؛
+  "use strict";
 
   const KEYS = {
     الحسابات: 'kareem3_accounts'،
