@@ -65,40 +65,6 @@ body{
   z-index:2;
 }
 
-.logo{
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  font-weight:bold;
-  color:var(--gold);
-}
-
-.icon-btn{
-  width:40px;
-  height:40px;
-  display:grid;
-  place-items:center;
-  border-radius:12px;
-  background:var(--glass);
-  cursor:pointer;
-  z-index:2;
-}
-
-.logo{
-  font-weight:bold;
-  color:var(--gold);
-}
-
-.icon-btn{
-  width:40px;
-  height:40px;
-  display:grid;
-  place-items:center;
-  border-radius:12px;
-  background:var(--glass);
-  cursor:pointer;
-}
-
 /* SEARCH (لو موجود) */
 .search-area{
   padding:10px;
