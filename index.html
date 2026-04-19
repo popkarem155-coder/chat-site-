@@ -23,18 +23,16 @@
   </button>  
 </header>  
 
-<section class="status-strip" aria-label="حالة الحساب والواجهة">  
-  <div class="status-pill">  
-    <span class="status-dot"></span>  
-    <span id="currentUserState">زائر</span>  
-  </div>  
+<section class="status-strip" aria-label="حالة الحساب والبحث">
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    <span id="currentUserState">زائر</span>
+  </div>
 
-  <button id="profileMonitorBtn" class="status-pill status-pill-btn" type="button">  
-    <span class="status-icon">🔔</span>  
-    <span>منظار ملفك</span>  
-    <span id="profileMonitorCount" class="count-badge">0</span>  
-  </button>  
-</section>  
+  <div class="search-pill">
+    <input id="userSearchInput" type="search" placeholder="ابحث عن مستخدم..." />
+  </div>
+</section>
 
 <main id="homeView" class="home-view">  
   <section class="panel panel-soft" aria-labelledby="onlineUsersTitle">  
