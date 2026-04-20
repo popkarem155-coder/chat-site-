@@ -306,7 +306,7 @@
     أعد الخيط؛
   }
 
-  دالة seedGuestAccount() {
+  function seedGuestAccount() {
     const guestSeed = safeJSONParse(localStorage.getItem(KEYS.guestSeed), null) || {
       المعرّف: makeId('acc'),
       تم الإنشاء في: الآن()،
@@ -472,7 +472,7 @@
     استدعاء الكل();
   }
 
-  دالة markActivity() {
+  function markActivity() {
     const acc = getCurrentAccount();
     const session = getCurrentSession();
     إذا لم يكن هناك حساب أو جلسة أو كان معرف الحساب في الجلسة لا يساوي معرف الحساب، فقم بالخروج.
@@ -491,7 +491,7 @@
     }, 900);
   }
 
-  دالة canUseCurrentSession() {
+  function canUseCurrentSession() {
     const acc = getCurrentAccount();
     const session = getCurrentSession();
     إذا لم يكن الحساب موجودًا أو لم تكن هناك جلسة، فسيتم إرجاع خطأ.
@@ -530,18 +530,18 @@
     }, CONFIG.TOAST_MS);
   }
 
-  دالة getCurrentPublicMessages() {
+  function getCurrentPublicMessages() {
     إذا كانت قيمة `state.publicMessages` مصفوفة، فسيتم إرجاعها إذا كانت `state.publicMessages` مصفوفة، وإلا فسيتم إرجاع مصفوفة فارغة.
   }
 
-  دالة getThreadMessagesForPeer(peerId) {
+  function getThreadMessagesForPeer(peerId) {
     const current = getCurrentAccount();
     إذا لم يكن (الحالي || !معرف النظير) فأرجع [];
     const thread = getThread(current.id, peerId, false);
     أعد قيمة الخيط إذا كانت `thread.messages` مصفوفة، وإلا فأعد `[]`.
   }
 
-  دالة getPrivateChatsForCurrentUser() {
+  function getPrivateChatsForCurrentUser() {
     const current = getCurrentAccount();
     إذا لم يكن (current) فسيتم إرجاع [];
 
@@ -634,7 +634,7 @@
     writeStorage();
   }
 
-  دالة markCurrentNotificationsRead() {
+  function markCurrentNotificationsRead() {
     const acc = getCurrentAccount();
     إذا لم يكن الحساب موجودًا أو لم يكن مصفوفة من الإشعارات، فقم بالخروج.
     acc.notifications.forEach((n) => { n.read = true; });
@@ -643,25 +643,25 @@
     renderShellState();
   }
 
-  دالة getUnreadNotificationCount() {
+  function getUnreadNotificationCount() {
     const acc = getCurrentAccount();
     إذا لم يكن الحساب موجودًا أو لم يكن مصفوفة من نوع `acc.notifications`، فسيتم إرجاع القيمة 0.
     return acc.notifications.filter((n) => !n.read).length;
   }
 
-  دالة getMonitorItems() {
+  function getMonitorItems() {
     const acc = getCurrentAccount();
     إذا لم يكن الحساب موجودًا أو لم يكن مصفوفة، فسيتم إرجاع مصفوفة فارغة.
     return [...acc.notifications].sort((a, b) => Number(b.at) - Number(a.at));
   }
 
-  دالة فتح المنزل() {
+  function فتح المنزل() {
     state.selectedUserId = null;
     state.selectedPrivatePeerId = state.selectedPrivatePeerId || null;
     setView('home');
   }
 
-  دالة إغلاق الدرج() {
+  function إغلاق الدرج() {
     إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
     els.menuDrawer.classList.add('is-hidden');
     els.menuDrawer.setAttribute('aria-hidden', 'true');
