@@ -697,20 +697,22 @@
     إذا كان (els.app) els.app.dataset.view = viewName;
     closeDrawer();
 
-    إذا كان اسم العرض يساوي 'الرئيسية' {
-      renderHomeView();
-      els.publicMessageInput?.focus?.();
-    } else if (viewName === 'profile') {
-      renderProfileView();
-      els.profileName?.focus?.();
-    } else if (viewName === 'private') {
-      renderPrivateChatsList();
-      renderPrivateConversation();
-      els.privateMessageInput?.focus?.();
-    } else if (viewName === 'user') {
-      renderUserView();
-    }
-  }
+if (viewName === 'home') {
+  renderHomeView();
+  els.publicMessageInput?.focus?.();
+
+} else if (viewName === 'profile') {
+  renderProfileView();
+  els.profileName?.focus?.();
+
+} else if (viewName === 'private') {
+  renderPrivateChatsList();
+  renderPrivateConversation();
+  els.privateMessageInput?.focus?.();
+
+} else if (viewName === 'user') {
+  renderUserView();
+}
 
   دالة فتح لوحة المراقبة() {
     إذا لم يكن بالإمكان استخدام الجلسة الحالية، فقم بالخروج.
