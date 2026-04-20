@@ -741,14 +741,11 @@
 
     if (viewName === "home") {
       renderHomeView();
-      els.publicMessageInput?.focus?.();
     } else if (viewName === "profile") {
       renderProfileView();
-      els.profileName?.focus?.();
     } else if (viewName === "private") {
       renderPrivateChatsList();
       renderPrivateConversation();
-      els.privateMessageInput?.focus?.();
     } else if (viewName === "user") {
       renderUserView();
     }
