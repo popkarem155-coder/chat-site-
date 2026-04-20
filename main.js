@@ -116,6 +116,8 @@ if (avatarUrl) {
 
 }
 
+/* ========================= 💾 STORAGE SYSTEM ========================= */
+
 function readStorage() { state.accounts = safeJSONParse(localStorage.getItem(KEYS.accounts), []); state.publicMessages = safeJSONParse(localStorage.getItem(KEYS.publicMessages), []); state.privateThreads = safeJSONParse(localStorage.getItem(KEYS.privateThreads), {}); }
 
 function writeStorage() { try { localStorage.setItem(KEYS.accounts, safeJSONStringify(state.accounts, "[]")); localStorage.setItem(KEYS.publicMessages, safeJSONStringify(state.publicMessages, "[]")); localStorage.setItem(KEYS.privateThreads, safeJSONStringify(state.privateThreads, "{}"));
@@ -192,6 +194,8 @@ state.privateThreads[key] = thread;
 return thread;
 
 }
+
+/* ========================= 🔐 AUTH SYSTEM ========================= */
 
 function seedGuestAccount() { const guestSeed = safeJSONParse(localStorage.getItem(KEYS.guestSeed), null) || { id: createId("acc"), createdAt: now(), };
 
@@ -403,6 +407,8 @@ setTimeout(() => {
 }
 
 function getCurrentPublicMessages() { return Array.isArray(state.publicMessages) ? state.publicMessages : []; }
+
+/* ========================= 💬 CHAT SYSTEM ========================= */
 
 function addPublicMessage(text, senderId = null, senderLabel = "مستخدم") { const message = { id: createId("msg"), senderId, senderLabel: senderLabel || "مستخدم", text: normalizeText(text), at: now(), };
 
@@ -663,6 +669,8 @@ markActivity();
 return true;
 
 }
+
+/* ========================= 🎨 UI RENDERING ========================= */
 
 function renderShellState() { const current = getCurrentAccount(); const online = isCurrentAccountOnline(); const featured = isCurrentAccountFeatured();
 
@@ -1307,6 +1315,8 @@ function handleAppTitleClick() { location.reload(); }
 
 function handlePrivateShortcutClick() { openPrivateChat(state.selectedPrivatePeerId || getPrivateChatsForCurrentUser()[0]?.peerId || null, true); }
 
+/* ========================= ⚡ EVENTS SYSTEM ========================= */
+
 function attachEvents() { if (els.menuBtn) { els.menuBtn.addEventListener("click", (event) => { event.stopPropagation(); if (!els.menuDrawer) return; els.menuDrawer.classList.toggle("is-hidden"); els.menuDrawer.setAttribute( "aria-hidden", els.menuDrawer.classList.contains("is-hidden") ? "true" : "false" ); }); }
 
 if (!window.__drawerClickAttached) {
@@ -1485,6 +1495,8 @@ prunePrivateThreads();
 writeStorage();
 
 }
+
+/* ========================= 🧠 APP CORE ========================= */
 
 async function init() { cacheElements(); createMonitorPanel(); initLocalData(); attachEvents(); setupIntervals(); renderAll(); openHome(); await tryBindExternalDB(); if (canUseCurrentSession()) markActivity(); }
 
