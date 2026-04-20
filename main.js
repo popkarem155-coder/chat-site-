@@ -124,27 +124,27 @@
     return `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط© ظˆ${دقائق} ط¯ظ‚ظٹظ‚ط©`;
   }
 
-  دالة getAccounts() {
+  function getAccounts() {
     return Array.isArray(state.accounts) ? state.accounts : [];
   }
 
-  دالة getAccountById(id) {
+  function getAccountById(id) {
     return getAccounts().find((acc) => acc.id === id) || null;
   }
 
-  دالة getAccountByUsername(اسم المستخدم) {
+  function getAccountByUsername(اسم المستخدم) {
     const key = normalizeText(username).toLowerCase();
     إذا لم يكن المفتاح موجودًا، فأرجع قيمة فارغة.
     return getAccounts().find((acc) => normalizeText(acc.username).toLowerCase() === key) || null;
   }
 
-  دالة getDisplayName(account) {
+  function getDisplayName(account) {
     إذا قام (!الحساب) بإرجاع 'ظ…ط³طھط®ط¯ظ…';
     const name = clampText(account.profile?.name || account.username || 'ظ…ط³طھط®ط¯ظ…', 40);
     اسم الإرجاع || 'ظ…ط³طھط®ط¯ظ…';
   }
 
-  دالة getAvatarInitial(account) {
+  function getAvatarInitial(account) {
     const name = getDisplayName(account);
     اسم العودة؟ name[0] : 'طں';
   }
