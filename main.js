@@ -1588,26 +1588,25 @@ function attachEvents() {
   });
 
   window.addEventListener('storage', () => {
-    readStorage();
-    ensureCurrentAccount();
-    renderAll();
-  });
-                                            }    }
-  }
-
-  دالة معالجة النقر على عنوان التطبيق () {
-    location.reload();
-  }
-
-  دالة معالجة نقرة الاختصار الخاص() {
-    افتح العرض الخاص بدون نظير();
-  }
-
-  دالة attachEvents() {
-  els.menuBtn?.addEventListener('click', () => {
-  if (!els.menuDrawer) return;
-  els.menuDrawer.classList.toggle('is-hidden');
+  readStorage();
+  ensureCurrentAccount();
+  renderAll();
 });
+  
+  function handleAppTitleClick() {
+  location.reload();
+}
+
+function handlePrivateShortcutClick() {
+  openPrivateViewWithoutPeer();
+}
+
+function attachEvents() {
+  els.menuBtn?.addEventListener('click', () => {
+    if (!els.menuDrawer) return;
+    els.menuDrawer.classList.toggle('is-hidden');
+  });
+}
     els.appTitleBtn?.addEventListener('click', handleAppTitleClick);
     els.privateShortcutBtn?.addEventListener('click', handlePrivateShortcutClick);
 
