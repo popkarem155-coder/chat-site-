@@ -149,21 +149,21 @@
     اسم العودة؟ name[0] : 'طں';
   }
 
-  دالة getCurrentSession() {
+  function getCurrentSession() {
     return safeJSONParse(localStorage.getItem(KEYS.currentSession), null);
   }
 
-  دالة isSessionExpired(session) {
+  function isSessionExpired(session) {
     إذا لم تكن هناك جلسة أو لم تكن الجلسة تنتهي صلاحيتها، فسيتم إرجاع القيمة true.
     return now() > Number(session.expiresAt);
   }
 
-  دالة getCurrentAccount() {
+  function getCurrentAccount() {
     إذا لم يكن (state.currentAccountId) موجودًا، فسيتم إرجاع قيمة فارغة (null).
     return getAccountById(state.currentAccountId);
   }
 
-  دالة isCurrentAccountOnline() {
+  function isCurrentAccountOnline() {
     const acc = getCurrentAccount();
     إذا لم يكن الحساب موجودًا، فأرجع خطأ.
     const session = getCurrentSession();
@@ -173,7 +173,7 @@
     return now() - lastSeen <= CONFIG.ONLINE_WINDOW_MS;
   }
 
-  دالة isCurrentAccountFeatured() {
+  function isCurrentAccountFeatured() {
     const acc = getCurrentAccount();
     إذا لم يكن الحساب موجودًا، فأرجع خطأ.
     إذا لم يكن الحساب الحالي متصلاً بالإنترنت، فسيتم إرجاع القيمة false.
@@ -183,7 +183,7 @@
     إرجاع المجموع >= CONFIG.FEATURED_WINDOW_MS;
   }
 
-  دالة getActiveDurationForAccount(acc) {
+  function getActiveDurationForAccount(acc) {
     إذا لم يكن الحساب صحيحًا، فأرجع 0.
     const session = getCurrentSession();
     إذا كانت الجلسة موجودة وكان معرف الحساب الخاص بها يساوي معرف الحساب ولم تكن الجلسة منتهية الصلاحية،
@@ -192,7 +192,7 @@
     أرجع الرقم (acc.totalActiveMs || 0)؛
   }
 
-  دالة setAvatar(el, account, fallbackLabel = 'طں') {
+  function setAvatar(el, account, fallbackLabel = 'طں') {
     إذا لم يكن العنصر موجودًا، فقم بالخروج.
     const initial = account ? getAvatarInitial(account) : fallbackLabel;
     const avatarUrl = account?.profile?.avatar || '';
@@ -243,14 +243,14 @@
     }
   }
 
-  دالة prunePublicMessages() {
+  function prunePublicMessages() {
     إذا لم تكن `state.publicMessages` مصفوفة، فسيتم تعيينها إلى `[]`.
     إذا كان طول الرسائل العامة في الحالة أكبر من الحد الأقصى المسموح به للرسائل العامة في الإعدادات {
       state.publicMessages = state.publicMessages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
     }
   }
 
-  دالة pruneNotifications(acc) {
+  function pruneNotifications(acc) {
     إذا لم يكن الحساب موجودًا، فقم بالخروج.
     إذا لم تكن `acc.notifications` مصفوفة، فسيتم تعيينها إلى `[]`.
     إذا كان عدد الإشعارات في الحساب أكبر من الحد الأقصى للإشعارات المحددة في الإعدادات {
@@ -258,7 +258,7 @@
     }
   }
 
-  دالة normalizeThread(thread) {
+  function normalizeThread(thread) {
     إذا لم يكن هناك خيط (thread) أو كان نوع الخيط (thread) ليس كائنًا (object)، فسيتم إرجاع قيمة فارغة (null).
     const messages = Array.isArray(thread.messages) ? thread.messages : [];
     يعود {
@@ -268,7 +268,7 @@
     };
   }
 
-  دالة prunePrivateThreads() {
+  function prunePrivateThreads() {
     const cleaned = {};
     Object.entries(state.privateThreads || {}).forEach(([key, thread]) => {
       const t = normalizeThread(thread);
@@ -282,11 +282,11 @@
     state.privateThreads = cleaned;
   }
 
-  دالة getThreadKey(a, b) {
+  function getThreadKey(a, b) {
     return [a, b].sort().join('__');
   }
 
-  دالة getThread(a, b, createIfMissing = false) {
+  function getThread(a, b, createIfMissing = false) {
     إذا لم يكن (أ || لم يكن ب) فأرجع قيمة فارغة؛
     const key = getThreadKey(a, b);
     let thread = normalizeThread(state.privateThreads[key]);
