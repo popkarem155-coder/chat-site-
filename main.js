@@ -1504,7 +1504,90 @@
       state.selectedPrivatePeerId = chats[0].peerId;
       renderPrivateConversation();
       renderPrivateChatsList();
+function attachEvents() {
+  els.menuBtn?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (!els.menuDrawer) return;
+    els.menuDrawer.classList.toggle('is-hidden');
+    els.menuDrawer.setAttribute(
+      'aria-hidden',
+      els.menuDrawer.classList.contains('is-hidden') ? 'true' : 'false'
+    );
+  });
+
+  document.addEventListener('click', (event) => {
+    const drawer = els.menuDrawer;
+    if (!drawer || drawer.classList.contains('is-hidden')) return;
+
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+
+    const insideDrawer = drawer.contains(target);
+    const insideMenuBtn = els.menuBtn?.contains(target);
+
+    if (!insideDrawer && !insideMenuBtn) {
+      drawer.classList.add('is-hidden');
+      drawer.setAttribute('aria-hidden', 'true');
     }
+  });
+
+  els.appTitleBtn?.addEventListener('click', handleAppTitleClick);
+  els.privateShortcutBtn?.addEventListener('click', handlePrivateShortcutClick);
+
+  els.publicMessageForm?.addEventListener('submit', handlePublicSubmit);
+  els.privateMessageForm?.addEventListener('submit', handlePrivateSubmit);
+  els.profileForm?.addEventListener('submit', handleProfileSave);
+  els.profileImageInput?.addEventListener('change', handleProfileImagePick);
+
+  els.openMyProfileFromMenu?.addEventListener('click', openSelfProfile);
+  els.drawerProfileBtn?.addEventListener('click', openSelfProfile);
+  els.drawerMonitorBtn?.addEventListener('click', openMonitorPanel);
+  els.profileMonitorBtn?.addEventListener('click', openMonitorPanel);
+
+  els.drawerSettingsBtn?.addEventListener('click', () => {
+    showToast('الإعدادات هتتضاف لاحقًا.');
+  });
+
+  els.drawerLogoutBtn?.addEventListener('click', () => {
+    if (!getCurrentAccount()) {
+      showToast('لا يوجد حساب نشط.');
+      return;
+    }
+    logoutCurrentAccount(true);
+  });
+
+  els.backFromProfileBtn?.addEventListener('click', () => openHome());
+  els.closeProfileBtn?.addEventListener('click', () => openHome());
+  els.backFromPrivateBtn?.addEventListener('click', () => openHome());
+  els.backFromUserViewBtn?.addEventListener('click', () => openHome());
+  els.closeUserViewBtn?.addEventListener('click', () => openHome());
+
+  els.startPrivateChatBtn?.addEventListener('click', () => {
+    const targetId = els.startPrivateChatBtn?.dataset?.targetId;
+    if (!targetId) return;
+    openPrivateChat(targetId, true);
+  });
+
+  els.userSearchInput?.addEventListener('input', () => {
+    renderUserSearchResults();
+  });
+
+  els.publicMessageInput?.addEventListener('focus', () => markActivity());
+  els.privateMessageInput?.addEventListener('focus', () => markActivity());
+
+  const activityEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'mousemove'];
+  activityEvents.forEach((type) => {
+    document.addEventListener(type, () => {
+      if (canUseCurrentSession()) markActivity();
+    }, { passive: true });
+  });
+
+  window.addEventListener('storage', () => {
+    readStorage();
+    ensureCurrentAccount();
+    renderAll();
+  });
+                                            }    }
   }
 
   دالة معالجة النقر على عنوان التطبيق () {
@@ -1529,66 +1612,7 @@
     els.profileImageInput?.addEventListener('change', handleProfileImagePick);
 
     els.openMyProfileFromMenu?.addEventListener('click', openSelfProfile);
-    els.drawerProfileBtn?.addEventListener('click', openSelfProfile);
-    els.drawerMonitorBtn?.addEventListener('click', openMonitorPanel);
-    els.profileMonitorBtn?.addEventListener('click', openMonitorPanel);
 
-    els.drawerSettingsBtn?.addEventListener('click', () => {
-      showToast('ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ ظ‡طھطھط¶ط§ظپ ظ„ط§طظ‚ظ‹ط§.');
-    });
-
-    els.drawerLogoutBtn?.addEventListener('click', () => {
-      إذا لم يكن الحساب الحالي موجودًا {
-        showToast('ظ„ط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.');
-        يعود؛
-      }
-      تسجيل الخروج من الحساب الحالي (صحيح)؛
-    });
-
-    els.backFromProfileBtn?.addEventListener('click', () => openHome());
-    els.closeProfileBtn?.addEventListener('click', () => openHome());
-    els.backFromPrivateBtn?.addEventListener('click', () => openHome());
-    els.backFromUserViewBtn?.addEventListener('click', () => openHome());
-    els.closeUserViewBtn?.addEventListener('click', () => openHome());
-
-    els.startPrivateChatBtn?.addEventListener('click', () => {
-      const targetId = els.startPrivateChatBtn?.dataset?.targetId;
-      إذا لم يكن (targetId) موجودًا، فقم بالخروج؛
-      فتح المحادثة الخاصة (معرف الهدف، صحيح)؛
-    });
-
-    els.userSearchInput?.addEventListener('input', () => {
-      renderUserSearchResults();
-    });
-
-    els.publicMessageInput?.addEventListener('focus', () => markActivity());
-    els.privateMessageInput?.addEventListener('focus', () => markActivity());
-
-    document.addEventListener('click', (event) => {
-      const draw = els.menuDrawer;
-      إذا لم يكن الدرج موجودًا أو كانت قائمة فئات الدرج تحتوي على "is-hidden"، فسيتم إنهاء العملية.
-
-      const target = event.target;
-      إذا لم يكن الهدف من نوع Node، فقم بالخروج.
-
-      const insideDrawer = drawer.contains(target);
-      const insideMenuBtn = els.menuBtn?.contains(target);
-      إذا لم يكن العنصر داخل الدرج أو زر القائمة، فسيتم إغلاق الدرج.
-    });
-
-    const activityEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'mousemove'];
-    activityEvents.forEach((type) => {
-      document.addEventListener(type, () => {
-        إذا كان بالإمكان استخدام الجلسة الحالية، فقم بتحديد النشاط.
-      }, { passive: true });
-    });
-
-    window.addEventListener('storage', () => {
-      readStorage();
-      تأكد من الحساب الحالي();
-      استدعاء الكل();
-    });
-  }
 
   دالة إنشاء لوحة المراقبة() {
     إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
