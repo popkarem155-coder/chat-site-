@@ -114,7 +114,7 @@
     return `ظ…ظ†ط° ${Math.floor(diff / day)} ظٹظˆظ…`;
   }
 
-  دالة تسمية المدة (مللي ثانية) {
+  function تسمية المدة (مللي ثانية) {
     const totalMinutes = Math.floor(Math.max(0, ms) / 60000);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
