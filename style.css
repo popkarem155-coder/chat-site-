@@ -101,18 +101,17 @@ background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02))
 
 .user-row { display:grid; grid-template-columns:40px 1fr 16px; gap:10px; padding:10px; border-radius:16px; }
 
-/* ========================= FIX LAYOUT RESET ========================= */
-
 * {
   box-sizing: border-box;
 }
+
+/* ========================= FIX LAYOUT RESET ========================= */
 
 .topbar {
   height: var(--header-h);
   display: grid;
   grid-template-columns: 54px 1fr 54px;
   align-items: center;
-  justify-content: unset;
 }
 
 #app {
