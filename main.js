@@ -228,11 +228,11 @@ function timeAgo(ts) {
     }
   }
 
-  دالة قراءة وحدة التخزين() {
-    state.accounts = safeJSONParse(localStorage.getItem(KEYS.accounts), []);
-    state.publicMessages = safeJSONParse(localStorage.getItem(KEYS.publicMessages), []);
-    state.privateThreads = safeJSONParse(localStorage.getItem(KEYS.privateThreads), {});
-  }
+function readStorage() {
+  state.accounts = safeJSONParse(localStorage.getItem(KEYS.accounts), []);
+  state.publicMessages = safeJSONParse(localStorage.getItem(KEYS.publicMessages), []);
+  state.privateThreads = safeJSONParse(localStorage.getItem(KEYS.privateThreads), {});
+}
 
 function writeStorage() {
   try {
@@ -393,7 +393,7 @@ function writeStorage() {
     ضيف عائد؛
   }
 
-  دالة إنشاء حساب (اسم المستخدم، كلمة المرور = '') {
+  function إنشاء حساب (اسم المستخدم، كلمة المرور = '') {
     const name = clampText(username, CONFIG.MAX_NAME_LENGTH);
     const pass = String(password || '').trim();
     const existing = getAccountByUsername(name);
@@ -450,7 +450,7 @@ function writeStorage() {
     }
   }
 
-  دالة commitCurrentSession(force = false) {
+  function commitCurrentSession(force = false) {
     const acc = getCurrentAccount();
     إذا لم يكن الحساب {
       localStorage.removeItem(KEYS.currentSession);
@@ -635,7 +635,7 @@ function writeStorage() {
     إرجاع الرسالة؛
   }
 
-  دالة إشعار عرض الملف الشخصي (معرف الحساب المستهدف، تسمية العارض، معرف العارض = لا شيء) {
+  function إشعار عرض الملف الشخصي (معرف الحساب المستهدف، تسمية العارض، معرف العارض = لا شيء) {
     const target = getAccountById(targetAccountId);
     إذا لم يكن الهدف موجودًا، فقم بالخروج.
     إذا كان (viewerId && viewerId === targetAccountId) فارجع؛
@@ -687,13 +687,13 @@ function writeStorage() {
     els.menuDrawer.setAttribute('aria-hidden', 'true');
   }
 
-  دالة فتح الدرج() {
+  function فتح الدرج() {
     إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
     els.menuDrawer.classList.remove('is-hidden');
     els.menuDrawer.setAttribute('aria-hidden', 'false');
   }
 
-  دالة تبديل الدرج() {
+  function تبديل الدرج() {
     إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
     if (els.menuDrawer.classList.contains('is-hidden')) openDrawer();
     وإلا أغلق الدرج.
@@ -734,7 +734,7 @@ if (viewName === 'home') {
   renderUserView();
 }
 
-  دالة فتح لوحة المراقبة() {
+  function فتح لوحة المراقبة() {
     إذا لم يكن بالإمكان استخدام الجلسة الحالية، فقم بالخروج.
     افتح الدرج();
     markCurrentNotificationsRead();
@@ -744,7 +744,7 @@ if (viewName === 'home') {
     }
   }
 
-  دالة فتح الملف الشخصي() {
+  function فتح الملف الشخصي() {
     إذا لم يكن بالإمكان استخدام الجلسة الحالية، فقم بالخروج.
     state.selectedUserId = null;
     setView('profile');
@@ -758,13 +758,13 @@ if (viewName === 'home') {
       يعود؛
     }
 
-    const current = getCurrentAccount();
-    const viewerLabel = current ? getDisplayName(current) : 'ط²ط§ط¦ط±';
+const current = getCurrentAccount();
+const viewerLabel = current ? getDisplayName(current) : 'زائر';
 
-    إذا كان (الحالي && معرف الحالي يساوي معرف الهدف) {
-      فتح الملف الشخصي();
-      يعود؛
-    }
+if (current && current.id === targetId) {
+  openProfile();
+  return;
+}
 
     state.selectedUserId = target.id;
     notifyProfileViewed(target.id, viewerLabel, current?.id || null);
@@ -773,16 +773,18 @@ if (viewName === 'home') {
     renderMonitorPanel();
   }
 
-  دالة فتح ملف تعريف الحساب بواسطة المعرف(معرف المستخدم) {
-    فتح ملف تعريف المستخدم بواسطة المعرف(معرف المستخدم)؛
-  }
+function openAccountProfileById(userId) {
+  openUserProfileById(userId);
+}
 
-  دالة فتح محادثة خاصة (معرف النظير، صامت = خطأ) {
-    const peer = getAccountById(peerId);
-    إذا لم يكن هناك نظير {
-      if (!silent) showToast('ط§ظ„ط´ط®طµ ط¯ظ‡ ط;ظٹط± ظ…ظˆط¬ظˆط¯.');
-      يعود؛
-    }
+function openPrivateChat(peerId, silent = false) {
+  const peer = getAccountById(peerId);
+
+  if (!peer) {
+    if (!silent) showToast('الشخص ده غير موجود.');
+    return;
+  }
+}
 
     state.selectedPrivatePeerId = peer.id;
     state.selectedUserId = null;
