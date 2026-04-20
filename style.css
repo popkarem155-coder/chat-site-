@@ -121,8 +121,8 @@ background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02))
 .drawer{
   z-index: 9999;
 }
-
 .page{
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 /* باقي الملف بدون تغيير */
