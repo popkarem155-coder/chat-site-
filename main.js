@@ -1517,6 +1517,7 @@
 
   دالة attachEvents() {
   els.menuBtn?.addEventListener('click', () => {
+  if (!els.menuDrawer) return;
   els.menuDrawer.classList.toggle('is-hidden');
 });
     els.appTitleBtn?.addEventListener('click', handleAppTitleClick);
