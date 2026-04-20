@@ -220,6 +220,10 @@
     }
   }
 
+  /* =========================
+     💾 STORAGE SYSTEM
+  ========================= */
+
   function readStorage() {
     state.accounts = safeJSONParse(localStorage.getItem(KEYS.accounts), []);
     state.publicMessages = safeJSONParse(localStorage.getItem(KEYS.publicMessages), []);
@@ -319,6 +323,10 @@
     state.privateThreads[key] = thread;
     return thread;
   }
+
+  /* =========================
+     🔐 AUTH SYSTEM
+  ========================= */
 
   function seedGuestAccount() {
     const guestSeed =
@@ -550,6 +558,10 @@
   function getCurrentPublicMessages() {
     return Array.isArray(state.publicMessages) ? state.publicMessages : [];
   }
+
+  /* =========================
+     💬 CHAT SYSTEM
+  ========================= */
 
   function addPublicMessage(text, senderId = null, senderLabel = "مستخدم") {
     const message = {
@@ -852,6 +864,10 @@
     markActivity();
     return true;
   }
+
+  /* =========================
+     🎨 UI RENDERING
+  ========================= */
 
   function renderShellState() {
     const current = getCurrentAccount();
@@ -1538,6 +1554,10 @@
     openPrivateChat(state.selectedPrivatePeerId || getPrivateChatsForCurrentUser()[0]?.peerId || null, true);
   }
 
+  /* =========================
+     ⚡ EVENTS SYSTEM
+  ========================= */
+
   function attachEvents() {
     if (els.menuBtn) {
       els.menuBtn.addEventListener("click", (event) => {
@@ -1553,7 +1573,6 @@
 
     if (!window.__drawerClickAttached) {
       window.__drawerClickAttached = true;
-
       document.addEventListener("click", (event) => {
         const drawer = els.menuDrawer;
         if (!drawer || drawer.classList.contains("is-hidden")) return;
@@ -1729,6 +1748,10 @@
     prunePrivateThreads();
     writeStorage();
   }
+
+  /* =========================
+     🧠 APP CORE
+  ========================= */
 
   async function init() {
     cacheElements();
