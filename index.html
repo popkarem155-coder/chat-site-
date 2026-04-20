@@ -10,11 +10,12 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="app-shell">
-  <div id="app" class="app" data-view="home">
-    <header class="topbar">
-      <button id="privateShortcutBtn" class="icon-btn icon-btn-left" type="button" aria-label="الرسائل الخاصة">
-        <span class="icon">✉</span>
-      </button><button id="appTitleBtn" class="brand-btn" type="button" aria-label="تحديث الشات">
+  <div id="app" class="app" data-view="home"><header class="topbar">
+  <button id="privateShortcutBtn" class="icon-btn icon-btn-left" type="button" aria-label="الرسائل الخاصة">
+    <span class="icon">✉</span>
+  </button>
+
+  <button id="appTitleBtn" class="brand-btn" type="button" aria-label="تحديث الشات">
     <span class="brand-text">شات نار</span>
   </button>
 
@@ -35,6 +36,7 @@
 </section>
 
 <main id="homeView" class="home-view">
+
   <section class="panel panel-soft" aria-labelledby="onlineUsersTitle">
     <div class="panel-head">
       <h2 id="onlineUsersTitle">المتصلين الآن</h2>
@@ -71,6 +73,7 @@
       <button id="publicSendBtn" class="composer-send" type="submit">إرسال</button>
     </form>
   </section>
+
 </main>
 
   </div>  <aside id="menuDrawer" class="drawer is-hidden" aria-hidden="true">
@@ -277,6 +280,5 @@
 
   </section>  <noscript>
     <div class="noscript-banner">لازم تفعيل JavaScript عشان الشات يشتغل.</div>
-  </noscript><script src="main.js"></script>
-</body>
+  </noscript>  <script src="main.js"></script></body>
 </html>
