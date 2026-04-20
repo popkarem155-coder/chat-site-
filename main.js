@@ -2,10 +2,10 @@
   "use strict";
 
   const KEYS = {
-    الحسابات: 'kareem3_accounts'،
-    الرسائل العامة: 'kareem3_publicMessages',
+    الحسابات: 'kareem3_accounts',
+    الرسائل_العامة: 'kareem3_publicMessages',
     privateThreads: 'kareem3_privateThreads',
-    الجلسة الحالية: 'kareem3_currentSession',
+    الجلسة_الحالية: 'kareem3_currentSession',
     guestSeed: 'kareem3_guestSeed',
   };
 
@@ -14,14 +14,14 @@
     ONLINE_WINDOW_MS: 15 * 60 * 1000,
     FEATURED_WINDOW_MS: 2 * 60 * 60 * 1000,
     PUBLIC_MESSAGE_CAP: 70,
-    الحد الأقصى للإشعارات: 20
+    MAX_NOTIFICATIONS: 20,
     TOAST_MS: 2400,
-    الحد الأقصى لطول الاسم: 40،
+    MAX_NAME_LENGTH: 40,
   };
 
   const state = {
     الحسابات: [],
-    الرسائل العامة: [],
+    الرسائل_العامة: [],
     privateThreads: {},
     currentAccountId: null,
     selectedPrivatePeerId: null,
@@ -31,75 +31,77 @@
     toastHostEl: null,
     activitySaveTimer: null,
     intervalTimer: null,
-    عرض: 'الرئيسية'،
-    استعلام البحث: '',
-    قاعدة البيانات الخارجية: لا شيء،
+    view: 'الرئيسية',
+    searchQuery: '',
+    externalDB: null,
   };
 
   const els = {};
 
-  دالة $(id) {
+  function $(id) {
     return document.getElementById(id);
   }
 
-  دالة الآن() {
-    أعد التاريخ الحالي.
+  function now() {
+    return new Date();
   }
 
-  دالة safeJSONParse(value, fallback) {
-    يحاول {
-      إذا كانت القيمة فارغة أو غير معرّفة أو فارغة، فأرجع القيمة الافتراضية.
-      أعد JSON.parse(value)؛
-    } يمسك {
-      العودة إلى الوضع الافتراضي؛
+  function safeJSONParse(value, fallback) {
+    try {
+      if (!value) return fallback;
+      return JSON.parse(value);
+    } catch {
+      return fallback;
     }
   }
 
-  دالة safeJSONStringify(value, fallback = '{}') {
-    يحاول {
-      أعد JSON.stringify(value)؛
-    } يمسك {
-      العودة إلى الوضع الافتراضي؛
+  function safeJSONStringify(value, fallback = '{}') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return fallback;
     }
   }
 
-  دالة normalizeText(value) {
+  function normalizeText(value) {
     return String(value ?? '').trim().replace(/\s+/g, ' ');
   }
 
-  دالة clampText(value, max = CONFIG.MAX_NAME_LENGTH) {
+  function clampText(value, max = CONFIG.MAX_NAME_LENGTH) {
     return normalizeText(value).slice(0, max);
   }
 
-  دالة إنشاء المعرف (البادئة = 'id') {
+  function createId(prefix = 'id') {
     return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   }
 
-  دالة hashString(str) {
-    ليكن h = 0؛
+  function hashString(str) {
+    let h = 0;
     const s = String(str || '');
     for (let i = 0; i < s.length; i++) {
       h = (h << 5) - h + s.charCodeAt(i);
       h |= 0;
     }
-    أرجع القيمة المطلقة لـ h.
+    return Math.abs(h);
   }
 
-  دالة تلوين النص (نص) {
+  function colorFromText(text) {
     const h = hashString(text) % 360;
-    return `hsl(${h} 35% 28%)`);
+    return `hsl(${h} 35% 28%)`;
   }
 
-  دالة تنسيق الساعة(ts) {
-    يحاول {
+  function formatTime(ts) {
+    try {
       return new Date(ts).toLocaleTimeString('ar-EG', {
-        الساعة: رقمان،
-        دقيقة: "رقمين"،
+        hour: '2-digit',
+        minute: '2-digit',
       });
-    } يمسك {
-      يعود ''؛
+    } catch {
+      return '';
     }
   }
+
+})();
 
   دالة timeAgo(ts) {
     const diff = Math.max(0, now() - Number(ts || 0));
