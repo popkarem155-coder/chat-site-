@@ -1028,17 +1028,13 @@ a {
 
 .search-row {
   width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-
+  margin: 0;
+  box-sizing: border-box;
   border: 1px solid var(--border);
   background: rgba(20, 24, 35, 0.92);
-  border-radius: 16px;
-
-  padding: 6px 10px;
-
-  display: flex;
-  align-items: center;
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: var(--shadow);
 }
 
 .search-input {
