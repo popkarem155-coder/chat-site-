@@ -679,7 +679,7 @@
     وإلا أغلق الدرج.
   }
 
-  دالة setView(viewName) {
+  function setView(viewName) {
     state.view = viewName;
 
     const sections = {
@@ -813,7 +813,7 @@
     أعد القيمة true؛
   }
 
-  دالة renderShellState() {
+  function renderShellState() {
     const current = getCurrentAccount();
     const online = isCurrentAccountOnline();
     const featured = isCurrentAccountFeatured();
@@ -907,7 +907,7 @@
     إرجاع المقالة؛
   }
 
-  دالة renderPublicMessages() {
+  function renderPublicMessages() {
     إذا لم تكن الرسائل العامة موجودة، فقم بالخروج.
     els.publicMessages.innerHTML = '';
 
@@ -927,7 +927,7 @@
     els.publicMessages.scrollTop = els.publicMessages.scrollHeight;
   }
 
-  دالة renderOnlineUsers() {
+  function renderOnlineUsers() {
     إذا لم تكن قائمة المستخدمين المتصلين (els.onlineUsersList) أو لم تكن فارغة (els.onlineUsersEmpty)، فقم بالخروج.
 
     const list = [];
@@ -976,7 +976,7 @@
     });
   }
 
-  دالة renderFeaturedUsers() {
+  function renderFeaturedUsers() {
     إذا لم تكن قائمة المستخدمين المميزين (els.featuredUsersList) فارغة أو لم تكن فارغة (els.featuredUsersEmpty)، فقم بالخروج.
 
     const list = [];
@@ -1029,7 +1029,7 @@
     });
   }
 
-  دالة renderHomeView() {
+  function renderHomeView() {
     renderShellState();
     renderPublicMessages();
     renderOnlineUsers();
@@ -1039,7 +1039,7 @@
     renderUserSearchResults();
   }
 
-  دالة renderProfileView() {
+  function renderProfileView() {
     const current = getCurrentAccount();
     إذا لم يكن (الحالي) فارجع؛
 
@@ -1062,7 +1062,7 @@
     }
   }
 
-  دالة renderPrivateChatsList() {
+  function renderPrivateChatsList() {
     إذا لم تكن قائمة المحادثات الخاصة (els.privateChatsList) فارغة، فقم بالخروج.
 
     const current = getCurrentAccount();
@@ -1126,7 +1126,7 @@
     });
   }
 
-  دالة renderPrivateConversation() {
+  function renderPrivateConversation() {
     if (!els.privateMessages || !els.privateChatTitle || !els.privateChatMeta || !els.privateChatAvatar) return;
 
     const current = getCurrentAccount();
@@ -1189,7 +1189,7 @@
     els.privateMessages.scrollTop = els.privateMessages.scrollHeight;
   }
 
-  دالة renderUserView() {
+  function renderUserView() {
     const target = getAccountById(state.selectedUserId);
     إذا لم يكن الهدف موجودًا {
       if (els.userViewTitle) els.userViewTitle.textContent = 'ظ…ظ„ظپ ط§ظ„ظ…ط³طھط®ط¯ظ…';
@@ -1228,7 +1228,7 @@
     }
   }
 
-  دالة renderMonitorPanel() {
+  function renderMonitorPanel() {
     إذا لم تكن حالة لوحة المراقبة موجودة، فقم بالخروج.
 
     const current = getCurrentAccount();
@@ -1288,7 +1288,7 @@
     });
   }
 
-  دالة renderUserSearchResults() {
+  function renderUserSearchResults() {
     إذا لم تكن هناك نتائج بحث للمستخدم أو عدد نتائج البحث، فقم بالخروج.
 
     const current = getCurrentAccount();
@@ -1363,12 +1363,12 @@
     });
   }
 
-  دالة renderMonitorPanelIfNeeded() {
+  function renderMonitorPanelIfNeeded() {
     إذا لم تكن حالة لوحة المراقبة موجودة، فقم بالخروج.
     renderMonitorPanel();
   }
 
-  دالة renderAll() {
+  function renderAll() {
     renderShellState();
     renderHomeView();
     renderProfileView();
@@ -1379,7 +1379,7 @@
     renderUserSearchResults();
   }
 
-  دالة handleProfileSave(event) {
+  function handleProfileSave(event) {
     event.preventDefault();
 
     const current = getCurrentAccount();
@@ -1425,7 +1425,7 @@
     showToast('طھظ… طظپط¸ ط§ظ„ظ…ظ„ظپ.');
   }
 
-  دالة handleProfileImagePick(event) {
+  function handleProfileImagePick(event) {
     const file = event.target.files?.[0];
     إذا لم يكن الملف موجودًا، فقم بالخروج.
 
@@ -1452,7 +1452,7 @@
     reader.readAsDataURL(file);
   }
 
-  دالة handlePublicSubmit(event) {
+  function handlePublicSubmit(event) {
     event.preventDefault();
     const text = normalizeText(els.publicMessageInput?.value || '');
     إذا لم يكن النص موجودًا {
@@ -1470,7 +1470,7 @@
     markActivity();
   }
 
-  دالة handlePrivateSubmit(event) {
+  function handlePrivateSubmit(event) {
     event.preventDefault();
     const text = normalizeText(els.privateMessageInput?.value || '');
     constpeerId =state.selectedPrivatePeerId;
@@ -1495,7 +1495,7 @@
     markActivity();
   }
 
-  دالة فتح العرض الخاص بدون نظير() {
+  function فتح العرض الخاص بدون نظير() {
     setView('private');
     renderPrivateChatsList();
     renderPrivateConversation();
@@ -1618,7 +1618,7 @@ function attachEvents() {
     els.openMyProfileFromMenu?.addEventListener('click', openSelfProfile);
 
 
-  دالة إنشاء لوحة المراقبة() {
+  function إنشاء لوحة المراقبة() {
     إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
 
     const panel = document.createElement('section');
@@ -1645,7 +1645,7 @@ function attachEvents() {
     state.monitorPanelEl = panel;
   }
 
-  دالة إعداد الفترات الزمنية() {
+  function إعداد الفترات الزمنية() {
     إذا كان (state.intervalTimer) قم بمسح الفاصل الزمني(state.intervalTimer)؛
 
     state.intervalTimer = setInterval(() => {
@@ -1680,7 +1680,7 @@ function attachEvents() {
     }, 30000);
   }
 
-  دالة cacheElements() {
+  function cacheElements() {
     els.app = $('app');
     els.privateShortcutBtn = $('privateShortcutBtn');
     els.appTitleBtn = $('appTitleBtn');
@@ -1772,7 +1772,7 @@ function attachEvents() {
     }
   }
 
-  دالة initLocalData() {
+  function initLocalData() {
     readStorage();
     const guest = ensureCurrentCaccount();
     إذا لم تكن `state.publicMessages` مصفوفة أو كان طولها يساوي صفرًا،
