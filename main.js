@@ -1515,12 +1515,15 @@ function attachEvents() {
     );
   });
 
+ if (!window.__drawerClickAttached) {
+  window.__drawerClickAttached = true;
+
   document.addEventListener('click', (event) => {
     const drawer = els.menuDrawer;
     if (!drawer || drawer.classList.contains('is-hidden')) return;
 
     const target = event.target;
-    if (!(target instanceof Node)) return;
+    if (!target || !(target instanceof Node)) return;
 
     const insideDrawer = drawer.contains(target);
     const insideMenuBtn = els.menuBtn?.contains(target);
@@ -1530,6 +1533,7 @@ function attachEvents() {
       drawer.setAttribute('aria-hidden', 'true');
     }
   });
+ }
 
   els.appTitleBtn?.addEventListener('click', handleAppTitleClick);
   els.privateShortcutBtn?.addEventListener('click', handlePrivateShortcutClick);
