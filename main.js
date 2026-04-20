@@ -364,7 +364,7 @@ function timeAgo(ts) {
     ضيف عائد؛
   }
 
-  دالة تضمن الحساب الحالي() {
+  function تضمن الحساب الحالي() {
     const session = getCurrentSession();
     إذا كانت الجلسة موجودة وكان معرف الحساب الخاص بها موجودًا،
       const acc = getAccountById(session.accountId);
@@ -422,7 +422,7 @@ function timeAgo(ts) {
     إعادة الحساب؛
   }
 
-  دالة تسجيل الدخول إلى الحساب (الحساب) {
+  function تسجيل الدخول إلى الحساب (الحساب) {
     إذا لم يكن هناك حساب، فقم بالخروج؛
 
     const startedAt = now();
@@ -517,14 +517,14 @@ function timeAgo(ts) {
     أعد القيمة true؛
   }
 
-  دالة تضمن المصادقة(الإجراء) {
+  function تضمن المصادقة(الإجراء) {
     // ط§ظ„ظ†ط³ط®ط© ط§ظ„طط§ظ„ظٹط© ط¨ط¯ظˆظ† ط´ط§ط´ط© طھط³ط¬ظٹظ„ ط¯ط®ظˆظ„ ظ…ظ†ظپطμظ„ط©.
     // ظˆ ط§ططھط¬طھ ظ„ط§طظ‚ظ‹ط§طŒ ظٹظ…ظƒظ† طھظپط¹ظٹظ„ظ‡ط§ ظ…ظ† firebase/ظˆط§ط¬ظ‡ط© ظ…ط³طھظ‚ظ„ط©.
     state.pendingAction = action || null;
     أعد canUseCurrentSession();
   }
 
-  دالة عرض رسالة التنبيه (الرسالة) {
+  function عرض رسالة التنبيه (الرسالة) {
     إذا لم تكن خاصية `toastHostEl` موجودة في الحالة، {
       state.toastHostEl = document.createElement('div');
       state.toastHostEl.id = 'toastHost';
