@@ -101,4 +101,28 @@ background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02))
 
 .user-row { display:grid; grid-template-columns:40px 1fr 16px; gap:10px; padding:10px; border-radius:16px; }
 
+/* FIX LAYOUT RESET */
+.topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#app{
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.app{
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.drawer{
+  z-index: 9999;
+}
+
+.page{
+  overflow: hidden;
+}
 /* باقي الملف بدون تغيير */
