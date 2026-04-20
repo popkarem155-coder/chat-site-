@@ -102,7 +102,7 @@
   }
 
 
-  دالة timeAgo(ts) {
+  function timeAgo(ts)
     const diff = Math.max(0, now() - Number(ts || 0));
     const minute = 60 * 1000;
     const hour = 60 * minute;
