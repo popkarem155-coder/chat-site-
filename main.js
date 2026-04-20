@@ -108,24 +108,41 @@
     const hour = 60 * minute;
     const day = 24 * hour;
 
-    إذا (فرق < دقيقة) تُرجع 'ظ…ظ†ط° ظ„طط¸ط§طھ'؛
-    إذا (فرق < ساعة) العودة `ظ…ظ†ط° ${Math.floor(diff / moment)} ط¯ظ‚ظٹظ‚ط©`;
-    إذا كان (الفرق < اليوم) أرجع `ظ…ظ†ط° ${Math.floor(الفرق / الساعة)} ط³ط§ط¹ط©`;
-    return `ظ…ظ†ط° ${Math.floor(diff / day)} ظٹظˆظ…`;
-  }
+
 
   function تسمية المدة (مللي ثانية) {
     const totalMinutes = Math.floor(Math.max(0, ms) / 60000);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    إذا كانت (الساعات <= 0) تُرجع `ظ†ط´ط· ظ…ظ†ط° ${دقائق} ط¯ظ‚ظٹظ‚ط©`;
-    إذا كانت (الدقائق <= 0) تُرجع `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط©`;
-    return `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط© ظˆ${دقائق} ط¯ظ‚ظٹظ‚ط©`;
-  }
+function timeAgo(ts) {
+  const diff = Date.now() - Number(ts || 0);
+
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  if (diff < minute) return 'منذ لحظات';
+  if (diff < hour) return `منذ ${Math.floor(diff / minute)} دقيقة`;
+  if (diff < day) return `منذ ${Math.floor(diff / hour)} ساعة`;
+
+  return `منذ ${Math.floor(diff / day)} يوم`;
+}
 
   function getAccounts() {
-    return Array.isArray(state.accounts) ? state.accounts : [];
+    returfunction timeAgo(ts) {
+  const diff = Date.now() - Number(ts || 0);
+
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  if (diff < minute) return 'منذ لحظات';
+  if (diff < hour) return `منذ ${Math.floor(diff / minute)} دقيقة`;
+  if (diff < day) return `منذ ${Math.floor(diff / hour)} ساعة`;
+
+  return `منذ ${Math.floor(diff / day)} يوم`;
+    }n Array.isArray(state.accounts) ? state.accounts : [];
   }
 
   function getAccountById(id) {
