@@ -101,7 +101,6 @@
     }
   }
 
-})();
 
   دالة timeAgo(ts) {
     const diff = Math.max(0, now() - Number(ts || 0));
