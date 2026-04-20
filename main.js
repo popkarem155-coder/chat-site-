@@ -1516,7 +1516,9 @@
   }
 
   دالة attachEvents() {
-    els.menuBtn?.addEventListener('click', () => toggleDrawer());
+  els.menuBtn?.addEventListener('click', () => {
+  els.menuDrawer.classList.toggle('is-hidden');
+});
     els.appTitleBtn?.addEventListener('click', handleAppTitleClick);
     els.privateShortcutBtn?.addEventListener('click', handlePrivateShortcutClick);
 
