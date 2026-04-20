@@ -234,31 +234,34 @@ function timeAgo(ts) {
     state.privateThreads = safeJSONParse(localStorage.getItem(KEYS.privateThreads), {});
   }
 
-  دالة كتابة التخزين() {
-    يحاول {
-      localStorage.setItem(KEYS.accounts, safeJSONStringify(state.accounts, '[]'));
-      localStorage.setItem(KEYS.publicMessages, safeJSONStringify(state.publicMessages, '[]'));
-      localStorage.setItem(KEYS.privateThreads, safeJSONStringify(state.privateThreads, '{}'));
-      إذا كان (state.currentAccountId) {
-        const acc = getCurrentAccount();
-        إذا (acc) {
-          localStorage.setItem(
-            KEYS.currentSession,
-            safeJSONStringify({
-              معرّف الحساب: state.currentAccountId،
-              بدأ في: acc.sessionStartedAt || الآن()،
-              expiresAt: acc.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS),
-            }, '{}')
-          );
-        }
-      } آخر {
-        localStorage.removeItem(KEYS.currentSession);
+function writeStorage() {
+  try {
+    localStorage.setItem(KEYS.accounts, safeJSONStringify(state.accounts, '[]'));
+    localStorage.setItem(KEYS.publicMessages, safeJSONStringify(state.publicMessages, '[]'));
+    localStorage.setItem(KEYS.privateThreads, safeJSONStringify(state.privateThreads, '{}'));
+
+    if (state.currentAccountId) {
+      const acc = getCurrentAccount();
+
+      if (acc) {
+        localStorage.setItem(
+          KEYS.currentSession,
+          safeJSONStringify({
+            accountId: state.currentAccountId,
+            startedAt: acc.sessionStartedAt || now(),
+            expiresAt: acc.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS),
+          }, '{}')
+        );
       }
-    } catch (err) {
-      showToast('طھط¹ط°ط± طظپط¸ ط§ظ„ط¨ظٹط§ظ†ط§طھ. طھط £ظƒط¯ ط £ظ† ظ…ط³ط§طط© ط§ظ„طھط®ط²ظٹظ† ظ…طھط§طط©.');
-      console.error(err);
+    } else {
+      localStorage.removeItem(KEYS.currentSession);
     }
+
+  } catch (err) {
+    showToast('تعذر حفظ البيانات. تأكد أن مساحة التخزين متاحة.');
+    console.error(err);
   }
+}
 
   function prunePublicMessages() {
     إذا لم تكن `state.publicMessages` مصفوفة، فسيتم تعيينها إلى `[]`.
