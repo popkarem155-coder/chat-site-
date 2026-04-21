@@ -311,7 +311,6 @@ a {
 }
 
 #onlineUsersList {
-  min-height: 60vh;
   overflow-y: auto;
 }
 
