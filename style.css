@@ -1,7 +1,8 @@
+@media (max-width: 720px) {
 :root {
-  --chat-height: 55vh;
-  --online-height: 70vh;
-  --featured-height: 20vh;
+  --chat-height: 50dvh;
+  --online-height: 32dvh;
+  --featured-height: 18dvh;
   --users-gap: 3px;
 
   --bg: #0e0e12;
