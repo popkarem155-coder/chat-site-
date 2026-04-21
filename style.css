@@ -345,9 +345,12 @@ a {
 }
 
 .user-list {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   min-height: 40vh;
+  max-height: 54vh;
+  overflow-y: auto;
 }
 
 .user-row {
