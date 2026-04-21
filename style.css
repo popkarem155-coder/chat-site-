@@ -1,13 +1,12 @@
 :root {
-  .messages-stream {
-  max-height: var(--chat-height);
-  }
+  --list-height: 80vh;
+
   --bg: #0e0e12;
   --bg-2: #12121a;
   --panel: #171723;
   --panel-2: #1d1d2b;
   --panel-3: #232336;
-
+}
   --text: #f3f4f6;
   --muted: #a7a7bb;
   --soft: #8d8da8;
@@ -352,7 +351,7 @@ a {
 }
 
 .user-list {
-  max-height: 80vh;
+  max-height: var(--list-height);
   overflow-y: auto;
 }
   
