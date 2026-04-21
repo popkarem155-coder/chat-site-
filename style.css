@@ -346,7 +346,8 @@ a {
 
 .user-list {
   display: grid;
-  gap: 8px;
+  gap: 10px;
+  min-height: 40vh;
 }
 
 .user-row {
