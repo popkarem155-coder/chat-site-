@@ -1,5 +1,5 @@
 :root {
-  --chat-height: 70vh;
+  --chat-height: 50vh;
   --online-height: 35vh;
   --featured-height: 20vh;
   --users-gap: 3px;
@@ -315,7 +315,6 @@ a {
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
 
-/* القوائم نفسها */
 .user-list {
   flex: 1;
   overflow-y: auto;
@@ -326,18 +325,17 @@ a {
 
 .online-users-wrapper,
 .featured-users-wrapper {
-  max-height: 35vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
-/* wrapper قائمة المميزين */
+.online-users-wrapper {
+  max-height: var(--online-height);
+}
+
 .featured-users-wrapper {
   max-height: var(--featured-height);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 .messages-stream::-webkit-scrollbar {
