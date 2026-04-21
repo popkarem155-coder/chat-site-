@@ -310,20 +310,13 @@ a {
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
 
-#onlineUsersList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
+#onlineUsersList,
 #featuredUsersList {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 25vh;
-  overflow-y: auto;
+  overflow: visible;
+  max-height: none;
 }
 
 .messages-stream::-webkit-scrollbar {
@@ -356,22 +349,10 @@ a {
 }
 
 .user-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  /* التحكم الحقيقي في الحجم */
-  max-height: 45vh;
-
-  /* سكرول ناعم */
+  max-height: 65vh;
   overflow-y: auto;
-  padding-right: 4px;
-
-  /* شكل أحسن للسكرول */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
-
+  
 .user-row {
   width: 100%;
   display: grid;
