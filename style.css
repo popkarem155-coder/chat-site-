@@ -311,12 +311,18 @@ a {
 }
 
 #onlineUsersList {
-  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 40vh;
   overflow-y: auto;
 }
 
 #featuredUsersList {
-  max-height: 30vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 25vh;
   overflow-y: auto;
 }
 
