@@ -315,27 +315,32 @@ a {
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
 
-.user-list {
-  flex: 1;
+#onlineUsersList,
+#featuredUsersList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--users-gap);
   overflow-y: auto;
+}
+
+.user-list {
   display: flex;
   flex-direction: column;
   gap: var(--users-gap);
 }
 
-.online-users-wrapper,
-.featured-users-wrapper {
+.online-users-wrapper {
+  max-height: var(--online-height);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
-.online-users-wrapper {
-  max-height: var(--online-height);
-}
-
 .featured-users-wrapper {
   max-height: var(--featured-height);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .messages-stream::-webkit-scrollbar {
