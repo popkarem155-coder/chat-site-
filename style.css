@@ -339,9 +339,20 @@ a {
   line-height: 1.7;
 }
 
-.empty-state-small {
-  min-height: 72px;
-  padding: 12px;
+#onlineUsersList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 54vh;
+  overflow-y: auto;
+}
+
+#featuredUsersList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 30vh;
+  overflow-y: auto;
 }
 
 .user-list {
