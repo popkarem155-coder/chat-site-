@@ -320,7 +320,6 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--users-gap);
-  overflow-y: auto;
 }
 
 .user-list {
