@@ -1,6 +1,6 @@
 :root {
   --chat-height: 54vh;
-  --online-height: 90vh;
+  --online-height: clamp(220px, 45vh, 600px);
   --featured-height: 25vh;
   --users-gap: 5px;
 
