@@ -296,7 +296,13 @@ a {
   display: grid;
   gap: 12px;
   padding: 14px;
-  min-height: 520px;
+  min-height: auto;
+  height: auto;
+}
+
+.messages-stream {
+  min-height: 260px;
+  max-height: clamp(300px, 54vh, 700px);
 }
 
 .chat-panel-head {
