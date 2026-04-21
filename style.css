@@ -330,7 +330,8 @@ a {
 }
 
 #onlineUsersList {
-  max-height: var(--online-height);
+  height: var(--online-height);
+  overflow-y: auto;
 }
 
 #featuredUsersList {
