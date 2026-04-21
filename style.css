@@ -1403,10 +1403,10 @@ a {
     height: 48vh;
   }
 
-  .online-users-wrapper {
-    height: 34vh;
-  }
-
+ .online-users-wrapper {
+   height: var(--online-height);
+ }
+  
   .featured-users-wrapper {
     height: 20vh;
   }
