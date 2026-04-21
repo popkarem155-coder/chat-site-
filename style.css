@@ -1471,16 +1471,11 @@ a {
   .messages-stream {
     height: 42vh;
   }
-
-  .online-users-wrapper {
-    height: 30vh;
-  }
-
-  .featured-users-wrapper {
-    height: 18vh;
+  
+ .online-users-wrapper {
+  height: 500px;
  }
-  
-  .online-users-wrapper {
-  height: 500px !important;
-}
-  
+
+.featured-users-wrapper {
+  height: 18vh;
+ }
