@@ -300,7 +300,7 @@ a {
 
 .messages-stream {
   min-height: 260px;
-  max-height: 84vh;
+  max-height: 54vh;
   overflow: auto;
   padding: 8px;
   border-radius: calc(var(--radius) - 4px);
@@ -314,7 +314,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 40vh;
+  max-height: 70vh;
   overflow-y: auto;
 }
 
@@ -358,7 +358,7 @@ a {
 .user-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
 }
 
 .user-row {
