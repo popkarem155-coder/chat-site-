@@ -303,7 +303,7 @@ a {
 
 .messages-stream {
   min-height: 260px;
-  max-height: 80vh;
+  max-height: none;
   overflow: auto;
   padding: 8px;
   border-radius: calc(var(--radius) - 4px);
