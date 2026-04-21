@@ -1343,5 +1343,8 @@ a {
   .search-result-item,
   .monitor-item {
     grid-template-columns: 36px 1fr;
+  .app {
+  transform: scale(var(--ui-scale));
+  transform-origin: top center;
   }
 }
