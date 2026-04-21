@@ -303,7 +303,7 @@ a {
 
 .messages-stream {
   min-height: 260px;
-  max-height: 54vh;
+  max-height: 80vh;
   overflow: auto;
   padding: 8px;
   border-radius: calc(var(--radius) - 4px);
@@ -352,7 +352,7 @@ a {
 }
 
 .user-list {
-  max-height: 65vh;
+  max-height: 80vh;
   overflow-y: auto;
 }
   
