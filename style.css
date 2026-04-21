@@ -309,6 +309,10 @@ a {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
+#onlineUsersList {
+  max-height: 50vh;
+  overflow-y: auto;
+}
 
 .messages-stream::-webkit-scrollbar {
   width: 8px;
