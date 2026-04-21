@@ -1,18 +1,8 @@
 @media (max-width: 720px) {
-
   :root {
-    --online-height: 32dvh;
-    --featured-height: 18dvh;
-  }
-
-  .online-users-wrapper {
-    max-height: var(--online-height);
-    overflow-y: auto;
-  }
-
-  .featured-users-wrapper {
-    max-height: var(--featured-height);
-    overflow-y: auto;
+    --chat-height: 48vh;
+    --online-height: 34vh;
+    --featured-height: 20vh;
   }
 }
 
