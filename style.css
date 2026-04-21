@@ -1477,5 +1477,6 @@ a {
  }
 
 .featured-users-wrapper {
-  height: 18vh;
- }
+  height: var(--featured-height);
+}
+  
