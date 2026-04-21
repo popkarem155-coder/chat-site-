@@ -322,19 +322,29 @@ a {
   gap: var(--users-gap);
 }
 
+/* القوائم نفسها */
 .user-list {
+  flex: 1;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--users-gap);
-  overflow-y: auto;
 }
 
-#onlineUsersList {
+/* wrapper قائمة المتصلين */
+.online-users-wrapper {
   max-height: var(--online-height);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-#featuredUsersList {
+/* wrapper قائمة المميزين */
+.featured-users-wrapper {
   max-height: var(--featured-height);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .messages-stream::-webkit-scrollbar {
