@@ -315,13 +315,6 @@ a {
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
 
-#onlineUsersList,
-#featuredUsersList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--users-gap);
-}
-
 /* القوائم نفسها */
 .user-list {
   flex: 1;
