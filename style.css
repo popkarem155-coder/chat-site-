@@ -324,10 +324,10 @@ a {
   gap: var(--users-gap);
 }
 
-/* wrapper قائمة المتصلين */
-.online-users-wrapper {
-  max-height: var(--online-height);
-  overflow: hidden;
+.online-users-wrapper,
+.featured-users-wrapper {
+  max-height: 35vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
