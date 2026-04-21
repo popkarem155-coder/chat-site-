@@ -36,12 +36,11 @@
 
   --font: "Tahoma", "Arial", sans-serif;
 
-  --chat-height: 20dvh;
-  --online-height: 20dvh;
-  --featured-height: 50dvh;
+  --chat-height: clamp(320px, 48vh, 600px);
+  --online-height: clamp(200px, 32vh, 360px);
+  --featured-height: clamp(140px, 20vh, 260px);
   --users-gap: 3px;
 }
-
 * {
   box-sizing: border-box;
 }
