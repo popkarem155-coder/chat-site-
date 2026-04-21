@@ -37,7 +37,7 @@
   --font: "Tahoma", "Arial", sans-serif;
 
   --chat-height: 70dvh;
-  --online-height: 70dvh;
+  --online-height: 100dvh;
   --featured-height: 18dvh;
   --users-gap: 3px;
 }
