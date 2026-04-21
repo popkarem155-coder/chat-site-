@@ -1,4 +1,7 @@
 :root {
+  .messages-stream {
+  max-height: var(--chat-height);
+  }
   --bg: #0e0e12;
   --bg-2: #12121a;
   --panel: #171723;
