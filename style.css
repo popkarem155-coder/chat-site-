@@ -358,7 +358,18 @@ a {
 .user-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 8px;
+
+  /* التحكم الحقيقي في الحجم */
+  max-height: 45vh;
+
+  /* سكرول ناعم */
+  overflow-y: auto;
+  padding-right: 4px;
+
+  /* شكل أحسن للسكرول */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 .user-row {
