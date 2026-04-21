@@ -1478,5 +1478,10 @@ a {
 
   .featured-users-wrapper {
     height: 18vh;
-  }
+ }
+  
+  .online-users-wrapper {
+  height: 500px !important;
+  background: red;
 }
+  
