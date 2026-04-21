@@ -1,20 +1,16 @@
 @media (max-width: 720px) {
   :root {
-    --chat-height: 48dvh;
-    --online-height: 34dvh;
-    --featured-height: 20dvh;
-    --users-gap: 3px;
-  }
-}
+  --chat-height: 48dvh;
+  --online-height: 34dvh;
+  --featured-height: 20dvh;
+  --users-gap: 3px;
 
 @media (max-width: 480px) {
   :root {
-    --chat-height: 42dvh;
-    --online-height: 30dvh;
-    --featured-height: 18dvh;
-    --users-gap: 3px;
-  }
-}
+   --chat-height: 42dvh;
+   --online-height: 30dvh;
+   --featured-height: 18dvh;
+   --users-gap: 3px;
 
   --bg: #0e0e12;
   --bg-2: #12121a;
