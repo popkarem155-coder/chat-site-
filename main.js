@@ -1556,42 +1556,52 @@
   ========================= */
 
   function attachEvents() {
-    if (els.menuBtn) {
-      els.menuBtn.addEventListener("click", (event) => {
-        event.stopPropagation();
-        if (!els.menuDrawer) return;
-        els.menuDrawer.classList.toggle("is-hidden");
-        els.menuDrawer.setAttribute(
-          "aria-hidden",
-          els.menuDrawer.classList.contains("is-hidden") ? "true" : "false"
-        );
-      });
-    }
+  // زر القائمة
+  if (els.menuBtn) {
+    els.menuBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (!els.menuDrawer) return;
 
-    if (!window.__drawerClickAttached) {
-  window.__drawerClickAttached = true;
+      els.menuDrawer.classList.toggle("is-hidden");
+      els.menuDrawer.setAttribute(
+        "aria-hidden",
+        els.menuDrawer.classList.contains("is-hidden") ? "true" : "false"
+      );
+    });
+  }
 
-  document.addEventListener("click", (event) => {
-    const drawer = els.menuDrawer;
-    const menuBtn = els.menuBtn;
+  // زر الرسائل الخاصة
+  if (els.privateShortcutBtn) {
+    els.privateShortcutBtn.addEventListener("click", () => {
+      setView("private");
+    });
+  }
 
-    if (!drawer || !menuBtn) return;
-    if (drawer.classList.contains("is-hidden")) return;
+  // قفل الدروار عند الضغط خارجها (مرة واحدة فقط)
+  if (!window.__drawerClickAttached) {
+    window.__drawerClickAttached = true;
 
-    const target = event.target;
-    if (!(target instanceof Node)) return;
+    document.addEventListener("click", (event) => {
+      const drawer = els.menuDrawer;
+      const menuBtn = els.menuBtn;
 
-    const insideDrawer = drawer.contains(target);
-    const insideMenuBtn = menuBtn.contains(target);
+      if (!drawer || !menuBtn) return;
+      if (drawer.classList.contains("is-hidden")) return;
 
-    // اقفل الدروار لو الضغط خارج الدروار والزرار
-    if (!insideDrawer && !insideMenuBtn) {
-      drawer.classList.add("is-hidden");
-      drawer.setAttribute("aria-hidden", "true");
-    }
-  });
-}
+      const target = event.target;
+      if (!(target instanceof Node)) return;
 
+      const insideDrawer = drawer.contains(target);
+      const insideMenuBtn = menuBtn.contains(target);
+
+      if (!insideDrawer && !insideMenuBtn) {
+        drawer.classList.add("is-hidden");
+        drawer.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
+  }
+  
     els.appTitleBtn?.addEventListener("click", handleAppTitleClick);
     els.privateShortcutBtn?.addEventListener("click", handlePrivateShortcutClick);
 
