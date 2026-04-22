@@ -107,13 +107,14 @@ a {
 
 .app {
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh; /* بدل min-height */
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 10px 10px 24px;
+  padding: 10px;
   position: relative;
   min-width: 0;
 }
+   
 
 .topbar {
   height: var(--header-h);
