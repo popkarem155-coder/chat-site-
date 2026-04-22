@@ -758,6 +758,7 @@
 
   function updateBodyScrollLock() {
     const locked = state.menuOpen || state.privateDrawerOpen;
+
     document.body.style.overflow = locked ? "hidden" : "";
   }
 
