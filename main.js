@@ -74,10 +74,18 @@ function bindEvents() {
 
   $("menuBtn").onclick = toggleMenu;
 
-  $("backFromProfileBtn")?.addEventListener("click", () => setView("home"));
+  $("drawerProfileBtn")?.addEventListener("click", () => {
+    setView("profile");
+  });
+
+  $("backFromProfileBtn")?.addEventListener("click", () => {
+    setView("home");
+  });
+
   $("backFromPrivateBtn")?.addEventListener("click", () => setView("home"));
 
   els.publicForm?.addEventListener("submit", sendPublicMessage);
+
   els.privateForm?.addEventListener("submit", sendPrivateMessage);
 
   els.profileForm?.addEventListener("submit", saveProfile);
