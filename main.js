@@ -1,6 +1,5 @@
 /* =========================
-   KAREEM CHAT MAIN.JS
-   CLEAN FULL VERSION
+   KAREEM CHAT MAIN.JS (FIXED)
 ========================= */
 
 const state = {
@@ -9,12 +8,11 @@ const state = {
   activePrivateUser: null,
   messages: [],
   privateChats: {},
-  users: [],
-  featuredUsers: []
+  users: []
 };
 
 /* =========================
-   HELPERS
+   ELEMENTS
 ========================= */
 const $ = (id) => document.getElementById(id);
 
@@ -25,18 +23,19 @@ const els = {};
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
   cache();
-  loadData();
   bindEvents();
+  loadData();
   renderAll();
   setView("home");
 });
 
 /* =========================
-   CACHE ELEMENTS
+   CACHE
 ========================= */
 function cache() {
   els.app = $("app");
 
+  els.menuBtn = $("menuBtn");
   els.menuDrawer = $("menuDrawer");
 
   els.publicForm = $("publicMessageForm");
@@ -47,11 +46,6 @@ function cache() {
   els.privateInput = $("privateMessageInput");
   els.privateMessages = $("privateMessages");
 
-  els.onlineList = $("onlineUsersList");
-  els.featuredList = $("featuredUsersList");
-
-  els.drawerLogoutBtn = $("drawerLogoutBtn");
-
   els.profileForm = $("profileForm");
   els.profileName = $("profileName");
   els.profilePassword = $("profilePassword");
@@ -59,6 +53,8 @@ function cache() {
   els.profileGender = $("profileGender");
   els.profileNationality = $("profileNationality");
   els.profileBio = $("profileBio");
+
+  els.drawerLogoutBtn = $("drawerLogoutBtn");
 }
 
 /* =========================
@@ -73,10 +69,19 @@ function bindEvents() {
 
   $("drawerProfileBtn")?.addEventListener("click", () => {
     setView("profile");
+    toggleMenu();
+  });
+
+  $("openMyProfileFromMenu")?.addEventListener("click", () => {
+    setView("profile");
+    toggleMenu();
   });
 
   $("backFromProfileBtn")?.addEventListener("click", () => setView("home"));
+
   $("backFromPrivateBtn")?.addEventListener("click", () => setView("home"));
+
+  $("backFromUserViewBtn")?.addEventListener("click", () => setView("home"));
 
   $("closeProfileBtn")?.addEventListener("click", () => setView("home"));
 
@@ -94,25 +99,20 @@ function setView(view) {
   state.view = view;
   els.app.dataset.view = view;
 
-  const views = ["homeView", "profileView", "privateView"];
+  // اخفاء كل الشاشات
+  const pages = [
+    "homeView",
+    "profileView",
+    "privateView",
+    "userView"
+  ];
 
-  views.forEach(v => {
-    document.getElementById(v)?.classList.add("is-hidden");
+  pages.forEach(id => {
+    document.getElementById(id)?.classList.add("is-hidden");
   });
 
-  if (view === "home") {
-    document.getElementById("homeView")?.classList.remove("is-hidden");
-  }
-
-  if (view === "profile") {
-    document.getElementById("profileView")?.classList.remove("is-hidden");
-  }
-
-  if (view === "private") {
-    document.getElementById("privateView")?.classList.remove("is-hidden");
-  }
-
-  els.menuDrawer?.classList.add("is-hidden");
+  // إظهار المطلوب
+  document.getElementById(view + "View")?.classList.remove("is-hidden");
 }
 
 /* =========================
@@ -128,22 +128,21 @@ function toggleMenu() {
 function loadData() {
   state.messages = JSON.parse(localStorage.getItem("publicMessages") || "[]");
   state.privateChats = JSON.parse(localStorage.getItem("privateChats") || "{}");
+
   state.users = JSON.parse(localStorage.getItem("users") || "[]");
 
-  state.currentUser =
-    JSON.parse(localStorage.getItem("currentUser")) || {
+  if (!state.currentUser) {
+    state.currentUser = {
       id: Date.now(),
-      name: "زائر",
-      bio: "",
-      online: true
+      name: "زائر"
     };
+  }
 }
 
 function saveData() {
   localStorage.setItem("publicMessages", JSON.stringify(state.messages));
   localStorage.setItem("privateChats", JSON.stringify(state.privateChats));
   localStorage.setItem("users", JSON.stringify(state.users));
-  localStorage.setItem("currentUser", JSON.stringify(state.currentUser));
 }
 
 /* =========================
@@ -162,9 +161,7 @@ function sendPublicMessage(e) {
     time: new Date().toLocaleTimeString()
   });
 
-  if (state.messages.length > 70) {
-    state.messages.shift();
-  }
+  if (state.messages.length > 70) state.messages.shift();
 
   els.publicInput.value = "";
 
@@ -186,20 +183,13 @@ function renderPublicMessages() {
     div.className = "message-item";
 
     div.innerHTML = `
-      <div class="message-head">
-        <div class="message-avatar">${m.user?.[0] || "?"}</div>
-        <div class="message-meta-wrap">
-          <span class="message-sender">${m.user}</span>
-          <span class="message-time">${m.time}</span>
-        </div>
-      </div>
-      <p class="message-text">${m.text}</p>
+      <strong>${m.user}</strong>
+      <p>${m.text}</p>
+      <small>${m.time}</small>
     `;
 
     els.publicMessages.appendChild(div);
   });
-
-  els.publicMessages.scrollTop = els.publicMessages.scrollHeight;
 }
 
 /* =========================
@@ -221,69 +211,13 @@ function sendPrivateMessage(e) {
 
   state.privateChats[uid].push({
     text,
-    time: new Date().toLocaleTimeString(),
-    from: state.currentUser.name
+    from: state.currentUser.name,
+    time: new Date().toLocaleTimeString()
   });
 
   els.privateInput.value = "";
 
   saveData();
-  renderPrivateMessages();
-}
-
-function renderPrivateMessages() {
-  const uid = state.activePrivateUser?.id;
-
-  els.privateMessages.innerHTML = "";
-
-  if (!uid || !state.privateChats[uid]) {
-    els.privateMessages.innerHTML =
-      `<div class="messages-placeholder">اختار محادثة</div>`;
-    return;
-  }
-
-  state.privateChats[uid].forEach(m => {
-    const div = document.createElement("div");
-    div.className = "message-item is-own";
-
-    div.innerHTML = `
-      <div class="message-head">
-        <div class="message-avatar">${m.from?.[0] || "?"}</div>
-        <div class="message-meta-wrap">
-          <span class="message-sender">${m.from}</span>
-          <span class="message-time">${m.time}</span>
-        </div>
-      </div>
-      <p class="message-text">${m.text}</p>
-    `;
-
-    els.privateMessages.appendChild(div);
-  });
-
-  els.privateMessages.scrollTop = els.privateMessages.scrollHeight;
-}
-
-/* =========================
-   USERS
-========================= */
-function renderUsers() {
-  els.onlineList.innerHTML = "";
-
-  state.users.forEach(u => {
-    const div = document.createElement("div");
-    div.className = "user-row";
-
-    div.innerHTML = `
-      <div class="avatar">${u.name?.[0] || "?"}</div>
-      <div class="user-row-info">
-        <strong>${u.name}</strong>
-        <span>${u.bio || "بدون وصف"}</span>
-      </div>
-      <div class="online-badge">●</div>
-    `;
-
-    els.onlineList.appendChild(div);
-  });
 }
 
 /* =========================
@@ -294,18 +228,12 @@ function saveProfile(e) {
 
   state.currentUser = {
     ...state.currentUser,
-    name: els.profileName.value,
-    password: els.profilePassword.value,
-    age: els.profileAge.value,
-    gender: els.profileGender.value,
-    nationality: els.profileNationality.value,
-    bio: els.profileBio.value
+    name: els.profileName.value
   };
 
-  saveData();
+  localStorage.setItem("currentUser", JSON.stringify(state.currentUser));
 
-  alert("تم حفظ الملف");
-  renderUsers();
+  alert("تم الحفظ");
 }
 
 /* =========================
@@ -321,5 +249,4 @@ function logout() {
 ========================= */
 function renderAll() {
   renderPublicMessages();
-  renderUsers();
 }
