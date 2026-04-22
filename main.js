@@ -2,7 +2,7 @@
 
 const KEYS = { accounts: "kareem3_accounts", publicMessages: "kareem3_publicMessages", privateThreads: "kareem3_privateThreads", currentSession: "kareem3_currentSession", guestSeed: "kareem3_guestSeed", };
 
-const CONFIG = { SESSION_TTL_MS: 24 * 60 * 60 * 1000, ONLINE_WINDOW_MS: 15 * 60 * 1000, FEATURED_WINDOW_MS: 2 * 60 * 60 * 1000, PUBLIC_MESSAGE_CAP: 70, MAX_NOTIFICATIONS: 20, TOAST_MS: 2400, MAX_NAME_LENGTH: 40, };
+const CONFIG = { SESSION_TTL_MS: 24 * 60 * 60 * 1000, ONLINE_WINDOW_MS: 15 * 60 * 1000, FEATURED_WINDOW_MS: 2 * 60 * 60 * 1000, PUBLIC_MESSAGE_CAP: 70, MAX_NOTIFICATIONS: 20, TOAST_MS: 2400, MAX_NAME_LENGTH: 40, MAX_PRIVATE_CHATS: 70, };
 
 const state = { accounts: [], publicMessages: [], privateThreads: {}, currentAccountId: null, selectedPrivatePeerId: null, selectedUserId: null, pendingAction: null, monitorPanelEl: null, toastHostEl: null, activitySaveTimer: null, intervalTimer: null, view: "home", searchQuery: "", privateSearchQuery: "", externalDB: null, };
 
@@ -112,8 +112,6 @@ if (avatarUrl) {
 
 }
 
-/* ========================= STORAGE SYSTEM ========================= */
-
 function readStorage() { state.accounts = safeJSONParse(localStorage.getItem(KEYS.accounts), []); state.publicMessages = safeJSONParse(localStorage.getItem(KEYS.publicMessages), []); state.privateThreads = safeJSONParse(localStorage.getItem(KEYS.privateThreads), {}); }
 
 function writeStorage() { try { localStorage.setItem(KEYS.accounts, safeJSONStringify(state.accounts, "[]")); localStorage.setItem(KEYS.publicMessages, safeJSONStringify(state.publicMessages, "[]")); localStorage.setItem(KEYS.privateThreads, safeJSONStringify(state.privateThreads, "{}"));
@@ -123,11 +121,14 @@ if (state.currentAccountId) {
     if (acc) {
       localStorage.setItem(
         KEYS.currentSession,
-        safeJSONStringify({
-          accountId: state.currentAccountId,
-          startedAt: acc.sessionStartedAt || now(),
-          expiresAt: acc.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS),
-        }, "{}")
+        safeJSONStringify(
+          {
+            accountId: state.currentAccountId,
+            startedAt: acc.sessionStartedAt || now(),
+            expiresAt: acc.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS),
+          },
+          "{}"
+        )
       );
     }
   } else {
@@ -191,8 +192,6 @@ return thread;
 
 }
 
-/* ========================= AUTH SYSTEM ========================= */
-
 function seedGuestAccount() { const guestSeed = safeJSONParse(localStorage.getItem(KEYS.guestSeed), null) || { id: createId("acc"), createdAt: now(), };
 
 try {
@@ -246,11 +245,14 @@ const guest = seedGuestAccount();
 state.currentAccountId = guest.id;
 localStorage.setItem(
   KEYS.currentSession,
-  safeJSONStringify({
-    accountId: guest.id,
-    startedAt: now(),
-    expiresAt: now() + CONFIG.SESSION_TTL_MS,
-  }, "{}")
+  safeJSONStringify(
+    {
+      accountId: guest.id,
+      startedAt: now(),
+      expiresAt: now() + CONFIG.SESSION_TTL_MS,
+    },
+    "{}"
+  )
 );
 return guest;
 
@@ -403,8 +405,6 @@ setTimeout(() => {
 }
 
 function getCurrentPublicMessages() { return Array.isArray(state.publicMessages) ? state.publicMessages : []; }
-
-/* ========================= CHAT SYSTEM ========================= */
 
 function addPublicMessage(text, senderId = null, senderLabel = "مستخدم") { const message = { id: createId("msg"), senderId, senderLabel: senderLabel || "مستخدم", text: normalizeText(text), at: now(), };
 
@@ -663,8 +663,6 @@ markActivity();
 return true;
 
 }
-
-/* ========================= UI RENDERING ========================= */
 
 function renderShellState() { const current = getCurrentAccount(); const online = isCurrentAccountOnline(); const featured = isCurrentAccountFeatured();
 
@@ -927,42 +925,45 @@ return chats.filter((item) => {
 
 }
 
-function renderPrivateSearchBar() { if (!els.privateListPanel) return;
+function createPrivateSearchBox() { if (!els.privateListPanel) return; if (els.privateSearchInput) return;
 
-let searchBox = els.privateSearchInput;
-if (!searchBox) {
-  const existing = els.privateListPanel.querySelector("#privateSearchInput");
-  if (existing) {
-    els.privateSearchInput = existing;
-    return;
-  }
+const wrap = document.createElement("label");
+wrap.className = "search-box";
+wrap.setAttribute("for", "privateSearchInput");
+wrap.style.marginBottom = "8px";
+wrap.style.display = "grid";
+wrap.style.gap = "7px";
 
-  const wrap = document.createElement("label");
-  wrap.className = "search-box";
-  wrap.setAttribute("for", "privateSearchInput");
-  wrap.innerHTML = `
-    <span class="search-label">بحث في الرسائل الخاصة</span>
-    <input id="privateSearchInput" type="search" placeholder="ابحث في الأشخاص أو آخر رسالة..." autocomplete="off" />
-  `;
+wrap.innerHTML = `
+  <span class="search-label">بحث في الرسائل الخاصة</span>
+  <input id="privateSearchInput" type="search" placeholder="ابحث في الأشخاص أو آخر رسالة..." autocomplete="off" />
+`;
 
-  const firstNode = els.privateChatsEmpty || els.privateChatsList || els.privateListPanel.firstElementChild;
-  if (firstNode && firstNode.parentElement === els.privateListPanel) {
-    els.privateListPanel.insertBefore(wrap, firstNode);
-  } else {
-    els.privateListPanel.insertBefore(wrap, els.privateListPanel.children[1] || null);
-  }
+const titleBlock = els.privateListPanel.querySelector(".panel-head");
+if (titleBlock && titleBlock.parentElement === els.privateListPanel) {
+  els.privateListPanel.insertBefore(wrap, titleBlock.nextSibling);
+} else {
+  els.privateListPanel.insertBefore(wrap, els.privateListPanel.firstChild);
+}
 
-  els.privateSearchInput = wrap.querySelector("#privateSearchInput");
-  if (els.privateSearchInput) {
-    els.privateSearchInput.value = state.privateSearchQuery || "";
-  }
+els.privateSearchInput = wrap.querySelector("#privateSearchInput");
+if (els.privateSearchInput) {
+  els.privateSearchInput.value = state.privateSearchQuery || "";
+  els.privateSearchInput.style.width = "100%";
+  els.privateSearchInput.style.borderRadius = "14px";
+  els.privateSearchInput.style.border = "1px solid rgba(255, 255, 255, 0.08)";
+  els.privateSearchInput.style.background = "linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015))";
+  els.privateSearchInput.style.color = "var(--text)";
+  els.privateSearchInput.style.padding = "11px 12px";
+  els.privateSearchInput.style.outline = "none";
+  els.privateSearchInput.style.minWidth = "0";
 }
 
 }
 
 function renderPrivateChatsList() { if (!els.privateChatsList || !els.privateChatsEmpty) return;
 
-renderPrivateSearchBar();
+createPrivateSearchBox();
 
 const current = getCurrentAccount();
 els.privateChatsList.innerHTML = "";
@@ -1376,32 +1377,6 @@ function handleAppTitleClick() { location.reload(); }
 
 function handlePrivateShortcutClick() { state.selectedPrivatePeerId = null; setView("private"); renderPrivateChatsList(); renderPrivateConversation(); }
 
-/* ========================= EVENTS SYSTEM ========================= */
-
-function createPrivateSearchBox() { if (!els.privateListPanel) return; if (els.privateSearchInput) return;
-
-const wrap = document.createElement("label");
-wrap.className = "search-box";
-wrap.setAttribute("for", "privateSearchInput");
-wrap.innerHTML = `
-  <span class="search-label">بحث في الرسائل الخاصة</span>
-  <input id="privateSearchInput" type="search" placeholder="ابحث في الأشخاص أو آخر رسالة..." autocomplete="off" />
-`;
-
-const firstChild = els.privateListPanel.firstElementChild;
-if (firstChild) {
-  els.privateListPanel.insertBefore(wrap, firstChild.nextSibling);
-} else {
-  els.privateListPanel.appendChild(wrap);
-}
-
-els.privateSearchInput = wrap.querySelector("#privateSearchInput");
-if (els.privateSearchInput) {
-  els.privateSearchInput.value = state.privateSearchQuery || "";
-}
-
-}
-
 function attachEvents() { if (els.menuBtn) { els.menuBtn.addEventListener("click", (event) => { event.stopPropagation(); if (!els.menuDrawer) return; els.menuDrawer.classList.toggle("is-hidden"); els.menuDrawer.setAttribute( "aria-hidden", els.menuDrawer.classList.contains("is-hidden") ? "true" : "false" ); }); }
 
 if (!window.__drawerClickAttached) {
@@ -1472,7 +1447,7 @@ if (els.userSearchInputDrawer) {
   });
 }
 
-const attachPrivateSearchListener = () => {
+const bindPrivateSearch = () => {
   if (!els.privateSearchInput) return;
   els.privateSearchInput.addEventListener("input", (e) => {
     state.privateSearchQuery = normalizeText(e.target.value || "");
@@ -1480,7 +1455,7 @@ const attachPrivateSearchListener = () => {
   });
 };
 
-attachPrivateSearchListener();
+bindPrivateSearch();
 
 els.publicMessageInput?.addEventListener("focus", () => markActivity());
 els.privateMessageInput?.addEventListener("focus", () => markActivity());
@@ -1579,7 +1554,26 @@ return db
 
 }
 
-function initLocalData() { readStorage(); const guest = ensureCurrentAccount();
+function ensureDemoPeerForTesting() { const current = getCurrentAccount(); if (!current) return null;
+
+const demoPeerName = "صديق تجريبي";
+let demo = getAccountByUsername(demoPeerName);
+if (!demo) {
+  demo = createAccount(demoPeerName, "");
+  demo.isDemo = true;
+  demo.profile.name = demoPeerName;
+  demo.profile.bio = "حساب تجريبي لاختبار الرسائل الخاصة.";
+  demo.profile.nationality = "تجريبي";
+  demo.lastSeenAt = now() - 20 * 60 * 1000;
+  demo.totalActiveMs = 3 * 60 * 60 * 1000;
+  pruneNotifications(demo);
+  writeStorage();
+}
+return demo;
+
+}
+
+function initLocalData() { readStorage(); const guest = ensureCurrentAccount(); ensureDemoPeerForTesting();
 
 if (!Array.isArray(state.publicMessages) || !state.publicMessages.length) {
   state.publicMessages = [
