@@ -107,10 +107,10 @@
     const hour = 60 * minute;
     const day = 24 * hour;
 
-    if (diff < minute) return "منذ لحظات";
-    if (diff < hour) return `منذ ${Math.floor(diff / minute)} دقيقة`;
-    if (diff < day) return `منذ ${Math.floor(diff / hour)} ساعة`;
-    return `منذ ${Math.floor(diff / day)} يوم`;
+    if (diff < minute) return "ظ…ظ†ط° ظ„ط­ط¸ط§طھ";
+    if (diff < hour) return `ظ…ظ†ط° ${Math.floor(diff / minute)} ط¯ظ‚ظٹظ‚ط©`;
+    if (diff < day) return `ظ…ظ†ط° ${Math.floor(diff / hour)} ط³ط§ط¹ط©`;
+    return `ظ…ظ†ط° ${Math.floor(diff / day)} ظٹظˆظ…`;
   }
 
   function durationLabel(ms) {
@@ -118,9 +118,9 @@
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    if (hours <= 0) return `نشط منذ ${minutes} دقيقة`;
-    if (minutes <= 0) return `نشط منذ ${hours} ساعة`;
-    return `نشط منذ ${hours} ساعة و${minutes} دقيقة`;
+    if (hours <= 0) return `ظ†ط´ط· ظ…ظ†ط° ${minutes} ط¯ظ‚ظٹظ‚ط©`;
+    if (minutes <= 0) return `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط©`;
+    return `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط© ظˆ${minutes} ط¯ظ‚ظٹظ‚ط©`;
   }
 
   function getAccounts() {
@@ -138,14 +138,14 @@
   }
 
   function getDisplayName(account) {
-    if (!account) return "مستخدم";
-    const name = clampText(account.profile?.name || account.username || "مستخدم", CONFIG.MAX_NAME_LENGTH);
-    return name || "مستخدم";
+    if (!account) return "ظ…ط³طھط®ط¯ظ…";
+    const name = clampText(account.profile?.name || account.username || "ظ…ط³طھط®ط¯ظ…", CONFIG.MAX_NAME_LENGTH);
+    return name || "ظ…ط³طھط®ط¯ظ…";
   }
 
   function getAvatarInitial(account) {
     const name = getDisplayName(account);
-    return name ? name[0] : "؟";
+    return name ? name[0] : "طں";
   }
 
   function getCurrentSession() {
@@ -200,7 +200,7 @@
     return Number(acc.totalActiveMs || 0);
   }
 
-  function setAvatar(el, account, fallbackLabel = "؟") {
+  function setAvatar(el, account, fallbackLabel = "طں") {
     if (!el) return;
 
     const initial = account ? getAvatarInitial(account) : fallbackLabel;
@@ -221,7 +221,7 @@
   }
 
   /* =========================
-     💾 STORAGE SYSTEM
+     ًں’¾ STORAGE SYSTEM
   ========================= */
 
   function readStorage() {
@@ -252,7 +252,7 @@
         localStorage.removeItem(KEYS.currentSession);
       }
     } catch (err) {
-      showToast("تعذر حفظ البيانات. تأكد أن مساحة التخزين متاحة.");
+      showToast("طھط¹ط°ط± ط­ظپط¸ ط§ظ„ط¨ظٹط§ظ†ط§طھ. طھط£ظƒط¯ ط£ظ† ظ…ط³ط§ط­ط© ط§ظ„طھط®ط²ظٹظ† ظ…طھط§ط­ط©.");
       console.error(err);
     }
   }
@@ -325,7 +325,7 @@
   }
 
   /* =========================
-     🔐 AUTH SYSTEM
+     ًں”گ AUTH SYSTEM
   ========================= */
 
   function seedGuestAccount() {
@@ -344,7 +344,7 @@
 
     const guest = {
       id: guestSeed.id,
-      username: "زائر",
+      username: "ط²ط§ط¦ط±",
       password: "",
       createdAt: guestSeed.createdAt,
       lastSeenAt: now(),
@@ -352,11 +352,11 @@
       sessionStartedAt: now(),
       sessionExpiresAt: now() + CONFIG.SESSION_TTL_MS,
       profile: {
-        name: "زائر",
+        name: "ط²ط§ط¦ط±",
         age: "",
         gender: "",
         nationality: "",
-        bio: "حساب افتراضي للتجربة.",
+        bio: "ط­ط³ط§ط¨ ط§ظپطھط±ط§ط¶ظٹ ظ„ظ„طھط¬ط±ط¨ط©.",
         avatar: "",
       },
       notifications: [],
@@ -488,7 +488,7 @@
     state.selectedPrivatePeerId = null;
     state.selectedUserId = null;
 
-    if (showMessage) showToast("تم تسجيل الخروج.");
+    if (showMessage) showToast("طھظ… طھط³ط¬ظٹظ„ ط§ظ„ط®ط±ظˆط¬.");
     renderAll?.();
   }
 
@@ -500,7 +500,7 @@
 
     if (isSessionExpired(session)) {
       logoutCurrentAccount(false);
-      showToast("انتهت الجلسة، سجل دخول مرة أخرى.");
+      showToast("ط§ظ†طھظ‡طھ ط§ظ„ط¬ظ„ط³ط©طŒ ط³ط¬ظ„ ط¯ط®ظˆظ„ ظ…ط±ط© ط£ط®ط±ظ‰.");
       return;
     }
 
@@ -560,14 +560,14 @@
   }
 
   /* =========================
-     💬 CHAT SYSTEM
+     ًں’¬ CHAT SYSTEM
   ========================= */
 
-  function addPublicMessage(text, senderId = null, senderLabel = "مستخدم") {
+  function addPublicMessage(text, senderId = null, senderLabel = "ظ…ط³طھط®ط¯ظ…") {
     const message = {
       id: createId("msg"),
       senderId,
-      senderLabel: senderLabel || "مستخدم",
+      senderLabel: senderLabel || "ظ…ط³طھط®ط¯ظ…",
       text: normalizeText(text),
       at: now(),
     };
@@ -621,7 +621,7 @@
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
-  function addPrivateMessage(peerId, text, senderId = null, senderLabel = "مستخدم") {
+  function addPrivateMessage(peerId, text, senderId = null, senderLabel = "ظ…ط³طھط®ط¯ظ…") {
     const current = getCurrentAccount();
     if (!current || !peerId) return null;
 
@@ -631,7 +631,7 @@
     const message = {
       id: createId("pmsg"),
       senderId,
-      senderLabel: senderLabel || "مستخدم",
+      senderLabel: senderLabel || "ظ…ط³طھط®ط¯ظ…",
       text: normalizeText(text),
       at: now(),
     };
@@ -663,7 +663,7 @@
       id: createId("noti"),
       type: "profile_view",
       viewerId,
-      viewerLabel: normalizeText(viewerLabel) || "زائر",
+      viewerLabel: normalizeText(viewerLabel) || "ط²ط§ط¦ط±",
       at: now(),
       read: false,
     });
@@ -776,12 +776,12 @@
 
     const target = getAccountById(userId);
     if (!target) {
-      showToast("المستخدم غير موجود.");
+      showToast("ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯.");
       return;
     }
 
     const current = getCurrentAccount();
-    const viewerLabel = current ? getDisplayName(current) : "زائر";
+    const viewerLabel = current ? getDisplayName(current) : "ط²ط§ط¦ط±";
 
     if (current && current.id === target.id) {
       openProfile();
@@ -799,25 +799,13 @@
     openUserProfileById(userId);
   }
 
-  function openPrivateChat(peerId = null, silent = false) {
-  const peer = peerId ? getAccountById(peerId) : null;
+  function openPrivateChat(peerId, silent = false) {
+    const peer = getAccountById(peerId);
 
-  if (!peer) {
-    if (!silent) showToast("الشخص غير موجود.");
-    return;
-  }
-
-  state.selectedPrivatePeerId = peer.id;
-  state.selectedUserId = null;
-
-  setView("private");
-  renderPrivateChatsList();
-  renderPrivateConversation();
-
-  setTimeout(() => {
-    els.privateMessageInput?.focus?.();
-  }, 20);
-}
+    if (!peer) {
+      if (!silent) showToast("ط§ظ„ط´ط®طµ ط؛ظٹط± ظ…ظˆط¬ظˆط¯.");
+      return;
+    }
 
     state.selectedPrivatePeerId = peer.id;
     state.selectedUserId = null;
@@ -833,13 +821,13 @@
     const messageText = normalizeText(text);
 
     if (!messageText) {
-      if (!silent) showToast("اكتب رسالة أولاً.");
+      if (!silent) showToast("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
       return false;
     }
 
     const current = getCurrentAccount();
     if (!current) {
-      if (!silent) showToast("لا يوجد حساب نشط.");
+      if (!silent) showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
       return false;
     }
 
@@ -852,12 +840,12 @@
     const messageText = normalizeText(text);
 
     if (!peerId) {
-      if (!silent) showToast("اختر شخص أولاً.");
+      if (!silent) showToast("ط§ط®طھط± ط´ط®طµ ط£ظˆظ„ط§ظ‹.");
       return false;
     }
 
     if (!messageText) {
-      if (!silent) showToast("اكتب رسالة أولاً.");
+      if (!silent) showToast("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
       return false;
     }
 
@@ -865,7 +853,7 @@
     const peer = getAccountById(peerId);
 
     if (!current || !peer) {
-      if (!silent) showToast("تعذر إرسال الرسالة.");
+      if (!silent) showToast("طھط¹ط°ط± ط¥ط±ط³ط§ظ„ ط§ظ„ط±ط³ط§ظ„ط©.");
       return false;
     }
 
@@ -875,7 +863,7 @@
   }
 
   /* =========================
-     🎨 UI RENDERING
+     ًںژ¨ UI RENDERING
   ========================= */
 
   function renderShellState() {
@@ -885,26 +873,26 @@
 
     if (els.currentUserState) {
       if (!current) {
-        els.currentUserState.textContent = "زائر";
+        els.currentUserState.textContent = "ط²ط§ط¦ط±";
       } else if (online) {
-        els.currentUserState.textContent = `${getDisplayName(current)} • متصل الآن`;
+        els.currentUserState.textContent = `${getDisplayName(current)} â€¢ ظ…طھطµظ„ ط§ظ„ط¢ظ†`;
       } else {
-        els.currentUserState.textContent = `${getDisplayName(current)} • غير نشط`;
+        els.currentUserState.textContent = `${getDisplayName(current)} â€¢ ط؛ظٹط± ظ†ط´ط·`;
       }
     }
 
     if (els.menuUserName) {
-      els.menuUserName.textContent = current ? getDisplayName(current) : "ملفي الشخصي";
+      els.menuUserName.textContent = current ? getDisplayName(current) : "ظ…ظ„ظپظٹ ط§ظ„ط´ط®طµظٹ";
     }
 
     if (els.menuUserMeta) {
       els.menuUserMeta.textContent = current
-        ? `اضغط لفتح الملف وتعديل البيانات • ${featured ? "مستخدم مميز" : "حساب عادي"}`
-        : "سجل دخول أو أنشئ حساب تجريبي";
+        ? `ط§ط¶ط؛ط· ظ„ظپطھط­ ط§ظ„ظ…ظ„ظپ ظˆطھط¹ط¯ظٹظ„ ط§ظ„ط¨ظٹط§ظ†ط§طھ â€¢ ${featured ? "ظ…ط³طھط®ط¯ظ… ظ…ظ…ظٹط²" : "ط­ط³ط§ط¨ ط¹ط§ط¯ظٹ"}`
+        : "ط³ط¬ظ„ ط¯ط®ظˆظ„ ط£ظˆ ط£ظ†ط´ط¦ ط­ط³ط§ط¨ طھط¬ط±ظٹط¨ظٹ";
     }
 
     if (els.menuAvatar) {
-      setAvatar(els.menuAvatar, current, current ? getAvatarInitial(current) : "ز");
+      setAvatar(els.menuAvatar, current, current ? getAvatarInitial(current) : "ط²");
     }
 
     if (els.profileMonitorCount) els.profileMonitorCount.textContent = String(getUnreadNotificationCount());
@@ -912,17 +900,17 @@
 
     if (els.publicMessageInput) {
       els.publicMessageInput.placeholder = current
-        ? "اكتب رسالتك في الشات العام"
-        : "جهز حساب أولاً";
+        ? "ط§ظƒطھط¨ ط±ط³ط§ظ„طھظƒ ظپظٹ ط§ظ„ط´ط§طھ ط§ظ„ط¹ط§ظ…"
+        : "ط¬ظ‡ط² ط­ط³ط§ط¨ ط£ظˆظ„ط§ظ‹";
     }
 
-    if (els.publicSendBtn) els.publicSendBtn.textContent = "إرسال";
-    if (els.privateSendBtn) els.privateSendBtn.textContent = "إرسال";
+    if (els.publicSendBtn) els.publicSendBtn.textContent = "ط¥ط±ط³ط§ظ„";
+    if (els.privateSendBtn) els.privateSendBtn.textContent = "ط¥ط±ط³ط§ظ„";
   }
 
   function buildMessageElement(message) {
     const sender = getAccountById(message.senderId);
-    const senderName = normalizeText(sender ? getDisplayName(sender) : message.senderLabel || "مستخدم");
+    const senderName = normalizeText(sender ? getDisplayName(sender) : message.senderLabel || "ظ…ط³طھط®ط¯ظ…");
 
     const article = document.createElement("article");
     article.className = "message-item";
@@ -936,8 +924,8 @@
     const avatar = document.createElement("button");
     avatar.type = "button";
     avatar.className = "message-avatar";
-    setAvatar(avatar, sender, senderName ? senderName[0] : "؟");
-    avatar.title = `فتح ملف ${senderName}`;
+    setAvatar(avatar, sender, senderName ? senderName[0] : "طں");
+    avatar.title = `ظپطھط­ ظ…ظ„ظپ ${senderName}`;
     avatar.addEventListener("click", () => {
       if (message.senderId) openAccountProfileById(message.senderId);
     });
@@ -980,7 +968,7 @@
     if (!messages.length) {
       const empty = document.createElement("div");
       empty.className = "messages-placeholder";
-      empty.textContent = "لسه ما فيش رسائل ظاهرة هنا.";
+      empty.textContent = "ظ„ط³ظ‡ ظ…ط§ ظپظٹط´ ط±ط³ط§ط¦ظ„ ط¸ط§ظ‡ط±ط© ظ‡ظ†ط§.";
       els.publicMessages.appendChild(empty);
       return;
     }
@@ -1023,14 +1011,14 @@
       name.textContent = getDisplayName(acc);
 
       const sub = document.createElement("span");
-      sub.textContent = "متصل الآن";
+      sub.textContent = "ظ…طھطµظ„ ط§ظ„ط¢ظ†";
 
       info.appendChild(name);
       info.appendChild(sub);
 
       const badge = document.createElement("span");
       badge.className = "online-badge";
-      badge.textContent = "●";
+      badge.textContent = "â—ڈ";
 
       row.appendChild(avatar);
       row.appendChild(info);
@@ -1076,7 +1064,7 @@
 
       const star = document.createElement("span");
       star.className = "featured-badge";
-      star.textContent = "★";
+      star.textContent = "âک…";
 
       nameLine.appendChild(name);
       nameLine.appendChild(star);
@@ -1117,13 +1105,13 @@
 
     if (els.profileAvatarPreview) setAvatar(els.profileAvatarPreview, current, getAvatarInitial(current));
     if (els.profileOnlineState) {
-      els.profileOnlineState.textContent = isCurrentAccountOnline() ? "متصل الآن" : "غير نشط";
+      els.profileOnlineState.textContent = isCurrentAccountOnline() ? "ظ…طھطµظ„ ط§ظ„ط¢ظ†" : "ط؛ظٹط± ظ†ط´ط·";
     }
 
     if (els.profileLastSeen) {
       els.profileLastSeen.textContent = current.lastSeenAt
-        ? `${durationLabel(getActiveDurationForAccount(current))} • آخر ظهور ${timeAgo(current.lastSeenAt)}`
-        : "لا يوجد نشاط مسجل";
+        ? `${durationLabel(getActiveDurationForAccount(current))} â€¢ ط¢ط®ط± ط¸ظ‡ظˆط± ${timeAgo(current.lastSeenAt)}`
+        : "ظ„ط§ ظٹظˆط¬ط¯ ظ†ط´ط§ط· ظ…ط³ط¬ظ„";
     }
   }
 
@@ -1135,14 +1123,14 @@
 
     if (!current) {
       els.privateChatsEmpty.classList.remove("is-hidden");
-      els.privateChatsEmpty.textContent = "لا يوجد حساب نشط حالياً.";
+      els.privateChatsEmpty.textContent = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط· ط­ط§ظ„ظٹط§ظ‹.";
       return;
     }
 
     const chats = getPrivateChatsForCurrentUser();
     if (!chats.length) {
       els.privateChatsEmpty.classList.remove("is-hidden");
-      els.privateChatsEmpty.textContent = "لسه ما كلمتش حد في الخاص.";
+      els.privateChatsEmpty.textContent = "ظ„ط³ظ‡ ظ…ط§ ظƒظ„ظ…طھط´ ط­ط¯ ظپظٹ ط§ظ„ط®ط§طµ.";
       return;
     }
 
@@ -1159,19 +1147,19 @@
 
       const avatar = document.createElement("div");
       avatar.className = "avatar";
-      setAvatar(avatar, peer, peer ? getAvatarInitial(peer) : "؟");
+      setAvatar(avatar, peer, peer ? getAvatarInitial(peer) : "طں");
 
       const info = document.createElement("div");
       info.className = "private-chat-item-info";
 
       const name = document.createElement("strong");
-      name.textContent = peer ? getDisplayName(peer) : "مستخدم غير معروف";
+      name.textContent = peer ? getDisplayName(peer) : "ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ط¹ط±ظˆظپ";
 
       const preview = document.createElement("span");
       const lastMessage = item.lastMessage;
       preview.textContent = lastMessage
-        ? (lastMessage.senderId === current.id ? "أنت: " : "") + (lastMessage.text || "")
-        : "ابدأ المحادثة";
+        ? (lastMessage.senderId === current.id ? "ط£ظ†طھ: " : "") + (lastMessage.text || "")
+        : "ط§ط¨ط¯ط£ ط§ظ„ظ…ط­ط§ط¯ط«ط©";
 
       info.appendChild(name);
       info.appendChild(preview);
@@ -1198,42 +1186,42 @@
     const peer = getAccountById(state.selectedPrivatePeerId);
 
     if (!current) {
-      els.privateChatTitle.textContent = "لا توجد محادثة";
-      els.privateChatMeta.textContent = "لا يوجد حساب نشط.";
-      setAvatar(els.privateChatAvatar, null, "؟");
+      els.privateChatTitle.textContent = "ظ„ط§ طھظˆط¬ط¯ ظ…ط­ط§ط¯ط«ط©";
+      els.privateChatMeta.textContent = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.";
+      setAvatar(els.privateChatAvatar, null, "طں");
       els.privateMessages.innerHTML = "";
       const placeholder = document.createElement("div");
       placeholder.className = "messages-placeholder";
-      placeholder.textContent = "لا يوجد حساب نشط حالياً.";
+      placeholder.textContent = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط· ط­ط§ظ„ظٹط§ظ‹.";
       els.privateMessages.appendChild(placeholder);
-      if (els.privateMessageInput) els.privateMessageInput.placeholder = "لا يوجد حساب نشط";
+      if (els.privateMessageInput) els.privateMessageInput.placeholder = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·";
       if (els.privateSendBtn) els.privateSendBtn.disabled = true;
       return;
     }
 
     if (!peer) {
-      els.privateChatTitle.textContent = "اختار شخص من القائمة";
-      els.privateChatMeta.textContent = "هنا هتظهر المحادثة كاملة.";
-      setAvatar(els.privateChatAvatar, null, "؟");
+      els.privateChatTitle.textContent = "ط§ط®طھط§ط± ط´ط®طµ ظ…ظ† ط§ظ„ظ‚ط§ط¦ظ…ط©";
+      els.privateChatMeta.textContent = "ظ‡ظ†ط§ ظ‡طھط¸ظ‡ط± ط§ظ„ظ…ط­ط§ط¯ط«ط© ظƒط§ظ…ظ„ط©.";
+      setAvatar(els.privateChatAvatar, null, "طں");
       els.privateMessages.innerHTML = "";
       const placeholder = document.createElement("div");
       placeholder.className = "messages-placeholder";
-      placeholder.textContent = "اختار شخص من القائمة أو من البحث.";
+      placeholder.textContent = "ط§ط®طھط§ط± ط´ط®طµ ظ…ظ† ط§ظ„ظ‚ط§ط¦ظ…ط© ط£ظˆ ظ…ظ† ط§ظ„ط¨ط­ط«.";
       els.privateMessages.appendChild(placeholder);
-      if (els.privateMessageInput) els.privateMessageInput.placeholder = "اكتب رسالتك الخاصة...";
+      if (els.privateMessageInput) els.privateMessageInput.placeholder = "ط§ظƒطھط¨ ط±ط³ط§ظ„طھظƒ ط§ظ„ط®ط§طµط©...";
       if (els.privateSendBtn) els.privateSendBtn.disabled = true;
       return;
     }
 
     els.privateChatTitle.textContent = getDisplayName(peer);
     els.privateChatMeta.textContent = peer.lastSeenAt
-      ? `${isCurrentAccountOnline() && state.selectedPrivatePeerId === peer.id ? "متصل الآن" : "آخر ظهور"} ${timeAgo(peer.lastSeenAt)}`
-      : "مستخدم جديد";
+      ? `${isCurrentAccountOnline() && state.selectedPrivatePeerId === peer.id ? "ظ…طھطµظ„ ط§ظ„ط¢ظ†" : "ط¢ط®ط± ط¸ظ‡ظˆط±"} ${timeAgo(peer.lastSeenAt)}`
+      : "ظ…ط³طھط®ط¯ظ… ط¬ط¯ظٹط¯";
 
     setAvatar(els.privateChatAvatar, peer, getAvatarInitial(peer));
     if (els.privateSendBtn) els.privateSendBtn.disabled = false;
     if (els.privateMessageInput) {
-      els.privateMessageInput.placeholder = `اكتب رسالة إلى ${getDisplayName(peer)}...`;
+      els.privateMessageInput.placeholder = `ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط¥ظ„ظ‰ ${getDisplayName(peer)}...`;
     }
 
     const messages = getThreadMessagesForPeer(peer.id);
@@ -1242,7 +1230,7 @@
     if (!messages.length) {
       const placeholder = document.createElement("div");
       placeholder.className = "messages-placeholder";
-      placeholder.textContent = "ما فيش رسائل لسه. ابدأ أول رسالة.";
+      placeholder.textContent = "ظ…ط§ ظپظٹط´ ط±ط³ط§ط¦ظ„ ظ„ط³ظ‡. ط§ط¨ط¯ط£ ط£ظˆظ„ ط±ط³ط§ظ„ط©.";
       els.privateMessages.appendChild(placeholder);
       return;
     }
@@ -1257,29 +1245,29 @@
   function renderUserView() {
     const target = getAccountById(state.selectedUserId);
     if (!target) {
-      if (els.userViewTitle) els.userViewTitle.textContent = "ملف المستخدم";
-      if (els.userViewName) els.userViewName.textContent = "اسم المستخدم";
-      if (els.userViewStatus) els.userViewStatus.textContent = "المستخدم غير موجود";
-      if (els.userViewBio) els.userViewBio.textContent = "لا توجد بيانات.";
-      setAvatar(els.userViewAvatar, null, "؟");
+      if (els.userViewTitle) els.userViewTitle.textContent = "ظ…ظ„ظپ ط§ظ„ظ…ط³طھط®ط¯ظ…";
+      if (els.userViewName) els.userViewName.textContent = "ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ…";
+      if (els.userViewStatus) els.userViewStatus.textContent = "ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯";
+      if (els.userViewBio) els.userViewBio.textContent = "ظ„ط§ طھظˆط¬ط¯ ط¨ظٹط§ظ†ط§طھ.";
+      setAvatar(els.userViewAvatar, null, "طں");
       return;
     }
 
-    if (els.userViewTitle) els.userViewTitle.textContent = `ملف ${getDisplayName(target)}`;
+    if (els.userViewTitle) els.userViewTitle.textContent = `ظ…ظ„ظپ ${getDisplayName(target)}`;
     if (els.userViewName) els.userViewName.textContent = getDisplayName(target);
-    if (els.userViewAge) els.userViewAge.textContent = target.profile?.age || "—";
-    if (els.userViewGender) els.userViewGender.textContent = target.profile?.gender || "—";
-    if (els.userViewNationality) els.userViewNationality.textContent = target.profile?.nationality || "—";
-    if (els.userViewBio) els.userViewBio.textContent = target.profile?.bio || "لا توجد نبذة بعد.";
+    if (els.userViewAge) els.userViewAge.textContent = target.profile?.age || "â€”";
+    if (els.userViewGender) els.userViewGender.textContent = target.profile?.gender || "â€”";
+    if (els.userViewNationality) els.userViewNationality.textContent = target.profile?.nationality || "â€”";
+    if (els.userViewBio) els.userViewBio.textContent = target.profile?.bio || "ظ„ط§ طھظˆط¬ط¯ ظ†ط¨ط°ط© ط¨ط¹ط¯.";
 
     if (els.userViewStatus) {
       const online = target.id === state.currentAccountId && isCurrentAccountOnline();
       if (online) {
-        els.userViewStatus.textContent = "متصل الآن";
+        els.userViewStatus.textContent = "ظ…طھطµظ„ ط§ظ„ط¢ظ†";
       } else if (target.lastSeenAt) {
-        els.userViewStatus.textContent = `آخر ظهور ${timeAgo(target.lastSeenAt)}`;
+        els.userViewStatus.textContent = `ط¢ط®ط± ط¸ظ‡ظˆط± ${timeAgo(target.lastSeenAt)}`;
       } else {
-        els.userViewStatus.textContent = "غير محدد";
+        els.userViewStatus.textContent = "ط؛ظٹط± ظ…ط­ط¯ط¯";
       }
     }
 
@@ -1290,7 +1278,7 @@
     setAvatar(els.userViewAvatar, target, getAvatarInitial(target));
     if (els.startPrivateChatBtn) {
       els.startPrivateChatBtn.dataset.targetId = target.id;
-      els.startPrivateChatBtn.textContent = "فتح شات خاص";
+      els.startPrivateChatBtn.textContent = "ظپطھط­ ط´ط§طھ ط®ط§طµ";
     }
   }
 
@@ -1313,17 +1301,17 @@
     countEl.textContent = String(unreadCount);
 
     if (!current) {
-      titleEl.textContent = "منظار ملفك";
-      emptyEl.textContent = "لا يوجد حساب نشط.";
+      titleEl.textContent = "ظ…ظ†ط¸ط§ط± ظ…ظ„ظپظƒ";
+      emptyEl.textContent = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.";
       emptyEl.classList.remove("is-hidden");
       return;
     }
 
-    titleEl.textContent = "منظار ملفك";
+    titleEl.textContent = "ظ…ظ†ط¸ط§ط± ظ…ظ„ظپظƒ";
     const items = getMonitorItems();
 
     if (!items.length) {
-      emptyEl.textContent = "ما فيش زيارات لملفك لسه.";
+      emptyEl.textContent = "ظ…ط§ ظپظٹط´ ط²ظٹط§ط±ط§طھ ظ„ظ…ظ„ظپظƒ ظ„ط³ظ‡.";
       emptyEl.classList.remove("is-hidden");
       return;
     }
@@ -1335,16 +1323,16 @@
 
       const icon = document.createElement("div");
       icon.className = "monitor-item-icon";
-      icon.textContent = "👀";
+      icon.textContent = "ًں‘€";
 
       const info = document.createElement("div");
       info.className = "monitor-item-info";
 
       const title = document.createElement("strong");
-      title.textContent = item.viewerLabel || "زائر";
+      title.textContent = item.viewerLabel || "ط²ط§ط¦ط±";
 
       const sub = document.createElement("span");
-      sub.textContent = `${timeAgo(item.at)} • زار ملفك`;
+      sub.textContent = `${timeAgo(item.at)} â€¢ ط²ط§ط± ظ…ظ„ظپظƒ`;
 
       info.appendChild(title);
       info.appendChild(sub);
@@ -1366,7 +1354,7 @@
       els.searchResultCount.textContent = "0";
       const empty = document.createElement("div");
       empty.className = "empty-state empty-state-small";
-      empty.textContent = "اكتب اسم المستخدم عشان يظهر في النتائج.";
+      empty.textContent = "ط§ظƒطھط¨ ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ… ط¹ط´ط§ظ† ظٹط¸ظ‡ط± ظپظٹ ط§ظ„ظ†طھط§ط¦ط¬.";
       els.userSearchResults.appendChild(empty);
       return;
     }
@@ -1385,7 +1373,7 @@
     if (!results.length) {
       const empty = document.createElement("div");
       empty.className = "empty-state empty-state-small";
-      empty.textContent = "مافيش نتائج مطابقة.";
+      empty.textContent = "ظ…ط§ظپظٹط´ ظ†طھط§ط¦ط¬ ظ…ط·ط§ط¨ظ‚ط©.";
       els.userSearchResults.appendChild(empty);
       return;
     }
@@ -1410,13 +1398,13 @@
 
       const badge = document.createElement("span");
       badge.className = "search-result-badge";
-      badge.textContent = acc.id === getCurrentAccount()?.id ? "أنت" : "فتح الملف";
+      badge.textContent = acc.id === getCurrentAccount()?.id ? "ط£ظ†طھ" : "ظپطھط­ ط§ظ„ظ…ظ„ظپ";
 
       titleLine.appendChild(name);
       titleLine.appendChild(badge);
 
       const sub = document.createElement("span");
-      sub.textContent = acc.profile?.bio ? acc.profile.bio : "ملف شخصي";
+      sub.textContent = acc.profile?.bio ? acc.profile.bio : "ظ…ظ„ظپ ط´ط®طµظٹ";
 
       info.appendChild(titleLine);
       info.appendChild(sub);
@@ -1444,7 +1432,7 @@
 
     const current = getCurrentAccount();
     if (!current) {
-      showToast("لا يوجد حساب نشط.");
+      showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
       return;
     }
 
@@ -1456,13 +1444,13 @@
     const newBio = normalizeText(els.profileBio?.value || "");
 
     if (!newName) {
-      showToast("الاسم مطلوب.");
+      showToast("ط§ظ„ط§ط³ظ… ظ…ط·ظ„ظˆط¨.");
       return;
     }
 
     const existing = getAccountByUsername(newName);
     if (existing && existing.id !== current.id) {
-      showToast("الاسم ده مستخدم بالفعل.");
+      showToast("ط§ظ„ط§ط³ظ… ط¯ظ‡ ظ…ط³طھط®ط¯ظ… ط¨ط§ظ„ظپط¹ظ„.");
       return;
     }
 
@@ -1482,7 +1470,7 @@
 
     writeStorage();
     renderAll();
-    showToast("تم حفظ الملف.");
+    showToast("طھظ… ط­ظپط¸ ط§ظ„ظ…ظ„ظپ.");
   }
 
   function handleProfileImagePick(event) {
@@ -1490,14 +1478,14 @@
     if (!file) return;
 
     if (file.size > 800 * 1024) {
-      showToast("الصورة كبيرة جدًا. اختار صورة أخف.");
+      showToast("ط§ظ„طµظˆط±ط© ظƒط¨ظٹط±ط© ط¬ط¯ظ‹ط§. ط§ط®طھط§ط± طµظˆط±ط© ط£ط®ظپ.");
       event.target.value = "";
       return;
     }
 
     const current = getCurrentAccount();
     if (!current) {
-      showToast("لا يوجد حساب نشط.");
+      showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
       return;
     }
 
@@ -1507,7 +1495,7 @@
       writeStorage();
       renderProfileView();
       renderShellState();
-      showToast("تم تحديث الصورة.");
+      showToast("طھظ… طھط­ط¯ظٹط« ط§ظ„طµظˆط±ط©.");
     };
     reader.readAsDataURL(file);
   }
@@ -1516,12 +1504,12 @@
     event.preventDefault();
     const text = normalizeText(els.publicMessageInput?.value || "");
     if (!text) {
-      showToast("اكتب رسالة أولاً.");
+      showToast("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
       return;
     }
 
     if (!canUseCurrentSession()) {
-      showToast("لا يوجد حساب نشط.");
+      showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
       return;
     }
 
@@ -1536,17 +1524,17 @@
     const peerId = state.selectedPrivatePeerId;
 
     if (!peerId) {
-      showToast("اختر شخص أولاً.");
+      showToast("ط§ط®طھط± ط´ط®طµ ط£ظˆظ„ط§ظ‹.");
       return;
     }
 
     if (!text) {
-      showToast("اكتب رسالة أولاً.");
+      showToast("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
       return;
     }
 
     if (!canUseCurrentSession()) {
-      showToast("لا يوجد حساب نشط.");
+      showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
       return;
     }
 
@@ -1564,7 +1552,7 @@
   }
 
   /* =========================
-     ⚡ EVENTS SYSTEM
+     âڑ، EVENTS SYSTEM
   ========================= */
 
   function attachEvents() {
@@ -1613,12 +1601,12 @@
     els.profileMonitorBtn?.addEventListener("click", openMonitorPanel);
 
     els.drawerSettingsBtn?.addEventListener("click", () => {
-      showToast("الإعدادات هتتضاف لاحقًا.");
+      showToast("ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ ظ‡طھطھط¶ط§ظپ ظ„ط§ط­ظ‚ظ‹ط§.");
     });
 
     els.drawerLogoutBtn?.addEventListener("click", () => {
       if (!getCurrentAccount()) {
-        showToast("لا يوجد حساب نشط.");
+        showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
         return;
       }
       logoutCurrentAccount(true);
@@ -1669,11 +1657,11 @@
     panel.id = "monitorPanel";
     panel.innerHTML = `
       <div class="drawer-subhead">
-        <h3 data-monitor-title>منظار ملفك</h3>
+        <h3 data-monitor-title>ظ…ظ†ط¸ط§ط± ظ…ظ„ظپظƒ</h3>
         <span class="tiny-count" data-monitor-count>0</span>
       </div>
       <div class="monitor-panel-body">
-        <div class="empty-state empty-state-small" data-monitor-empty>سجّل دخولك عشان يظهر سجل الزيارات.</div>
+        <div class="empty-state empty-state-small" data-monitor-empty>ط³ط¬ظ‘ظ„ ط¯ط®ظˆظ„ظƒ ط¹ط´ط§ظ† ظٹط¸ظ‡ط± ط³ط¬ظ„ ط§ظ„ط²ظٹط§ط±ط§طھ.</div>
         <div class="monitor-list" data-monitor-list></div>
       </div>
     `;
@@ -1698,7 +1686,7 @@
       if (session && acc) {
         if (isSessionExpired(session)) {
           commitCurrentSession(true);
-          showToast("انتهت الجلسة بعد 24 ساعة.");
+          showToast("ط§ظ†طھظ‡طھ ط§ظ„ط¬ظ„ط³ط© ط¨ط¹ط¯ 24 ط³ط§ط¹ط©.");
           renderAll();
           return;
         }
@@ -1732,7 +1720,7 @@
       .init({ mode: "auto" })
       .then(() => db.getStatus?.() || null)
       .catch((err) => {
-        console.warn("[KAREEM3] فشل تهيئة قاعدة البيانات الخارجية، جارٍ متابعة الوضع المحلي", err);
+        console.warn("[KAREEM3] ظپط´ظ„ طھظ‡ظٹط¦ط© ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط®ط§ط±ط¬ظٹط©طŒ ط¬ط§ط±ظچ ظ…طھط§ط¨ط¹ط© ط§ظ„ظˆط¶ط¹ ط§ظ„ظ…ط­ظ„ظٹ", err);
         return null;
       });
   }
@@ -1747,7 +1735,7 @@
           id: createId("msg"),
           senderId: guest.id,
           senderLabel: getDisplayName(guest),
-          text: "أهلاً بك في شات نار. جرّب اكتب رسالة.",
+          text: "ط£ظ‡ظ„ط§ظ‹ ط¨ظƒ ظپظٹ ط´ط§طھ ظ†ط§ط±. ط¬ط±ظ‘ط¨ ط§ظƒطھط¨ ط±ط³ط§ظ„ط©.",
           at: now() - 5 * 60 * 1000,
         },
       ];
@@ -1759,7 +1747,7 @@
   }
 
   /* =========================
-     🧠 APP CORE
+     ًں§  APP CORE
   ========================= */
 
   async function init() {
