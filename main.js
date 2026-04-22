@@ -1569,23 +1569,28 @@
     }
 
     if (!window.__drawerClickAttached) {
-      window.__drawerClickAttached = true;
-      document.addEventListener("click", (event) => {
-        const drawer = els.menuDrawer;
-        if (!drawer || drawer.classList.contains("is-hidden")) return;
+  window.__drawerClickAttached = true;
 
-        const target = event.target;
-        if (!(target instanceof Node)) return;
+  document.addEventListener("click", (event) => {
+    const drawer = els.menuDrawer;
+    const menuBtn = els.menuBtn;
 
-        const insideDrawer = drawer.contains(target);
-        const insideMenuBtn = els.menuBtn?.contains(target);
+    if (!drawer || !menuBtn) return;
+    if (drawer.classList.contains("is-hidden")) return;
 
-        if (!insideDrawer && !insideMenuBtn) {
-          drawer.classList.add("is-hidden");
-          drawer.setAttribute("aria-hidden", "true");
-        }
-      });
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+
+    const insideDrawer = drawer.contains(target);
+    const insideMenuBtn = menuBtn.contains(target);
+
+    // اقفل الدروار لو الضغط خارج الدروار والزرار
+    if (!insideDrawer && !insideMenuBtn) {
+      drawer.classList.add("is-hidden");
+      drawer.setAttribute("aria-hidden", "true");
     }
+  });
+}
 
     els.appTitleBtn?.addEventListener("click", handleAppTitleClick);
     els.privateShortcutBtn?.addEventListener("click", handlePrivateShortcutClick);
