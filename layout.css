@@ -108,8 +108,9 @@
   grid-template-rows: auto 1fr auto;
 }
 
- body {
-  outline: 5px solid red;
+ .messages-stream {
+  height: 200px;
+  background: rgba(255,0,0,0.1);
  }
 
 }
