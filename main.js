@@ -802,7 +802,12 @@
   function openPrivateChat(peerId = null, silent = false) {
   const peer = peerId ? getAccountById(peerId) : null;
 
-  state.selectedPrivatePeerId = peer ? peer.id : null;
+  if (!peer) {
+    if (!silent) showToast("الشخص غير موجود.");
+    return;
+  }
+
+  state.selectedPrivatePeerId = peer.id;
   state.selectedUserId = null;
 
   setView("private");
