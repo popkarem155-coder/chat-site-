@@ -819,11 +819,6 @@
   }, 20);
 }
 
-    if (!peer) {
-      if (!silent) showToast("الشخص غير موجود.");
-      return;
-    }
-
     state.selectedPrivatePeerId = peer.id;
     state.selectedUserId = null;
     setView("private");
