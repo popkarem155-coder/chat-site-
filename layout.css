@@ -104,7 +104,10 @@
     grid-template-columns: 1fr;
   }
 
-  .chat-panel {
-    grid-template-rows: auto 1fr auto;
-  }
+.chat-panel {
+  grid-template-rows: auto 1fr auto;
+}
+
+body {
+  outline: 5px solid red;
 }
