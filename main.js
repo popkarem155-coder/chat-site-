@@ -1877,7 +1877,10 @@
     }
 
     sendPublicMessage(text);
-  }
+
+    els.publicMessageInput.value = "";
+    els.publicMessageInput.focus();
+   }
 
   function handlePrivateSubmit(event) {
     event.preventDefault();
