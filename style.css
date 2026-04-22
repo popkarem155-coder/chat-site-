@@ -1477,8 +1477,6 @@ a {
 
 .featured-users-wrapper {
   height: var(--featured-height);
-body {
-  outline: 3px solid red;
 }
 
   
