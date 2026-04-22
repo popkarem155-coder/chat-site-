@@ -799,8 +799,20 @@
     openUserProfileById(userId);
   }
 
-  function openPrivateChat(peerId, silent = false) {
-    const peer = getAccountById(peerId);
+  function openPrivateChat(peerId = null, silent = false) {
+  const peer = peerId ? getAccountById(peerId) : null;
+
+  state.selectedPrivatePeerId = peer ? peer.id : null;
+  state.selectedUserId = null;
+
+  setView("private");
+  renderPrivateChatsList();
+  renderPrivateConversation();
+
+  setTimeout(() => {
+    els.privateMessageInput?.focus?.();
+  }, 20);
+}
 
     if (!peer) {
       if (!silent) showToast("الشخص غير موجود.");
