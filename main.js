@@ -983,7 +983,7 @@
 
     state.selectedPrivatePeerId = peer.id;
     state.selectedUserId = null;
-    setView("private");
+    openPrivateDrawer();
     renderPrivateConversation();
     renderPrivateChatsList();
     setTimeout(() => {
