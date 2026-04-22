@@ -1556,7 +1556,6 @@
   ========================= */
 
   function attachEvents() {
-  // زر القائمة
   if (els.menuBtn) {
     els.menuBtn.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -1570,14 +1569,12 @@
     });
   }
 
-  // زر الرسائل الخاصة
   if (els.privateShortcutBtn) {
     els.privateShortcutBtn.addEventListener("click", () => {
       setView("private");
     });
   }
 
-  // قفل الدروار عند الضغط خارجها (مرة واحدة فقط)
   if (!window.__drawerClickAttached) {
     window.__drawerClickAttached = true;
 
@@ -1600,7 +1597,59 @@
       }
     });
   }
-  }
+
+  els.appTitleBtn?.addEventListener("click", handleAppTitleClick);
+  els.privateShortcutBtn?.addEventListener("click", handlePrivateShortcutClick);
+
+  els.publicMessageForm?.addEventListener("submit", handlePublicSubmit);
+  els.privateMessageForm?.addEventListener("submit", handlePrivateSubmit);
+  els.profileForm?.addEventListener("submit", handleProfileSave);
+  els.profileImageInput?.addEventListener("change", handleProfileImagePick);
+
+  els.openMyProfileFromMenu?.addEventListener("click", openProfile);
+  els.drawerProfileBtn?.addEventListener("click", openProfile);
+  els.drawerMonitorBtn?.addEventListener("click", openMonitorPanel);
+  els.profileMonitorBtn?.addEventListener("click", openMonitorPanel);
+
+  els.drawerSettingsBtn?.addEventListener("click", () => {
+    showToast("الإعدادات هتضاف لاحقًا.");
+  });
+
+  els.drawerLogoutBtn?.addEventListener("click", () => {
+    if (!getCurrentAccount()) {
+      showToast("لا يوجد حساب نشط.");
+      return;
+    }
+    logoutCurrentAccount(true);
+  });
+
+  els.backFromProfileBtn?.addEventListener("click", () => openHome());
+  els.closeProfileBtn?.addEventListener("click", () => openHome());
+  els.backFromPrivateBtn?.addEventListener("click", () => openHome());
+  els.backFromUserViewBtn?.addEventListener("click", () => openHome());
+  els.closeUserViewBtn?.addEventListener("click", () => openHome());
+
+  els.startPrivateChatBtn?.addEventListener("click", () => {
+    const targetId = els.startPrivateChatBtn?.dataset?.targetId;
+    if (!targetId) return;
+    openPrivateChat(targetId, true);
+  });
+
+  els.userSearchInput?.addEventListener("input", renderUserSearchResults);
+
+  const activityEvents = ["pointerdown", "keydown", "touchstart", "scroll", "mousemove"];
+  activityEvents.forEach((type) => {
+    document.addEventListener(type, () => {
+      if (canUseCurrentSession()) markActivity();
+    }, { passive: true });
+  });
+
+  window.addEventListener("storage", () => {
+    readStorage();
+    ensureCurrentAccount();
+    renderAll();
+  });
+}
   
     els.appTitleBtn?.addEventListener("click", handleAppTitleClick);
     els.privateShortcutBtn?.addEventListener("click", handlePrivateShortcutClick);
