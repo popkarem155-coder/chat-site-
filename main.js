@@ -1,192 +1,312 @@
-(() => {
-  "use strict";
+/* =========================
+   KAREEM CHAT MAIN.JS
+   FULL WORKING CORE
+========================= */
 
-  const KEYS = {
-    accounts: "kareem3_accounts",
-    publicMessages: "kareem3_publicMessages",
-    privateThreads: "kareem3_privateThreads",
-    currentSession: "kareem3_currentSession",
-    guestSeed: "kareem3_guestSeed",
-  };
+const state = {
+  view: "home",
+  currentUser: null,
+  activePrivateUser: null,
+  messages: [],
+  privateChats: {},
+  users: [],
+  featuredUsers: []
+};
 
-  const CONFIG = {
-    SESSION_TTL_MS: 24 * 60 * 60 * 1000,
-    ONLINE_WINDOW_MS: 15 * 60 * 1000,
-    FEATURED_WINDOW_MS: 2 * 60 * 60 * 1000,
-    PUBLIC_MESSAGE_CAP: 70,
-    MAX_NOTIFICATIONS: 20,
-    TOAST_MS: 2400,
-    MAX_NAME_LENGTH: 40,
-  };
+/* =========================
+   ELEMENTS CACHE
+========================= */
+const $ = (id) => document.getElementById(id);
 
-  const state = {
-    accounts: [],
-    publicMessages: [],
-    privateThreads: {},
-    currentAccountId: null,
-    selectedPrivatePeerId: null,
-    selectedUserId: null,
-    view: "home",
-  };
+const els = {};
 
-  const els = {};
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  cache();
+  bindEvents();
+  loadData();
+  renderAll();
+  setView("home");
+});
 
-  const $ = (id) => document.getElementById(id);
-  const now = () => Date.now();
+/* =========================
+   CACHE ELEMENTS
+========================= */
+function cache() {
+  els.app = $("app");
 
-  function normalizeText(v) {
-    return String(v || "").trim();
-  }
+  els.menuBtn = $("menuBtn");
+  els.menuDrawer = $("menuDrawer");
 
-  function createId(prefix = "id") {
-    return prefix + "_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-  }
+  els.publicForm = $("publicMessageForm");
+  els.publicInput = $("publicMessageInput");
+  els.publicMessages = $("publicMessages");
 
-  /* ===================== STORAGE ===================== */
+  els.privateForm = $("privateMessageForm");
+  els.privateInput = $("privateMessageInput");
+  els.privateMessages = $("privateMessages");
 
-  function load() {
-    state.accounts = JSON.parse(localStorage.getItem(KEYS.accounts) || "[]");
-    state.publicMessages = JSON.parse(localStorage.getItem(KEYS.publicMessages) || "[]");
-    state.privateThreads = JSON.parse(localStorage.getItem(KEYS.privateThreads) || "{}");
+  els.onlineList = $("onlineUsersList");
+  els.featuredList = $("featuredUsersList");
 
-    const session = JSON.parse(localStorage.getItem(KEYS.currentSession) || "null");
-    if (session) state.currentAccountId = session.accountId;
-  }
+  els.drawerLogoutBtn = $("drawerLogoutBtn");
 
-  function save() {
-    localStorage.setItem(KEYS.accounts, JSON.stringify(state.accounts));
-    localStorage.setItem(KEYS.publicMessages, JSON.stringify(state.publicMessages));
-    localStorage.setItem(KEYS.privateThreads, JSON.stringify(state.privateThreads));
+  els.profileForm = $("profileForm");
+  els.profileName = $("profileName");
+  els.profilePassword = $("profilePassword");
+  els.profileAge = $("profileAge");
+  els.profileGender = $("profileGender");
+  els.profileNationality = $("profileNationality");
+  els.profileBio = $("profileBio");
 
-    if (state.currentAccountId) {
-      localStorage.setItem(
-        KEYS.currentSession,
-        JSON.stringify({ accountId: state.currentAccountId })
-      );
-    }
-  }
+  els.profileAvatar = $("profileAvatarPreview");
+}
 
-  /* ===================== ACCOUNTS ===================== */
+/* =========================
+   EVENTS
+========================= */
+function bindEvents() {
+  $("appTitleBtn").onclick = () => setView("home");
 
-  function getCurrentAccount() {
-    return state.accounts.find(a => a.id === state.currentAccountId);
-  }
+  $("privateShortcutBtn").onclick = () => setView("private");
 
-  function createGuest() {
-    const guest = {
-      id: createId("acc"),
-      username: "زائر",
-      createdAt: now(),
-      lastSeenAt: now(),
-      profile: { name: "زائر", bio: "حساب تجريبي" }
+  $("menuBtn").onclick = toggleMenu;
+
+  $("backFromProfileBtn")?.addEventListener("click", () => setView("home"));
+  $("backFromPrivateBtn")?.addEventListener("click", () => setView("home"));
+
+  els.publicForm?.addEventListener("submit", sendPublicMessage);
+  els.privateForm?.addEventListener("submit", sendPrivateMessage);
+
+  els.profileForm?.addEventListener("submit", saveProfile);
+
+  $("closeProfileBtn")?.addEventListener("click", () => setView("home"));
+
+  els.drawerLogoutBtn?.addEventListener("click", logout);
+}
+
+/* =========================
+   VIEW SYSTEM
+========================= */
+function setView(view) {
+  state.view = view;
+  els.app.dataset.view = view;
+
+  document.querySelectorAll(".page").forEach(p => p.classList.add("is-hidden"));
+  document.querySelectorAll("main").forEach(p => p.classList.add("is-hidden"));
+
+  if (view === "home") $("homeView")?.classList.remove("is-hidden");
+  if (view === "profile") $("profileView")?.classList.remove("is-hidden");
+  if (view === "private") $("privateView")?.classList.remove("is-hidden");
+}
+
+/* =========================
+   MENU
+========================= */
+function toggleMenu() {
+  els.menuDrawer.classList.toggle("is-hidden");
+}
+
+/* =========================
+   DATA STORAGE
+========================= */
+function loadData() {
+  state.messages = JSON.parse(localStorage.getItem("publicMessages") || "[]");
+  state.privateChats = JSON.parse(localStorage.getItem("privateChats") || "{}");
+
+  state.users = JSON.parse(localStorage.getItem("users") || "[]");
+
+  if (!state.currentUser) {
+    state.currentUser = {
+      id: Date.now(),
+      name: "زائر",
+      bio: "",
+      online: true
     };
-    state.accounts.push(guest);
-    state.currentAccountId = guest.id;
-    save();
-    return guest;
+  }
+}
+
+function saveData() {
+  localStorage.setItem("publicMessages", JSON.stringify(state.messages));
+  localStorage.setItem("privateChats", JSON.stringify(state.privateChats));
+  localStorage.setItem("users", JSON.stringify(state.users));
+}
+
+/* =========================
+   PUBLIC CHAT
+========================= */
+function sendPublicMessage(e) {
+  e.preventDefault();
+
+  const text = els.publicInput.value.trim();
+  if (!text) return;
+
+  const msg = {
+    id: Date.now(),
+    text,
+    user: state.currentUser.name,
+    time: new Date().toLocaleTimeString()
+  };
+
+  state.messages.push(msg);
+
+  if (state.messages.length > 70) {
+    state.messages.shift();
   }
 
-  /* ===================== PUBLIC CHAT ===================== */
+  els.publicInput.value = "";
 
-  function addPublicMessage(text) {
-    state.publicMessages.push({
-      id: createId("msg"),
-      text,
-      at: now(),
-      senderId: state.currentAccountId
-    });
+  saveData();
+  renderPublicMessages();
+}
 
-    if (state.publicMessages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
-      state.publicMessages = state.publicMessages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
-    }
+function renderPublicMessages() {
+  els.publicMessages.innerHTML = "";
 
-    save();
-    renderPublic();
+  if (!state.messages.length) {
+    els.publicMessages.innerHTML = `<div class="messages-placeholder">لسه ما فيش رسائل ظاهرة هنا.</div>`;
+    return;
   }
 
-  function renderPublic() {
-    const box = $("publicMessages");
-    if (!box) return;
+  state.messages.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "message-item";
 
-    box.innerHTML = "";
+    div.innerHTML = `
+      <div class="message-head">
+        <div class="message-avatar">${m.user[0]}</div>
+        <div class="message-meta-wrap">
+          <button class="message-sender">${m.user}</button>
+          <span class="message-time">${m.time}</span>
+        </div>
+      </div>
+      <p class="message-text">${m.text}</p>
+    `;
 
-    state.publicMessages.forEach(m => {
-      const div = document.createElement("div");
-      div.className = "msg";
-      div.textContent = m.text;
-      box.appendChild(div);
-    });
+    els.publicMessages.appendChild(div);
+  });
+
+  els.publicMessages.scrollTop = els.publicMessages.scrollHeight;
+}
+
+/* =========================
+   PRIVATE CHAT
+========================= */
+function sendPrivateMessage(e) {
+  e.preventDefault();
+
+  if (!state.activePrivateUser) return;
+
+  const text = els.privateInput.value.trim();
+  if (!text) return;
+
+  const uid = state.activePrivateUser.id;
+
+  if (!state.privateChats[uid]) {
+    state.privateChats[uid] = [];
   }
 
-  /* ===================== PRIVATE CHAT ===================== */
+  state.privateChats[uid].push({
+    text,
+    time: new Date().toLocaleTimeString(),
+    from: state.currentUser.name
+  });
 
-  function getThread(a, b) {
-    const key = [a, b].sort().join("__");
+  els.privateInput.value = "";
 
-    if (!state.privateThreads[key]) {
-      state.privateThreads[key] = { messages: [] };
-    }
+  saveData();
+  renderPrivateMessages();
+}
 
-    return state.privateThreads[key];
+function renderPrivateMessages() {
+  const uid = state.activePrivateUser?.id;
+  els.privateMessages.innerHTML = "";
+
+  if (!uid || !state.privateChats[uid]) {
+    els.privateMessages.innerHTML = `<div class="messages-placeholder">اختار محادثة عشان تبدأ.</div>`;
+    return;
   }
 
-  function sendPrivate(peerId, text) {
-    const me = state.currentAccountId;
-    const thread = getThread(me, peerId);
+  state.privateChats[uid].forEach(m => {
+    const div = document.createElement("div");
+    div.className = "message-item is-own";
 
-    thread.messages.push({
-      id: createId("pmsg"),
-      text,
-      from: me,
-      at: now()
-    });
+    div.innerHTML = `
+      <div class="message-head">
+        <div class="message-avatar">${m.from[0]}</div>
+        <div class="message-meta-wrap">
+          <span class="message-sender">${m.from}</span>
+          <span class="message-time">${m.time}</span>
+        </div>
+      </div>
+      <p class="message-text">${m.text}</p>
+    `;
 
-    save();
-  }
+    els.privateMessages.appendChild(div);
+  });
 
-  /* ===================== UI ===================== */
+  els.privateMessages.scrollTop = els.privateMessages.scrollHeight;
+}
 
-  function setView(v) {
-    state.view = v;
+/* =========================
+   USERS
+========================= */
+function renderUsers() {
+  els.onlineList.innerHTML = "";
 
-    ["homeView","profileView","privateView","userView"].forEach(id => {
-      const el = $(id);
-      if (el) el.classList.add("hidden");
-    });
+  state.users.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "user-row";
 
-    const active = $(v + "View");
-    if (active) active.classList.remove("hidden");
-  }
+    div.innerHTML = `
+      <div class="avatar">${u.name[0]}</div>
+      <div class="user-row-info">
+        <strong>${u.name}</strong>
+        <span>${u.bio || "بدون وصف"}</span>
+      </div>
+      <div class="online-badge">●</div>
+    `;
 
-  function cache() {
-    els.publicForm = $("publicMessageForm");
-    els.publicInput = $("publicMessageInput");
-    els.privateForm = $("privateMessageForm");
-    els.privateInput = $("privateMessageInput");
-  }
+    els.onlineList.appendChild(div);
+  });
+}
 
-  function bind() {
-    els.publicForm?.addEventListener("submit", e => {
-      e.preventDefault();
-      const val = els.publicInput.value;
-      if (!val) return;
-      addPublicMessage(val);
-      els.publicInput.value = "";
-    });
+/* =========================
+   PROFILE
+========================= */
+function saveProfile(e) {
+  e.preventDefault();
 
-    $("appTitleBtn")?.addEventListener("click", () => location.reload());
-  }
+  state.currentUser = {
+    ...state.currentUser,
+    name: els.profileName.value,
+    password: els.profilePassword.value,
+    age: els.profileAge.value,
+    gender: els.profileGender.value,
+    nationality: els.profileNationality.value,
+    bio: els.profileBio.value
+  };
 
-  function init() {
-    cache();
-    load();
+  localStorage.setItem("currentUser", JSON.stringify(state.currentUser));
 
-    if (!state.currentAccountId) createGuest();
+  alert("تم حفظ الملف");
+  renderUsers();
+}
 
-    bind();
-    renderPublic();
-    setView("home");
-  }
+/* =========================
+   LOGOUT
+========================= */
+function logout() {
+  localStorage.clear();
+  location.reload();
+}
 
-  document.addEventListener("DOMContentLoaded", init);
-})();
+/* =========================
+   RENDER ALL
+========================= */
+function renderAll() {
+  renderPublicMessages();
+  renderUsers();
+}
