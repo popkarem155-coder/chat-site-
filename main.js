@@ -1,11 +1,11 @@
 (() => {
-  "استخدام صارم"؛
+  "use strict";
 
   const KEYS = {
-    الحسابات: "kareem3_accounts"،
-    الرسائل العامة: "kareem3_publicMessages"،
+    accounts: "kareem3_accounts",
+    publicMessages: "kareem3_publicMessages",
     privateThreads: "kareem3_privateThreads",
-    الجلسة الحالية: "kareem3_currentSession"،
+    currentSession: "kareem3_currentSession",
     guestSeed: "kareem3_guestSeed",
   };
 
@@ -14,14 +14,14 @@
     ONLINE_WINDOW_MS: 15 * 60 * 1000,
     FEATURED_WINDOW_MS: 2 * 60 * 60 * 1000,
     PUBLIC_MESSAGE_CAP: 70,
-    الحد الأقصى للإشعارات: 20
+    MAX_NOTIFICATIONS: 20,
     TOAST_MS: 2400,
-    الحد الأقصى لطول الاسم: 40،
+    MAX_NAME_LENGTH: 40,
   };
 
   const state = {
-    الحسابات: [],
-    الرسائل العامة: [],
+    accounts: [],
+    publicMessages: [],
     privateThreads: {},
     currentAccountId: null,
     selectedPrivatePeerId: null,
@@ -31,177 +31,177 @@
     toastHostEl: null,
     activitySaveTimer: null,
     intervalTimer: null,
-    عرض: "الرئيسية"،
-    استعلام البحث: "",
+    view: "home",
+    searchQuery: "",
     externalDB: null,
   };
 
   const els = {};
 
-  دالة $(id) {
+  function $(id) {
     return document.getElementById(id);
   }
 
-  دالة الآن() {
-    أعد التاريخ الحالي.
+  function now() {
+    return Date.now();
   }
 
-  دالة safeJSONParse(value, fallback) {
-    يحاول {
-      إذا لم تكن القيمة موجودة، فقم بإرجاع القيمة الافتراضية.
-      أعد JSON.parse(value)؛
-    } يمسك {
-      العودة إلى الوضع الافتراضي؛
+  function safeJSONParse(value, fallback) {
+    try {
+      if (!value) return fallback;
+      return JSON.parse(value);
+    } catch {
+      return fallback;
     }
   }
 
-  دالة safeJSONStringify(value, fallback = "{}") {
-    يحاول {
-      أعد JSON.stringify(value)؛
-    } يمسك {
-      العودة إلى الوضع الافتراضي؛
+  function safeJSONStringify(value, fallback = "{}") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return fallback;
     }
   }
 
-  دالة normalizeText(value) {
+  function normalizeText(value) {
     return String(value ?? "").trim().replace(/\s+/g, " ");
   }
 
-  دالة clampText(value, max = CONFIG.MAX_NAME_LENGTH) {
+  function clampText(value, max = CONFIG.MAX_NAME_LENGTH) {
     return normalizeText(value).slice(0, max);
   }
 
-  دالة إنشاء المعرف (البادئة = "id") {
+  function createId(prefix = "id") {
     return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   }
 
-  دالة hashString(str) {
-    ليكن h = 0؛
+  function hashString(str) {
+    let h = 0;
     const s = String(str || "");
     for (let i = 0; i < s.length; i++) {
       h = (h << 5) - h + s.charCodeAt(i);
       h |= 0;
     }
-    أرجع القيمة المطلقة لـ h.
+    return Math.abs(h);
   }
 
-  دالة تلوين النص (نص) {
+  function colorFromText(text) {
     const h = hashString(text) % 360;
-    return `hsl(${h} 35% 28%)`);
+    return `hsl(${h} 35% 28%)`;
   }
 
-  دالة تنسيق الوقت(ts) {
-    يحاول {
+  function formatTime(ts) {
+    try {
       return new Date(ts).toLocaleTimeString("ar-EG", {
-        الساعة: "رقمين"،
-        دقيقة: "رقمين"،
+        hour: "2-digit",
+        minute: "2-digit",
       });
-    } يمسك {
-      يعود ""؛
+    } catch {
+      return "";
     }
   }
 
-  دالة timeAgo(ts) {
+  function timeAgo(ts) {
     const diff = Math.max(0, now() - Number(ts || 0));
     const minute = 60 * 1000;
     const hour = 60 * minute;
     const day = 24 * hour;
 
-    إذا (فرق < دقيقة) تُرجع "ظ…ظ†ط° ظ"طط¸ط§طھ"؛
-    إذا (فرق < ساعة) العودة `ظ…ظ†ط° ${Math.floor(diff / moment)} ط¯ظ‚ظٹظ‚ط©`;
-    إذا كان (الفرق < اليوم) أرجع `ظ…ظ†ط° ${Math.floor(الفرق / الساعة)} ط³ط§ط¹ط©`;
+    if (diff < minute) return "ظ…ظ†ط° ظ„ط­ط¸ط§طھ";
+    if (diff < hour) return `ظ…ظ†ط° ${Math.floor(diff / minute)} ط¯ظ‚ظٹظ‚ط©`;
+    if (diff < day) return `ظ…ظ†ط° ${Math.floor(diff / hour)} ط³ط§ط¹ط©`;
     return `ظ…ظ†ط° ${Math.floor(diff / day)} ظٹظˆظ…`;
   }
 
-  دالة تسمية المدة (مللي ثانية) {
+  function durationLabel(ms) {
     const totalMinutes = Math.floor(Math.max(0, ms) / 60000);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    إذا كانت (الساعات <= 0) تُرجع `ظ†ط´ط· ظ…ظ†ط° ${دقائق} ط¯ظ‚ظٹظ‚ط©`;
-    إذا كانت (الدقائق <= 0) تُرجع `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط©`;
-    return `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط© ظˆ${دقائق} ط¯ظ‚ظٹظ‚ط©`;
+    if (hours <= 0) return `ظ†ط´ط· ظ…ظ†ط° ${minutes} ط¯ظ‚ظٹظ‚ط©`;
+    if (minutes <= 0) return `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط©`;
+    return `ظ†ط´ط· ظ…ظ†ط° ${hours} ط³ط§ط¹ط© ظˆ${minutes} ط¯ظ‚ظٹظ‚ط©`;
   }
 
-  دالة getAccounts() {
+  function getAccounts() {
     return Array.isArray(state.accounts) ? state.accounts : [];
   }
 
-  دالة getAccountById(id) {
+  function getAccountById(id) {
     return getAccounts().find((acc) => acc.id === id) || null;
   }
 
-  دالة getAccountByUsername(اسم المستخدم) {
+  function getAccountByUsername(username) {
     const key = normalizeText(username).toLowerCase();
-    إذا لم يكن المفتاح موجودًا، فأرجع قيمة فارغة.
+    if (!key) return null;
     return getAccounts().find((acc) => normalizeText(acc.username).toLowerCase() === key) || null;
   }
 
-  دالة getDisplayName(account) {
-    إذا قام (!الحساب) بإرجاع "ظ…ط³طھط®ط¯ظ…";
+  function getDisplayName(account) {
+    if (!account) return "ظ…ط³طھط®ط¯ظ…";
     const name = clampText(account.profile?.name || account.username || "ظ…ط³طھط®ط¯ظ…", CONFIG.MAX_NAME_LENGTH);
-    اسم الإرجاع || "ظ…ط³طھط®ط¯ظ…";
+    return name || "ظ…ط³طھط®ط¯ظ…";
   }
 
-  دالة getAvatarInitial(account) {
+  function getAvatarInitial(account) {
     const name = getDisplayName(account);
-    اسم العودة؟ name[0] : "طں";
+    return name ? name[0] : "طں";
   }
 
-  دالة getCurrentSession() {
+  function getCurrentSession() {
     return safeJSONParse(localStorage.getItem(KEYS.currentSession), null);
   }
 
-  دالة isSessionExpired(session) {
-    إذا لم تكن هناك جلسة أو لم تكن الجلسة تنتهي صلاحيتها، فسيتم إرجاع القيمة true.
+  function isSessionExpired(session) {
+    if (!session || !session.expiresAt) return true;
     return now() > Number(session.expiresAt);
   }
 
-  دالة getCurrentAccount() {
-    إذا لم يكن (state.currentAccountId) موجودًا، فسيتم إرجاع قيمة فارغة (null).
+  function getCurrentAccount() {
+    if (!state.currentAccountId) return null;
     return getAccountById(state.currentAccountId);
   }
 
-  دالة isCurrentAccountOnline() {
+  function isCurrentAccountOnline() {
     const acc = getCurrentAccount();
-    إذا لم يكن الحساب موجودًا، فأرجع خطأ.
+    if (!acc) return false;
 
     const session = getCurrentSession();
-    إذا لم تكن هناك جلسة أو كان معرف الحساب الخاص بالجلسة لا يساوي معرف الحساب، فسيتم إرجاع خطأ.
-    إذا كانت الجلسة منتهية الصلاحية (isSessionExpired(session))، فسيتم إرجاع خطأ (false).
+    if (!session || session.accountId !== acc.id) return false;
+    if (isSessionExpired(session)) return false;
 
     const lastSeen = Number(acc.lastSeenAt || 0);
     return now() - lastSeen <= CONFIG.ONLINE_WINDOW_MS;
   }
 
-  دالة isCurrentAccountFeatured() {
+  function isCurrentAccountFeatured() {
     const acc = getCurrentAccount();
-    إذا لم يكن الحساب موجودًا، فأرجع خطأ.
-    إذا لم يكن الحساب الحالي متصلاً بالإنترنت، فسيتم إرجاع القيمة false.
+    if (!acc) return false;
+    if (!isCurrentAccountOnline()) return false;
 
     const session = getCurrentSession();
     const startedAt = Number(session?.startedAt || 0);
     const total = Number(acc.totalActiveMs || 0) + Math.max(0, now() - startedAt);
-    إرجاع المجموع >= CONFIG.FEATURED_WINDOW_MS;
+    return total >= CONFIG.FEATURED_WINDOW_MS;
   }
 
-  دالة getActiveDurationForAccount(acc) {
-    إذا لم يكن الحساب صحيحًا، فأرجع 0.
+  function getActiveDurationForAccount(acc) {
+    if (!acc) return 0;
 
     const session = getCurrentSession();
-    لو (
-      حصة &&
+    if (
+      session &&
       session.accountId === acc.id &&
       !isSessionExpired(session)
     ) {
-      أعد القيمة العددية (acc.totalActiveMs || 0) + Math.max(0, now() - Number(session.startedAt || now()));
+      return Number(acc.totalActiveMs || 0) + Math.max(0, now() - Number(session.startedAt || now()));
     }
 
-    أرجع الرقم (acc.totalActiveMs || 0)؛
+    return Number(acc.totalActiveMs || 0);
   }
 
-  دالة setAvatar(el, account, fallbackLabel = "طں") {
-    إذا لم يكن العنصر موجودًا، فقم بالخروج.
+  function setAvatar(el, account, fallbackLabel = "طں") {
+    if (!el) return;
 
     const initial = account ? getAvatarInitial(account) : fallbackLabel;
     const avatarUrl = account?.profile?.avatar || "";
@@ -213,83 +213,83 @@
     el.style.backgroundColor = colorFromText(account?.username || fallbackLabel);
     el.style.color = "";
 
-    إذا كان (avatarUrl) {
-      el.style.backgroundImage = `url("${avatarUrl}")`);
+    if (avatarUrl) {
+      el.style.backgroundImage = `url("${avatarUrl}")`;
       el.textContent = "";
       el.style.backgroundColor = "#222";
     }
   }
 
   /* =========================
-     نظام تخزين ًں'¾
+     ًں’¾ STORAGE SYSTEM
   ========================= */
 
-  دالة قراءة وحدة التخزين() {
+  function readStorage() {
     state.accounts = safeJSONParse(localStorage.getItem(KEYS.accounts), []);
     state.publicMessages = safeJSONParse(localStorage.getItem(KEYS.publicMessages), []);
     state.privateThreads = safeJSONParse(localStorage.getItem(KEYS.privateThreads), {});
   }
 
-  دالة كتابة التخزين() {
-    يحاول {
+  function writeStorage() {
+    try {
       localStorage.setItem(KEYS.accounts, safeJSONStringify(state.accounts, "[]"));
       localStorage.setItem(KEYS.publicMessages, safeJSONStringify(state.publicMessages, "[]"));
       localStorage.setItem(KEYS.privateThreads, safeJSONStringify(state.privateThreads, "{}"));
 
-      إذا كان (state.currentAccountId) {
+      if (state.currentAccountId) {
         const acc = getCurrentAccount();
-        إذا (acc) {
+        if (acc) {
           localStorage.setItem(
             KEYS.currentSession,
             safeJSONStringify({
               accountId: state.currentAccountId,
-              بدأ في: acc.sessionStartedAt || الآن()،
+              startedAt: acc.sessionStartedAt || now(),
               expiresAt: acc.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS),
             }, "{}")
           );
         }
-      } آخر {
+      } else {
         localStorage.removeItem(KEYS.currentSession);
       }
     } catch (err) {
-      showToast("طھط¹ط°ط± طظپط¸ ط§ظ„ط¨ظٹط§ظ†ط§طھ.طھط £ظƒط¯ ط £ظ† ظ…ط³ط§طط© ط§ظ„طھط®ط²ظٹظ† ظ…طھط§طط©.”);
+      showToast("طھط¹ط°ط± ط­ظپط¸ ط§ظ„ط¨ظٹط§ظ†ط§طھ. طھط£ظƒط¯ ط£ظ† ظ…ط³ط§ط­ط© ط§ظ„طھط®ط²ظٹظ† ظ…طھط§ط­ط©.");
       console.error(err);
     }
   }
 
-  دالة prunePublicMessages() {
-    إذا لم تكن `state.publicMessages` مصفوفة، فسيتم تعيينها إلى `[]`.
-    إذا كان طول الرسائل العامة في الحالة أكبر من الحد الأقصى المسموح به للرسائل العامة في الإعدادات {
+  function prunePublicMessages() {
+    if (!Array.isArray(state.publicMessages)) state.publicMessages = [];
+    if (state.publicMessages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
       state.publicMessages = state.publicMessages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
     }
   }
 
-  دالة pruneNotifications(acc) {
-    إذا لم يكن الحساب موجودًا، فقم بالخروج.
-    إذا لم تكن `acc.notifications` مصفوفة، فسيتم تعيينها إلى `[]`.
-    إذا كان عدد الإشعارات في الحساب أكبر من الحد الأقصى للإشعارات المحددة في الإعدادات {
+  function pruneNotifications(acc) {
+    if (!acc) return;
+    if (!Array.isArray(acc.notifications)) acc.notifications = [];
+    if (acc.notifications.length > CONFIG.MAX_NOTIFICATIONS) {
       acc.notifications = acc.notifications.slice(-CONFIG.MAX_NOTIFICATIONS);
     }
   }
 
-  دالة normalizeThread(thread) {
-    إذا لم يكن (thread) موجودًا أو كان نوع thread ليس "object"، فسيتم إرجاع قيمة فارغة (null).
+  function normalizeThread(thread) {
+    if (!thread || typeof thread !== "object") return null;
 
     const messages = Array.isArray(thread.messages) ? thread.messages : [];
-    يعود {
-      المشاركون: Array.isArray(thread.participants) ? thread.participants : [],
-      رسائل،
-      تم التحديث في: رقم (thread.updatedAt || 0)،
+    return {
+      participants: Array.isArray(thread.participants) ? thread.participants : [],
+      messages,
+      updatedAt: Number(thread.updatedAt || 0),
     };
   }
 
-  دالة prunePrivateThreads() {
+  function prunePrivateThreads() {
     const cleaned = {};
     Object.entries(state.privateThreads || {}).forEach(([key, thread]) => {
       const t = normalizeThread(thread);
-      إذا لم يكن (t) فارجع؛
+      if (!t) return;
 
-      إذا كان عدد الرسائل أكبر من الحد الأقصى المسموح به للرسائل العامة (CONFIG.PUBLIC_MESSAGE_CAP) {
+      if (t.messages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
         t.messages = t.messages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
       }
 
@@ -298,87 +298,87 @@
     state.privateThreads = cleaned;
   }
 
-  دالة getThreadKey(a, b) {
+  function getThreadKey(a, b) {
     return [a, b].sort().join("__");
   }
 
-  دالة getThread(a, b, createIfMissing = false) {
-    إذا لم يكن (أ || لم يكن ب) فأرجع قيمة فارغة؛
+  function getThread(a, b, createIfMissing = false) {
+    if (!a || !b) return null;
 
     const key = getThreadKey(a, b);
     let thread = normalizeThread(state.privateThreads[key]);
 
-    إذا لم يكن هناك خيط (thread) وتم إنشاء الدالة إذا كانت مفقودة (createIfMissing) {
-      الخيط = {
-        المشاركون: [أ، ب]،
-        رسائل: []،
-        تم التحديث في: الآن()،
+    if (!thread && createIfMissing) {
+      thread = {
+        participants: [a, b],
+        messages: [],
+        updatedAt: now(),
       };
       state.privateThreads[key] = thread;
-      أعد الخيط؛
+      return thread;
     }
 
-    إذا لم يكن هناك خيط، فأرجع قيمة فارغة.
+    if (!thread) return null;
 
     state.privateThreads[key] = thread;
-    أعد الخيط؛
+    return thread;
   }
 
   /* =========================
-     نظام المصادقة ًں”گ
+     ًں”گ AUTH SYSTEM
   ========================= */
 
-  دالة seedGuestAccount() {
+  function seedGuestAccount() {
     const guestSeed =
       safeJSONParse(localStorage.getItem(KEYS.guestSeed), null) || {
         id: createId("acc"),
-        تم الإنشاء في: الآن()،
+        createdAt: now(),
       };
 
-    يحاول {
+    try {
       localStorage.setItem(KEYS.guestSeed, safeJSONStringify(guestSeed, "{}"));
-    } يمسك {}
+    } catch {}
 
     const existing = getAccountById(guestSeed.id);
-    إذا (كان موجودًا) فأرجع الموجود؛
+    if (existing) return existing;
 
     const guest = {
-      المعرّف: guestSeed.id،
-      اسم المستخدم: "ط²ط§ط¦ط±"،
-      كلمة المرور: ""،
-      تاريخ الإنشاء: guestSeed.createdAt،
+      id: guestSeed.id,
+      username: "ط²ط§ط¦ط±",
+      password: "",
+      createdAt: guestSeed.createdAt,
       lastSeenAt: now(),
       totalActiveMs: 0,
       sessionStartedAt: now(),
       sessionExpiresAt: now() + CONFIG.SESSION_TTL_MS,
-      حساب تعريفي: {
-        الاسم: "ط²ط§ط¦ط±"،
-        عمر: ""،
-        جنس: ""،
-        جنسية: ""،
-        السيرة الذاتية: "طط³ط§ط¨ ط§ظپطھط±ط§ط¶ظٹ ظ‹ظ‹طھط¬ط±ط¨ط©.”,
-        الصورة الرمزية: "",
+      profile: {
+        name: "ط²ط§ط¦ط±",
+        age: "",
+        gender: "",
+        nationality: "",
+        bio: "ط­ط³ط§ط¨ ط§ظپطھط±ط§ط¶ظٹ ظ„ظ„طھط¬ط±ط¨ط©.",
+        avatar: "",
       },
-      إشعارات: []،
+      notifications: [],
       isDemo: true,
     };
 
     state.accounts.push(guest);
-    حذف الإشعارات (الضيف)؛
-    ضيف عائد؛
+    pruneNotifications(guest);
+    return guest;
   }
 
-  دالة تضمن الحساب الحالي() {
+  function ensureCurrentAccount() {
     const session = getCurrentSession();
 
-    إذا كانت الجلسة موجودة وكان معرف الحساب الخاص بها موجودًا،
+    if (session && session.accountId) {
       const acc = getAccountById(session.accountId);
-      إذا كان الحساب موجودًا ولم تنتهِ صلاحية الجلسة، {
+      if (acc && !isSessionExpired(session)) {
         state.currentAccountId = acc.id;
         acc.sessionStartedAt = Number(session.startedAt || now());
         acc.sessionExpiresAt = Number(session.expiresAt || (now() + CONFIG.SESSION_TTL_MS));
         acc.lastSeenAt = acc.lastSeenAt || now();
-        إرجاع الحساب؛
+        return acc;
       }
     }
 
@@ -387,49 +387,49 @@
     localStorage.setItem(
       KEYS.currentSession,
       safeJSONStringify({
-        معرّف الحساب: guest.id،
-        بدأ في: الآن()،
+        accountId: guest.id,
+        startedAt: now(),
         expiresAt: now() + CONFIG.SESSION_TTL_MS,
       }, "{}")
     );
-    ضيف عائد؛
+    return guest;
   }
 
-  دالة إنشاء حساب (اسم المستخدم، كلمة المرور = "") {
+  function createAccount(username, password = "") {
     const name = clampText(username, CONFIG.MAX_NAME_LENGTH);
     const pass = String(password || "").trim();
 
     const existing = getAccountByUsername(name);
-    إذا (كان موجودًا) فأرجع الموجود؛
+    if (existing) return existing;
 
     const account = {
       id: createId("acc"),
-      اسم المستخدم: الاسم،
-      كلمة المرور: كلمة المرور،
-      تم الإنشاء في: الآن()،
+      username: name,
+      password: pass,
+      createdAt: now(),
       lastSeenAt: now(),
       totalActiveMs: 0,
       sessionStartedAt: now(),
       sessionExpiresAt: now() + CONFIG.SESSION_TTL_MS,
-      حساب تعريفي: {
-        الاسم: الاسم،
-        عمر: ""،
-        جنس: ""،
-        جنسية: ""،
-        نبذة تعريفية: ",
-        الصورة الرمزية: "",
+      profile: {
+        name: name,
+        age: "",
+        gender: "",
+        nationality: "",
+        bio: "",
+        avatar: "",
       },
-      إشعارات: []،
+      notifications: [],
       isDemo: false,
     };
 
     state.accounts.push(account);
-    حذف الإشعارات (الحساب)؛
-    إعادة الحساب؛
+    pruneNotifications(account);
+    return account;
   }
 
-  دالة تسجيل الدخول إلى الحساب (الحساب) {
-    إذا لم يكن هناك حساب، فقم بالخروج؛
+  function loginAccount(account) {
+    if (!account) return;
 
     const startedAt = now();
     account.lastSeenAt = startedAt;
@@ -442,9 +442,9 @@
       KEYS.currentSession,
       safeJSONStringify(
         {
-          معرّف الحساب: account.id،
-          بدأ في،
-          تنتهي صلاحيات الجلسة في: account.sessionExpiresAt,
+          accountId: account.id,
+          startedAt,
+          expiresAt: account.sessionExpiresAt,
         },
         "{}"
       )
@@ -453,24 +453,24 @@
     writeStorage();
     renderAll?.();
 
-    إذا كان (state.externalDB?.setUser) {
+    if (state.externalDB?.setUser) {
       state.externalDB
         .setUser({
-          المعرّف: account.id،
-          الاسم: getDisplayName(account),
+          id: account.id,
+          name: getDisplayName(account),
         })
         .catch?.(() => {});
     }
   }
 
-  دالة commitCurrentSession(force = false) {
+  function commitCurrentSession(force = false) {
     const acc = getCurrentAccount();
     const session = getCurrentSession();
 
-    إذا لم يكن الحساب أو الجلسة موجودين، فقم بالخروج.
+    if (!acc || !session) return;
 
     const duration = Math.max(0, now() - Number(session.startedAt || now()));
-    إذا كانت (المدة > 0 || القوة) {
+    if (duration > 0 || force) {
       acc.totalActiveMs = Number(acc.totalActiveMs || 0) + duration;
     }
 
@@ -483,7 +483,7 @@
     writeStorage();
   }
 
-  دالة تسجيل الخروج من الحساب الحالي (عرض الرسالة = صحيح) {
+  function logoutCurrentAccount(showMessage = true) {
     commitCurrentSession(true);
     state.selectedPrivatePeerId = null;
     state.selectedUserId = null;
@@ -492,21 +492,21 @@
     renderAll?.();
   }
 
-  دالة markActivity() {
+  function markActivity() {
     const acc = getCurrentAccount();
     const session = getCurrentSession();
 
-    إذا لم يكن هناك حساب أو جلسة أو كان معرف الحساب في الجلسة لا يساوي معرف الحساب، فقم بالخروج.
+    if (!acc || !session || session.accountId !== acc.id) return;
 
-    إذا كانت الجلسة منتهية الصلاحية {
+    if (isSessionExpired(session)) {
       logoutCurrentAccount(false);
-      showToast("ط§ظ†طھظ‡طھ ط§ظ„ط¬ظ„ط³ط©طŒ ط³ط¬ظ„ ط¯ط®ظˆظ„ ظ…ط±ط© ط £ط®ط±ظ‰.”);
-      يعود؛
+      showToast("ط§ظ†طھظ‡طھ ط§ظ„ط¬ظ„ط³ط©طŒ ط³ط¬ظ„ ط¯ط®ظˆظ„ ظ…ط±ط© ط£ط®ط±ظ‰.");
+      return;
     }
 
     acc.lastSeenAt = now();
 
-    إذا كان (state.activitySaveTimer) موجودًا، فقم بالخروج؛
+    if (state.activitySaveTimer) return;
 
     state.activitySaveTimer = setTimeout(() => {
       state.activitySaveTimer = null;
@@ -515,24 +515,24 @@
     }, 900);
   }
 
-  دالة canUseCurrentSession() {
+  function canUseCurrentSession() {
     const acc = getCurrentAccount();
     const session = getCurrentSession();
 
-    إذا لم يكن الحساب موجودًا أو لم تكن هناك جلسة، فسيتم إرجاع خطأ.
-    إذا كان (session.accountId !== acc.id) فسيتم إرجاع خطأ؛
-    إذا كانت الجلسة منتهية الصلاحية (isSessionExpired(session))، فسيتم إرجاع خطأ (false).
+    if (!acc || !session) return false;
+    if (session.accountId !== acc.id) return false;
+    if (isSessionExpired(session)) return false;
 
-    أعد القيمة true؛
+    return true;
   }
 
-  دالة تتطلب المصادقة (الإجراء) {
+  function requireAuth(action) {
     state.pendingAction = action || null;
-    أعد canUseCurrentSession();
+    return canUseCurrentSession();
   }
 
-  دالة عرض رسالة التنبيه (الرسالة) {
-    إذا لم تكن خاصية `toastHostEl` موجودة في الحالة، {
+  function showToast(message) {
+    if (!state.toastHostEl) {
       state.toastHostEl = document.createElement("div");
       state.toastHostEl.id = "toastHost";
       state.toastHostEl.className = "toast-host";
@@ -555,48 +555,48 @@
     }, CONFIG.TOAST_MS);
   }
 
-  دالة getCurrentPublicMessages() {
+  function getCurrentPublicMessages() {
     return Array.isArray(state.publicMessages) ? state.publicMessages : [];
   }
 
   /* =========================
-     نظام الدردشة
+     ًں’¬ CHAT SYSTEM
   ========================= */
 
-  الوظيفة addPublicMessage(text, senderId = null, senderLabel = "ظ…ط³طھط®ط¯ظ…") {
+  function addPublicMessage(text, senderId = null, senderLabel = "ظ…ط³طھط®ط¯ظ…") {
     const message = {
       id: createId("msg"),
-      معرف المرسل،
-      senderLabel: senderLabel || "ظ…ط³طھط®ط¯ظ…"،
+      senderId,
+      senderLabel: senderLabel || "ظ…ط³طھط®ط¯ظ…",
       text: normalizeText(text),
-      في: الآن()،
+      at: now(),
     };
 
     state.publicMessages.push(message);
-    حذف الرسائل العامة();
+    prunePublicMessages();
     writeStorage();
     renderPublicMessages();
     renderShellState();
-    إرجاع الرسالة؛
+    return message;
   }
 
-  دالة getThreadMessagesForPeer(peerId) {
+  function getThreadMessagesForPeer(peerId) {
     const current = getCurrentAccount();
-    إذا لم يكن (الحالي || معرف النظير) فارجع [];
+    if (!current || !peerId) return [];
 
     const thread = getThread(current.id, peerId, false);
     return Array.isArray(thread?.messages) ? thread.messages : [];
   }
 
-  دالة getPrivateChatsForCurrentUser() {
+  function getPrivateChatsForCurrentUser() {
     const current = getCurrentAccount();
-    إذا لم يكن (current) فسيتم إرجاع [];
+    if (!current) return [];
 
     return Object.entries(state.privateThreads || {})
       .map(([key, thread]) => {
         const t = normalizeThread(thread);
-        إذا لم يكن t أو لم يكن t.participants مصفوفة، فسيتم إرجاع قيمة فارغة (null).
-        إذا لم يكن t.participants.includes(current.id))، فسيتم إرجاع قيمة فارغة (null).
+        if (!t || !Array.isArray(t.participants)) return null;
+        if (!t.participants.includes(current.id)) return null;
 
         const peerId = t.participants.find((id) => id !== current.id);
         const peer = getAccountById(peerId);
@@ -604,42 +604,42 @@
         const lastMessage =
           Array.isArray(t.messages) && t.messages.length
             ? t.messages[t.messages.length - 1]
-            : باطل؛
+            : null;
 
-        يعود {
-          مفتاح،
-          الموضوع: t،
+        return {
+          key,
+          thread: t,
           peerId,
-          نظير،
-          الرسالة الأخيرة،
-          تاريخ التحديث: رقم (
+          peer,
+          lastMessage,
+          updatedAt: Number(
             t.updatedAt || lastMessage?.at || lastMessage?.time || 0
-          )
+          ),
         };
       })
       .filter(Boolean)
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
-  وظيفة addPrivateMessage(peerId, text, senderId = null, senderLabel = "ظ…ط³طھط®ط¯ظ…") {
+  function addPrivateMessage(peerId, text, senderId = null, senderLabel = "ظ…ط³طھط®ط¯ظ…") {
     const current = getCurrentAccount();
-    إذا لم يكن (الحالي || !معرف النظير) فأرجع قيمة فارغة؛
+    if (!current || !peerId) return null;
 
     const thread = getThread(current.id, peerId, true);
-    إذا لم يكن هناك خيط، فأرجع قيمة فارغة.
+    if (!thread) return null;
 
     const message = {
       id: createId("pmsg"),
-      معرف المرسل،
-      senderLabel: senderLabel || "ظ…ط³طھط®ط¯ظ…"،
+      senderId,
+      senderLabel: senderLabel || "ظ…ط³طھط®ط¯ظ…",
       text: normalizeText(text),
-      في: الآن()،
+      at: now(),
     };
 
     thread.messages = Array.isArray(thread.messages) ? thread.messages : [];
     thread.messages.push(message);
 
-    إذا كان عدد الرسائل في سلسلة الرسائل أكبر من الحد الأقصى المسموح به للرسائل العامة (CONFIG.PUBLIC_MESSAGE_CAP) {
+    if (thread.messages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
       thread.messages = thread.messages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
     }
 
@@ -650,31 +650,31 @@
     renderPrivateChatsList?.();
     renderPrivateConversation?.();
     renderShellState?.();
-    إرجاع الرسالة؛
+    return message;
   }
 
-  دالة إشعار عرض الملف الشخصي (معرف الحساب المستهدف، تسمية العارض، معرف العارض = لا شيء) {
+  function notifyProfileViewed(targetAccountId, viewerLabel, viewerId = null) {
     const target = getAccountById(targetAccountId);
-    إذا لم يكن الهدف موجودًا، فقم بالخروج.
-    إذا كان (viewerId && viewerId === targetAccountId) فارجع؛
+    if (!target) return;
+    if (viewerId && viewerId === targetAccountId) return;
 
-    إذا لم تكن `target.notifications` مصفوفة، فسيتم تعيينها إلى `[]`.
+    if (!Array.isArray(target.notifications)) target.notifications = [];
     target.notifications.push({
       id: createId("noti"),
-      النوع: "profile_view"
-      معرف المشاهد،
+      type: "profile_view",
+      viewerId,
       viewerLabel: normalizeText(viewerLabel) || "ط²ط§ط¦ط±",
-      في: الآن()،
-      القراءة: خطأ،
+      at: now(),
+      read: false,
     });
 
-    حذف الإشعارات (الهدف)؛
+    pruneNotifications(target);
     writeStorage();
   }
 
-  دالة markCurrentNotificationsRead() {
+  function markCurrentNotificationsRead() {
     const acc = getCurrentAccount();
-    إذا لم يكن الحساب موجودًا أو لم يكن مصفوفة من الإشعارات، فقم بالخروج.
+    if (!acc || !Array.isArray(acc.notifications)) return;
 
     acc.notifications.forEach((n) => {
       n.read = true;
@@ -685,61 +685,61 @@
     renderShellState?.();
   }
 
-  دالة getUnreadNotificationCount() {
+  function getUnreadNotificationCount() {
     const acc = getCurrentAccount();
-    إذا لم يكن الحساب موجودًا أو لم يكن مصفوفة من نوع `acc.notifications`، فسيتم إرجاع القيمة 0.
+    if (!acc || !Array.isArray(acc.notifications)) return 0;
     return acc.notifications.filter((n) => !n.read).length;
   }
 
-  دالة getMonitorItems() {
+  function getMonitorItems() {
     const acc = getCurrentAccount();
-    إذا لم يكن الحساب موجودًا أو لم يكن مصفوفة، فسيتم إرجاع مصفوفة فارغة.
+    if (!acc || !Array.isArray(acc.notifications)) return [];
     return [...acc.notifications].sort((a, b) => Number(b.at) - Number(a.at));
   }
 
-  دالة فتح المنزل() {
+  function openHome() {
     state.selectedUserId = null;
     state.selectedPrivatePeerId = state.selectedPrivatePeerId || null;
     setView("home");
   }
 
-  دالة إغلاق الدرج() {
-    إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
+  function closeDrawer() {
+    if (!els.menuDrawer) return;
     els.menuDrawer.classList.add("is-hidden");
     els.menuDrawer.setAttribute("aria-hidden", "true");
   }
 
-  دالة فتح الدرج() {
-    إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
+  function openDrawer() {
+    if (!els.menuDrawer) return;
     els.menuDrawer.classList.remove("is-hidden");
     els.menuDrawer.setAttribute("aria-hidden", "false");
   }
 
-  دالة تبديل الدرج() {
-    إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
-    إذا (els.menuDrawer.classList.contains("is-hidden")) openDrawer();
-    وإلا أغلق الدرج.
+  function toggleDrawer() {
+    if (!els.menuDrawer) return;
+    if (els.menuDrawer.classList.contains("is-hidden")) openDrawer();
+    else closeDrawer();
   }
 
-  دالة setView(viewName) {
+  function setView(viewName) {
     state.view = viewName;
 
     const sections = {
-      الصفحة الرئيسية: els.homeView،
-      الملف الشخصي: els.profileView،
-      خاص: els.privateView،
-      المستخدم: els.userView،
+      home: els.homeView,
+      profile: els.profileView,
+      private: els.privateView,
+      user: els.userView,
     };
 
     Object.entries(sections).forEach(([name, el]) => {
-      إذا لم يكن العنصر موجودًا، فقم بالخروج.
+      if (!el) return;
       el.classList.toggle("is-hidden", name !== viewName);
     });
 
-    إذا كان (els.app) els.app.dataset.view = viewName;
+    if (els.app) els.app.dataset.view = viewName;
     closeDrawer();
 
-    إذا كان اسم العرض يساوي "الصفحة الرئيسية" {
+    if (viewName === "home") {
       renderHomeView();
     } else if (viewName === "profile") {
       renderProfileView();
@@ -751,41 +751,41 @@
     }
   }
 
-  دالة فتح لوحة المراقبة() {
-    إذا لم يكن بالإمكان استخدام الجلسة الحالية، فقم بالخروج.
+  function openMonitorPanel() {
+    if (!canUseCurrentSession()) return;
 
-    افتح الدرج();
+    openDrawer();
     markCurrentNotificationsRead();
     renderMonitorPanel();
-    إذا كان (state.monitorPanelEl) {
+    if (state.monitorPanelEl) {
       state.monitorPanelEl.scrollIntoView({
-        السلوك: "سلس"،
-        الكتلة: "البداية"،
+        behavior: "smooth",
+        block: "start",
       });
     }
   }
 
-  دالة فتح الملف الشخصي() {
-    إذا لم يكن بالإمكان استخدام الجلسة الحالية، فقم بالخروج.
+  function openProfile() {
+    if (!canUseCurrentSession()) return;
     state.selectedUserId = null;
     setView("profile");
   }
 
-  دالة فتح ملف تعريف المستخدم بواسطة المعرف(معرف المستخدم) {
-    إذا لم يكن (userId) موجودًا، فقم بالخروج؛
+  function openUserProfileById(userId) {
+    if (!userId) return;
 
     const target = getAccountById(userId);
-    إذا لم يكن الهدف موجودًا {
-      showToast("ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯.”);
-      يعود؛
+    if (!target) {
+      showToast("ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯.");
+      return;
     }
 
     const current = getCurrentAccount();
     const viewerLabel = current ? getDisplayName(current) : "ط²ط§ط¦ط±";
 
-    إذا كان (الحالي && معرف الحالي يساوي معرف الهدف) {
-      فتح الملف الشخصي();
-      يعود؛
+    if (current && current.id === target.id) {
+      openProfile();
+      return;
     }
 
     state.selectedUserId = target.id;
@@ -795,16 +795,16 @@
     renderMonitorPanel();
   }
 
-  دالة فتح ملف تعريف الحساب بواسطة المعرف(معرف المستخدم) {
-    فتح ملف تعريف المستخدم بواسطة المعرف(معرف المستخدم)؛
+  function openAccountProfileById(userId) {
+    openUserProfileById(userId);
   }
 
-  دالة فتح محادثة خاصة (معرف النظير، صامت = خطأ) {
+  function openPrivateChat(peerId, silent = false) {
     const peer = getAccountById(peerId);
 
-    إذا لم يكن هناك نظير {
-      if (!silent) showToast("ط§ظ„ط´ط®طµ ط;ظٹط± ظ…ظˆط¬ظˆط¯.");
-      يعود؛
+    if (!peer) {
+      if (!silent) showToast("ط§ظ„ط´ط®طµ ط؛ظٹط± ظ…ظˆط¬ظˆط¯.");
+      return;
     }
 
     state.selectedPrivatePeerId = peer.id;
@@ -817,104 +817,104 @@
     }, 20);
   }
 
-  دالة إرسال رسالة عامة (نص، صامت = خطأ) {
+  function sendPublicMessage(text, silent = false) {
     const messageText = normalizeText(text);
 
-    إذا لم يكن نص الرسالة موجودًا {
-      إذا لم يكن الوضع صامتًا، فسيتم عرض رسالة تنبيه ("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
-      أعد القيمة خطأ؛
+    if (!messageText) {
+      if (!silent) showToast("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
+      return false;
     }
 
     const current = getCurrentAccount();
-    إذا لم يكن (الحالي) {
-      if (!silent) showToast("ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.");
-      أعد القيمة خطأ؛
+    if (!current) {
+      if (!silent) showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
+      return false;
     }
 
     addPublicMessage(messageText, current.id, getDisplayName(current));
     markActivity();
-    أعد القيمة true؛
+    return true;
   }
 
-  دالة إرسال رسالة خاصة (معرف النظير، النص، صامت = خطأ) {
+  function sendPrivateMessage(peerId, text, silent = false) {
     const messageText = normalizeText(text);
 
-    إذا لم يكن (peerId) {
-      إذا لم يكن الوضع صامتًا، فسيتم عرض رسالة منبثقة ("ط§ط®طھط± ط´ط®طµ ط£ظˆظ„ط§ظ‹.");
-      أعد القيمة خطأ؛
+    if (!peerId) {
+      if (!silent) showToast("ط§ط®طھط± ط´ط®طµ ط£ظˆظ„ط§ظ‹.");
+      return false;
     }
 
-    إذا لم يكن نص الرسالة موجودًا {
-      إذا لم يكن الوضع صامتًا، فسيتم عرض رسالة تنبيه ("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
-      أعد القيمة خطأ؛
+    if (!messageText) {
+      if (!silent) showToast("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
+      return false;
     }
 
     const current = getCurrentAccount();
     const peer = getAccountById(peerId);
 
-    إذا لم يكن (الحالي || النظير) {
-      if (!silent) showToast("طھط¹ط°ط± ط¥ط±ط³ط§ظ‹ ط§ظ‹ط±ط³ط§ظ‹ط©.”);
-      أعد القيمة خطأ؛
+    if (!current || !peer) {
+      if (!silent) showToast("طھط¹ط°ط± ط¥ط±ط³ط§ظ„ ط§ظ„ط±ط³ط§ظ„ط©.");
+      return false;
     }
 
     addPrivateMessage(peerId, messageText, current.id, getDisplayName(current));
     markActivity();
-    أعد القيمة true؛
+    return true;
   }
 
   /* =========================
-     عرض واجهة المستخدم
+     ًںژ¨ UI RENDERING
   ========================= */
 
-  دالة renderShellState() {
+  function renderShellState() {
     const current = getCurrentAccount();
     const online = isCurrentAccountOnline();
     const featured = isCurrentAccountFeatured();
 
-    إذا كان (els.currentUserState) {
-      إذا لم يكن (الحالي) {
+    if (els.currentUserState) {
+      if (!current) {
         els.currentUserState.textContent = "ط²ط§ط¦ط±";
       } else if (online) {
-        els.currentUserState.textContent = `${getDisplayName(current)} â€¢ ظ…طھطμظ„ ط§ظ„ط¢ظ†`;
-      } آخر {
-        els.currentUserState.textContent = `${getDisplayName(current)} â€¢ ط;ظٹط± ظ†ط´ط·`;
+        els.currentUserState.textContent = `${getDisplayName(current)} â€¢ ظ…طھطµظ„ ط§ظ„ط¢ظ†`;
+      } else {
+        els.currentUserState.textContent = `${getDisplayName(current)} â€¢ ط؛ظٹط± ظ†ط´ط·`;
       }
     }
 
-    إذا كان (els.menuUserName) {
-      els.menuUserName.textContent = الحالي؟ getDisplayName(current) : "ظ…ظ„ظپظٹ ط§ظ„ط´ط®طμظٹ";
+    if (els.menuUserName) {
+      els.menuUserName.textContent = current ? getDisplayName(current) : "ظ…ظ„ظپظٹ ط§ظ„ط´ط®طµظٹ";
     }
 
-    إذا كان (els.menuUserMeta) {
+    if (els.menuUserMeta) {
       els.menuUserMeta.textContent = current
-        ؟ `ط§ط¯ظٹظ„ ط§ظ„ط¨ظٹط§ظ†ط§طھ â€¢ ${featured ? "ظ…ط³طھط®ط¯ظ… ظ…ظ…ظٹط²” : "طط³ط§ط¨ ط¹ط§ط¯ظٹ"}`
-        : "ط³ط¬ظ„ ط¯ط®ظˆظ„ ط £ظˆ ط £ظ†ط´ط¦ طط³ط§ط¨ طھط¬ط±ظٹط¨ظٹ";
+        ? `ط§ط¶ط؛ط· ظ„ظپطھط­ ط§ظ„ظ…ظ„ظپ ظˆطھط¹ط¯ظٹظ„ ط§ظ„ط¨ظٹط§ظ†ط§طھ â€¢ ${featured ? "ظ…ط³طھط®ط¯ظ… ظ…ظ…ظٹط²" : "ط­ط³ط§ط¨ ط¹ط§ط¯ظٹ"}`
+        : "ط³ط¬ظ„ ط¯ط®ظˆظ„ ط£ظˆ ط£ظ†ط´ط¦ ط­ط³ط§ط¨ طھط¬ط±ظٹط¨ظٹ";
     }
 
-    إذا كان (els.menuAvatar) {
+    if (els.menuAvatar) {
       setAvatar(els.menuAvatar, current, current ? getAvatarInitial(current) : "ط²");
     }
 
-    إذا كان (els.profileMonitorCount) els.profileMonitorCount.textContent = String(getUnreadNotificationCount());
-    إذا كان (els.drawerMonitorBadge) els.drawerMonitorBadge.textContent = String(getUnreadNotificationCount());
+    if (els.profileMonitorCount) els.profileMonitorCount.textContent = String(getUnreadNotificationCount());
+    if (els.drawerMonitorBadge) els.drawerMonitorBadge.textContent = String(getUnreadNotificationCount());
 
-    إذا كان (els.publicMessageInput) {
+    if (els.publicMessageInput) {
       els.publicMessageInput.placeholder = current
-        ؟ "ط§ظƒطھط¨ ط±ط³ط§ظ"طھظƒ ظپظٹ ط§ظ"ط´ط§طھ ط§ظ"ط¹ط§ظ…"
-        : "ط¬ظ‡ط² طط³ط§ط¨ ط £ظˆظ„ط§ظ‹";
+        ? "ط§ظƒطھط¨ ط±ط³ط§ظ„طھظƒ ظپظٹ ط§ظ„ط´ط§طھ ط§ظ„ط¹ط§ظ…"
+        : "ط¬ظ‡ط² ط­ط³ط§ط¨ ط£ظˆظ„ط§ظ‹";
     }
 
     if (els.publicSendBtn) els.publicSendBtn.textContent = "ط¥ط±ط³ط§ظ„";
     if (els.privateSendBtn) els.privateSendBtn.textContent = "ط¥ط±ط³ط§ظ„";
   }
 
-  دالة بناء عنصر الرسالة (الرسالة) {
+  function buildMessageElement(message) {
     const sender = getAccountById(message.senderId);
-    const senderName = NormalizeText(sender ? getDisplayName(sender) : message.senderLabel || "ظ…ط³طھط®ط¯ظ…");
+    const senderName = normalizeText(sender ? getDisplayName(sender) : message.senderLabel || "ظ…ط³طھط®ط¯ظ…");
 
     const article = document.createElement("article");
     article.className = "message-item";
-    إذا كان (message.senderId && state.currentAccountId && message.senderId === state.currentAccountId) {
+    if (message.senderId && state.currentAccountId && message.senderId === state.currentAccountId) {
       article.classList.add("is-own");
     }
 
@@ -925,9 +925,9 @@
     avatar.type = "button";
     avatar.className = "message-avatar";
     setAvatar(avatar, sender, senderName ? senderName[0] : "طں");
-    avatar.title = `ظپطھط ظ…ظ„ظپ ${senderName}`;
+    avatar.title = `ظپطھط­ ظ…ظ„ظپ ${senderName}`;
     avatar.addEventListener("click", () => {
-      إذا كان (message.senderId) افتح ملف تعريف الحساب بواسطة المعرف (message.senderId)؛
+      if (message.senderId) openAccountProfileById(message.senderId);
     });
 
     const metaWrap = document.createElement("div");
@@ -938,7 +938,7 @@
     senderBtn.className = "message-sender";
     senderBtn.textContent = senderName;
     senderBtn.addEventListener("click", () => {
-      إذا كان (message.senderId) افتح ملف تعريف الحساب بواسطة المعرف (message.senderId)؛
+      if (message.senderId) openAccountProfileById(message.senderId);
     });
 
     const time = document.createElement("time");
@@ -953,24 +953,24 @@
 
     const body = document.createElement("p");
     body.className = "message-text";
-    body.textContent = message.text || '';
+    body.textContent = message.text || "";
 
     article.appendChild(head);
     article.appendChild(body);
-    إرجاع المقالة؛
+    return article;
   }
 
-  دالة renderPublicMessages() {
-    إذا لم تكن الرسائل العامة موجودة، فقم بالخروج.
+  function renderPublicMessages() {
+    if (!els.publicMessages) return;
     els.publicMessages.innerHTML = "";
 
     const messages = getCurrentPublicMessages();
-    إذا لم يكن هناك عدد كافٍ من الرسائل {
+    if (!messages.length) {
       const empty = document.createElement("div");
       empty.className = "messages-placeholder";
-      فارغ.textContent = "ظط³ظ‡ ظ…ط§ ظپظٹط´ ط±ط³ط§ط¦ظ„ ط¸ط§ظ‡ط±ط© ظ‡ظ†ط§.";
+      empty.textContent = "ظ„ط³ظ‡ ظ…ط§ ظپظٹط´ ط±ط³ط§ط¦ظ„ ط¸ط§ظ‡ط±ط© ظ‡ظ†ط§.";
       els.publicMessages.appendChild(empty);
-      يعود؛
+      return;
     }
 
     messages.forEach((message) => {
@@ -980,17 +980,17 @@
     els.publicMessages.scrollTop = els.publicMessages.scrollHeight;
   }
 
-  دالة renderOnlineUsers() {
-    إذا لم تكن قائمة المستخدمين المتصلين (els.onlineUsersList) أو لم تكن فارغة (els.onlineUsersEmpty)، فقم بالخروج.
+  function renderOnlineUsers() {
+    if (!els.onlineUsersList || !els.onlineUsersEmpty) return;
 
     const list = [];
     const current = getCurrentAccount();
-    إذا كان الحساب الحالي متصلاً بالإنترنت، فسيتم إضافته إلى القائمة.
+    if (current && isCurrentAccountOnline()) list.push(current);
 
     els.onlineUsersList.innerHTML = "";
-    إذا لم يكن طول القائمة {
+    if (!list.length) {
       els.onlineUsersEmpty.classList.remove("is-hidden");
-      يعود؛
+      return;
     }
 
     els.onlineUsersEmpty.classList.add("is-hidden");
@@ -1011,7 +1011,7 @@
       name.textContent = getDisplayName(acc);
 
       const sub = document.createElement("span");
-      sub.textContent = "ظ…طھطμظ„ ط§ظ„طˈظ†";
+      sub.textContent = "ظ…طھطµظ„ ط§ظ„ط¢ظ†";
 
       info.appendChild(name);
       info.appendChild(sub);
@@ -1029,17 +1029,17 @@
     });
   }
 
-  دالة renderFeaturedUsers() {
-    إذا لم تكن قائمة المستخدمين المميزين (els.featuredUsersList) فارغة أو لم تكن فارغة (els.featuredUsersEmpty)، فقم بالخروج.
+  function renderFeaturedUsers() {
+    if (!els.featuredUsersList || !els.featuredUsersEmpty) return;
 
     const list = [];
     const current = getCurrentAccount();
-    إذا كان الحساب الحالي موجودًا وكان الحساب الحالي مميزًا، فسيتم إضافة الحساب الحالي إلى القائمة.
+    if (current && isCurrentAccountFeatured()) list.push(current);
 
     els.featuredUsersList.innerHTML = "";
-    إذا لم يكن طول القائمة {
+    if (!list.length) {
       els.featuredUsersEmpty.classList.remove("is-hidden");
-      يعود؛
+      return;
     }
 
     els.featuredUsersEmpty.classList.add("is-hidden");
@@ -1070,7 +1070,7 @@
       nameLine.appendChild(star);
 
       const sub = document.createElement("span");
-      sub.textContent = DurationLabel(getActiveDurationForAccount(acc));
+      sub.textContent = durationLabel(getActiveDurationForAccount(acc));
 
       info.appendChild(nameLine);
       info.appendChild(sub);
@@ -1082,7 +1082,7 @@
     });
   }
 
-  دالة renderHomeView() {
+  function renderHomeView() {
     renderShellState();
     renderPublicMessages();
     renderOnlineUsers();
@@ -1092,46 +1092,46 @@
     renderUserSearchResults();
   }
 
-  دالة renderProfileView() {
+  function renderProfileView() {
     const current = getCurrentAccount();
-    إذا لم يكن (الحالي) فارجع؛
+    if (!current) return;
 
-    إذا كان (els.profileName) els.profileName.value = current.username || '';
-    إذا كان (els.profilePassword) els.profilePassword.value = current.password || "";
-    إذا كان (els.profileAge) els.profileAge.value = current.profile?.age || '';
-    إذا كان (els.profileGender) els.profileGender.value = current.profile?.gender || '';
-    إذا كانت (els.profileNationality) els.profileNationality.value = current.profile?.nationality || '';
-    إذا كان (els.profileBio) els.profileBio.value = current.profile?.bio || '';
+    if (els.profileName) els.profileName.value = current.username || "";
+    if (els.profilePassword) els.profilePassword.value = current.password || "";
+    if (els.profileAge) els.profileAge.value = current.profile?.age || "";
+    if (els.profileGender) els.profileGender.value = current.profile?.gender || "";
+    if (els.profileNationality) els.profileNationality.value = current.profile?.nationality || "";
+    if (els.profileBio) els.profileBio.value = current.profile?.bio || "";
 
-    إذا كان (els.profileAvatarPreview) setAvatar(els.profileAvatarPreview, current, getAvatarInitial(current));
-    إذا كانت حالة الملف الشخصي متصلة بالإنترنت (els.profileOnlineState) {
-      els.profileOnlineState.textContent = isCurrentAccountOnline() ؟ "ظ…طھطμظ„ ط§ظ„ط¢ظ†” : "ط؛ظٹط± ظ†ط´ط·";
+    if (els.profileAvatarPreview) setAvatar(els.profileAvatarPreview, current, getAvatarInitial(current));
+    if (els.profileOnlineState) {
+      els.profileOnlineState.textContent = isCurrentAccountOnline() ? "ظ…طھطµظ„ ط§ظ„ط¢ظ†" : "ط؛ظٹط± ظ†ط´ط·";
     }
 
-    إذا كان (els.profileLastSeen) {
+    if (els.profileLastSeen) {
       els.profileLastSeen.textContent = current.lastSeenAt
         ? `${durationLabel(getActiveDurationForAccount(current))} â€¢ ط¢ط®ط± ط¸ظ‡ظˆط± ${timeAgo(current.lastSeenAt)}`
-        : "ظط§ ظٹظˆط¬ط¯ ظ†ط´ط§ط· ظ…ط³ط¬ظ„";
+        : "ظ„ط§ ظٹظˆط¬ط¯ ظ†ط´ط§ط· ظ…ط³ط¬ظ„";
     }
   }
 
-  دالة renderPrivateChatsList() {
-    إذا لم تكن قائمة المحادثات الخاصة (els.privateChatsList) فارغة، فقم بالخروج.
+  function renderPrivateChatsList() {
+    if (!els.privateChatsList || !els.privateChatsEmpty) return;
 
     const current = getCurrentAccount();
     els.privateChatsList.innerHTML = "";
 
-    إذا لم يكن (الحالي) {
+    if (!current) {
       els.privateChatsEmpty.classList.remove("is-hidden");
-      els.privateChatsEmpty.textContent = "ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط· ط§ظظ„ظٹط§ظ‹.";
-      يعود؛
+      els.privateChatsEmpty.textContent = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط· ط­ط§ظ„ظٹط§ظ‹.";
+      return;
     }
 
     const chats = getPrivateChatsForCurrentUser();
-    إذا لم يكن عدد المحادثات {
+    if (!chats.length) {
       els.privateChatsEmpty.classList.remove("is-hidden");
-      els.privateChatsEmpty.textContent = "ظ„ط³ظ‡ ظ…ط§ ظƒظ„ظ…طھط´ طط¯ ظپظٹ ط§ظ„ط®ط§طط.”;
-      يعود؛
+      els.privateChatsEmpty.textContent = "ظ„ط³ظ‡ ظ…ط§ ظƒظ„ظ…طھط´ ط­ط¯ ظپظٹ ط§ظ„ط®ط§طµ.";
+      return;
     }
 
     els.privateChatsEmpty.classList.add("is-hidden");
@@ -1141,32 +1141,32 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "private-chat-item";
-      إذا كان (state.selectedPrivatePeerId && state.selectedPrivatePeerId === item.peerId) {
+      if (state.selectedPrivatePeerId && state.selectedPrivatePeerId === item.peerId) {
         btn.classList.add("is-active");
       }
 
       const avatar = document.createElement("div");
       avatar.className = "avatar";
-      setAvatar(avatar, Peer, Peer ? getAvatarInitial(peer) : "طں");
+      setAvatar(avatar, peer, peer ? getAvatarInitial(peer) : "طں");
 
       const info = document.createElement("div");
       info.className = "private-chat-item-info";
 
       const name = document.createElement("strong");
-      name.textContent = النظير؟ getDisplayName(peer) : "ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ط¹ط±ظˆظپ”;
+      name.textContent = peer ? getDisplayName(peer) : "ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ط¹ط±ظˆظپ";
 
       const preview = document.createElement("span");
       const lastMessage = item.lastMessage;
-      Preview.textContent = lastMessage
-        ؟ (lastMessage.senderId === current.id ? "ط £ظ†طھ: " : "") + (lastMessage.text || "")
-        : "ط§ط¨ط¯ط £ ط§ظ„ظ…ط§ط¯ط«ط©";
+      preview.textContent = lastMessage
+        ? (lastMessage.senderId === current.id ? "ط£ظ†طھ: " : "") + (lastMessage.text || "")
+        : "ط§ط¨ط¯ط£ ط§ظ„ظ…ط­ط§ط¯ط«ط©";
 
       info.appendChild(name);
       info.appendChild(preview);
 
       const time = document.createElement("time");
       time.className = "private-chat-item-time";
-      time.textContent = lastMessage؟ formatTime(lastMessage.at) : "";
+      time.textContent = lastMessage ? formatTime(lastMessage.at) : "";
 
       btn.appendChild(avatar);
       btn.appendChild(info);
@@ -1179,60 +1179,60 @@
     });
   }
 
-  دالة renderPrivateConversation() {
+  function renderPrivateConversation() {
     if (!els.privateMessages || !els.privateChatTitle || !els.privateChatMeta || !els.privateChatAvatar) return;
 
     const current = getCurrentAccount();
     const peer = getAccountById(state.selectedPrivatePeerId);
 
-    إذا لم يكن (الحالي) {
-      els.privateChatTitle.textContent = "ظ"ط§ طھظˆط¬ط¯ ظ…ط§ط¯ط«ط©";
-      els.privateChatMeta.textContent = "ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.";
+    if (!current) {
+      els.privateChatTitle.textContent = "ظ„ط§ طھظˆط¬ط¯ ظ…ط­ط§ط¯ط«ط©";
+      els.privateChatMeta.textContent = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.";
       setAvatar(els.privateChatAvatar, null, "طں");
       els.privateMessages.innerHTML = "";
       const placeholder = document.createElement("div");
       placeholder.className = "messages-placeholder";
-      placeholder.textContent = "ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط· طط§ظ„ظٹط§ظ‹.";
+      placeholder.textContent = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط· ط­ط§ظ„ظٹط§ظ‹.";
       els.privateMessages.appendChild(placeholder);
-      if (els.privateMessageInput) els.privateMessageInput.placeholder = "ظ„ط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·";
-      إذا كان (els.privateSendBtn) els.privateSendBtn.disabled = true;
-      يعود؛
+      if (els.privateMessageInput) els.privateMessageInput.placeholder = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·";
+      if (els.privateSendBtn) els.privateSendBtn.disabled = true;
+      return;
     }
 
-    إذا لم يكن هناك نظير {
+    if (!peer) {
       els.privateChatTitle.textContent = "ط§ط®طھط§ط± ط´ط®طµ ظ…ظ† ط§ظ„ظ‚ط§ط¦ظ…ط©";
-      els.privateChatMeta.textContent = "ظ‡ظ†ط§ ظ‡طھط¸ظ‡ط± ط§ظ‹ظ…طط§ط¯ط«ط© ظƒط§ظ…ظ„ط©.”;
+      els.privateChatMeta.textContent = "ظ‡ظ†ط§ ظ‡طھط¸ظ‡ط± ط§ظ„ظ…ط­ط§ط¯ط«ط© ظƒط§ظ…ظ„ط©.";
       setAvatar(els.privateChatAvatar, null, "طں");
       els.privateMessages.innerHTML = "";
       const placeholder = document.createElement("div");
       placeholder.className = "messages-placeholder";
-      placeholder.textContent = "ط§ط®طھط§ط± ط´ط®طμ ظ…ظ† ط§ظ„ظ‚ط§ط¦ظ…ط© ط £ظˆ ظ…ظ† ط§ظ„ط¨طط«.";
+      placeholder.textContent = "ط§ط®طھط§ط± ط´ط®طµ ظ…ظ† ط§ظ„ظ‚ط§ط¦ظ…ط© ط£ظˆ ظ…ظ† ط§ظ„ط¨ط­ط«.";
       els.privateMessages.appendChild(placeholder);
       if (els.privateMessageInput) els.privateMessageInput.placeholder = "ط§ظƒطھط¨ ط±ط³ط§ظ„طھظƒ ط§ظ„ط®ط§طµط©...";
-      إذا كان (els.privateSendBtn) els.privateSendBtn.disabled = true;
-      يعود؛
+      if (els.privateSendBtn) els.privateSendBtn.disabled = true;
+      return;
     }
 
     els.privateChatTitle.textContent = getDisplayName(peer);
-    els.privateChatMeta.textContent = Peer.lastSeenAt
-      ؟ `${isCurrentAccountOnline() &&state.selectedPrivatePeerId ===peer.id ? "ظ…طھطμظ„ ط§ظ„طˆظ†" : "طط®ط± ط¸ظ‡ظˆط±"} ${timeAgo(peer.lastSeenAt)}`
-      : "ظ…ط³طھط®ط¯ظ… ط¬ط¯ظٹط¯”;
+    els.privateChatMeta.textContent = peer.lastSeenAt
+      ? `${isCurrentAccountOnline() && state.selectedPrivatePeerId === peer.id ? "ظ…طھطµظ„ ط§ظ„ط¢ظ†" : "ط¢ط®ط± ط¸ظ‡ظˆط±"} ${timeAgo(peer.lastSeenAt)}`
+      : "ظ…ط³طھط®ط¯ظ… ط¬ط¯ظٹط¯";
 
-    setAvatar(els.privateChatAvatar, Peer, getAvatarInitial(peer));
-    إذا كان (els.privateSendBtn) els.privateSendBtn.disabled = false;
-    إذا (els.privateMessageInput) {
+    setAvatar(els.privateChatAvatar, peer, getAvatarInitial(peer));
+    if (els.privateSendBtn) els.privateSendBtn.disabled = false;
+    if (els.privateMessageInput) {
       els.privateMessageInput.placeholder = `ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط¥ظ„ظ‰ ${getDisplayName(peer)}...`;
     }
 
     const messages = getThreadMessagesForPeer(peer.id);
     els.privateMessages.innerHTML = "";
 
-    إذا لم يكن هناك عدد كافٍ من الرسائل {
+    if (!messages.length) {
       const placeholder = document.createElement("div");
       placeholder.className = "messages-placeholder";
-      placeholder.textContent = "ظ…ط§ ظپظٹط´ ط±ط³ط§ط¦ظ„ ظ„ط³ظ‡.ط§ط¨ط¯ط £ ط £ظˆظ„ ط±ط³ط§ظ„ط©.”;
+      placeholder.textContent = "ظ…ط§ ظپظٹط´ ط±ط³ط§ط¦ظ„ ظ„ط³ظ‡. ط§ط¨ط¯ط£ ط£ظˆظ„ ط±ط³ط§ظ„ط©.";
       els.privateMessages.appendChild(placeholder);
-      يعود؛
+      return;
     }
 
     messages.forEach((message) => {
@@ -1242,78 +1242,78 @@
     els.privateMessages.scrollTop = els.privateMessages.scrollHeight;
   }
 
-  دالة renderUserView() {
+  function renderUserView() {
     const target = getAccountById(state.selectedUserId);
-    إذا لم يكن الهدف موجودًا {
+    if (!target) {
       if (els.userViewTitle) els.userViewTitle.textContent = "ظ…ظ„ظپ ط§ظ„ظ…ط³طھط®ط¯ظ…";
       if (els.userViewName) els.userViewName.textContent = "ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ…";
-      if (els.userViewStatus) els.userViewStatus.textContent = "ط§ظ„ظ…ط³طھط®ط¯ظ… ط;ظٹط± ظ…ظˆط¬ظˆط¯";
+      if (els.userViewStatus) els.userViewStatus.textContent = "ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯";
       if (els.userViewBio) els.userViewBio.textContent = "ظ„ط§ طھظˆط¬ط¯ ط¨ظٹط§ظ†ط§طھ.";
       setAvatar(els.userViewAvatar, null, "طں");
-      يعود؛
+      return;
     }
 
-    إذا كان (els.userViewTitle) els.userViewTitle.textContent = `ظ…ظ„ظپ ${getDisplayName(target)}`;
-    إذا كان (els.userViewName) els.userViewName.textContent = getDisplayName(target);
-    إذا كان (els.userViewAge) els.userViewAge.textContent = target.profile?.age || "";
-    إذا كان (els.userViewGender) els.userViewGender.textContent = target.profile?.gender || "-";
-    إذا كانت (els.userViewNationality) els.userViewNationality.textContent = target.profile?.nationality || "–";
-    إذا (els.userViewBio) els.userViewBio.textContent = target.profile?.bio || "ظ"ط§ طھظˆط¬ط¯ ظ†ط¨ط°ط© ط¨ط¹ط¯.";
+    if (els.userViewTitle) els.userViewTitle.textContent = `ظ…ظ„ظپ ${getDisplayName(target)}`;
+    if (els.userViewName) els.userViewName.textContent = getDisplayName(target);
+    if (els.userViewAge) els.userViewAge.textContent = target.profile?.age || "â€”";
+    if (els.userViewGender) els.userViewGender.textContent = target.profile?.gender || "â€”";
+    if (els.userViewNationality) els.userViewNationality.textContent = target.profile?.nationality || "â€”";
+    if (els.userViewBio) els.userViewBio.textContent = target.profile?.bio || "ظ„ط§ طھظˆط¬ط¯ ظ†ط¨ط°ط© ط¨ط¹ط¯.";
 
-    إذا كان (els.userViewStatus) {
+    if (els.userViewStatus) {
       const online = target.id === state.currentAccountId && isCurrentAccountOnline();
-      إذا كان (متصلاً بالإنترنت) {
-        els.userViewStatus.textContent = "ظ…طھطμظ" ط§ظ"طˈظ†";
+      if (online) {
+        els.userViewStatus.textContent = "ظ…طھطµظ„ ط§ظ„ط¢ظ†";
       } else if (target.lastSeenAt) {
         els.userViewStatus.textContent = `ط¢ط®ط± ط¸ظ‡ظˆط± ${timeAgo(target.lastSeenAt)}`;
-      } آخر {
-        els.userViewStatus.textContent = "ط؛ظٹط± ظ…طط¯ط¯";
+      } else {
+        els.userViewStatus.textContent = "ط؛ظٹط± ظ…ط­ط¯ط¯";
       }
     }
 
-    إذا كان (els.userViewActivity) {
-      els.userViewActivity.textContent = DurationLabel(getActiveDurationForAccount(target));
+    if (els.userViewActivity) {
+      els.userViewActivity.textContent = durationLabel(getActiveDurationForAccount(target));
     }
 
     setAvatar(els.userViewAvatar, target, getAvatarInitial(target));
-    إذا (els.startPrivateChatBtn) {
+    if (els.startPrivateChatBtn) {
       els.startPrivateChatBtn.dataset.targetId = target.id;
-      els.startPrivateChatBtn.textContent = "ظپطھط ط´ط§طھ ط®ط§طμ";
+      els.startPrivateChatBtn.textContent = "ظپطھط­ ط´ط§طھ ط®ط§طµ";
     }
   }
 
-  دالة renderMonitorPanel() {
-    إذا لم تكن حالة لوحة المراقبة موجودة، فقم بالخروج.
+  function renderMonitorPanel() {
+    if (!state.monitorPanelEl) return;
 
     const current = getCurrentAccount();
     const unreadCount = getUnreadNotificationCount();
-    إذا كان (els.profileMonitorCount) els.profileMonitorCount.textContent = String(unreadCount);
-    إذا كان (els.drawerMonitorBadge) els.drawerMonitorBadge.textContent = String(unreadCount);
+    if (els.profileMonitorCount) els.profileMonitorCount.textContent = String(unreadCount);
+    if (els.drawerMonitorBadge) els.drawerMonitorBadge.textContent = String(unreadCount);
 
     const titleEl = state.monitorPanelEl.querySelector("[data-monitor-title]");
     const countEl = state.monitorPanelEl.querySelector("[data-monitor-count]");
     const listEl = state.monitorPanelEl.querySelector("[data-monitor-list]");
     const emptyEl = state.monitorPanelEl.querySelector("[data-monitor-empty]");
 
-    إذا لم يكن (titleEl || countEl || listEl || emptyEl) فارجع؛
+    if (!titleEl || !countEl || !listEl || !emptyEl) return;
 
     listEl.innerHTML = "";
     countEl.textContent = String(unreadCount);
 
-    إذا لم يكن (الحالي) {
+    if (!current) {
       titleEl.textContent = "ظ…ظ†ط¸ط§ط± ظ…ظ„ظپظƒ";
-      فارغEl.textContent = "ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.";
+      emptyEl.textContent = "ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.";
       emptyEl.classList.remove("is-hidden");
-      يعود؛
+      return;
     }
 
     titleEl.textContent = "ظ…ظ†ط¸ط§ط± ظ…ظ„ظپظƒ";
     const items = getMonitorItems();
 
-    إذا لم يكن عدد العناصر {
-      فارغEl.textContent = "ظ…ط§ ظپظٹط´ ط²ظٹط§ط±ط§طھ ظ„ظ…ظ„ظپظƒ ظ„ط³ظ‡.”;
+    if (!items.length) {
+      emptyEl.textContent = "ظ…ط§ ظپظٹط´ ط²ظٹط§ط±ط§طھ ظ„ظ…ظ„ظپظƒ ظ„ط³ظ‡.";
       emptyEl.classList.remove("is-hidden");
-      يعود؛
+      return;
     }
 
     emptyEl.classList.add("is-hidden");
@@ -1323,7 +1323,7 @@
 
       const icon = document.createElement("div");
       icon.className = "monitor-item-icon";
-      icon.textContent = "ًں'€";
+      icon.textContent = "ًں‘€";
 
       const info = document.createElement("div");
       info.className = "monitor-item-info";
@@ -1332,7 +1332,7 @@
       title.textContent = item.viewerLabel || "ط²ط§ط¦ط±";
 
       const sub = document.createElement("span");
-      sub.textContent = `${timeAgo(item.at)} € ™ ط²ط§ط± ظ…ظ„ظپظƒ`;
+      sub.textContent = `${timeAgo(item.at)} â€¢ ط²ط§ط± ظ…ظ„ظپظƒ`;
 
       info.appendChild(title);
       info.appendChild(sub);
@@ -1342,21 +1342,21 @@
     });
   }
 
-  دالة renderUserSearchResults() {
-    إذا لم تكن هناك نتائج بحث للمستخدم أو عدد نتائج البحث، فقم بالخروج.
+  function renderUserSearchResults() {
+    if (!els.userSearchResults || !els.searchResultCount) return;
 
     const query = normalizeText(els.userSearchInput?.value || "");
     state.searchQuery = query;
 
     els.userSearchResults.innerHTML = "";
 
-    إذا لم يتم تنفيذ الاستعلام {
+    if (!query) {
       els.searchResultCount.textContent = "0";
       const empty = document.createElement("div");
       empty.className = "empty-state empty-state-small";
-      فارغ.textContent = "ط§ظƒطھط¨ ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ… ط¹ط´ط§ظ† ظٹط¸ظ‡ط± ظپظٹ ط§ظ„ظ†طھط§ط¦ط¬.”;
+      empty.textContent = "ط§ظƒطھط¨ ط§ط³ظ… ط§ظ„ظ…ط³طھط®ط¯ظ… ط¹ط´ط§ظ† ظٹط¸ظ‡ط± ظپظٹ ط§ظ„ظ†طھط§ط¦ط¬.";
       els.userSearchResults.appendChild(empty);
-      يعود؛
+      return;
     }
 
     const q = query.toLowerCase();
@@ -1370,12 +1370,12 @@
 
     els.searchResultCount.textContent = String(results.length);
 
-    إذا لم تكن النتائج موجودة {
+    if (!results.length) {
       const empty = document.createElement("div");
       empty.className = "empty-state empty-state-small";
       empty.textContent = "ظ…ط§ظپظٹط´ ظ†طھط§ط¦ط¬ ظ…ط·ط§ط¨ظ‚ط©.";
       els.userSearchResults.appendChild(empty);
-      يعود؛
+      return;
     }
 
     results.forEach((acc) => {
@@ -1398,13 +1398,13 @@
 
       const badge = document.createElement("span");
       badge.className = "search-result-badge";
-      Badge.textContent = acc.id === getCurrentAccount()?.id ? "ط £ظ†طھ" : "ظپطھط ط§ظ„ظ…ظ„ظپ";
+      badge.textContent = acc.id === getCurrentAccount()?.id ? "ط£ظ†طھ" : "ظپطھط­ ط§ظ„ظ…ظ„ظپ";
 
       titleLine.appendChild(name);
       titleLine.appendChild(badge);
 
       const sub = document.createElement("span");
-      sub.textContent = acc.profile?.bio ? acc.profile.bio : "ظ…ظ„ظپ ط´ط®طμظٹ";
+      sub.textContent = acc.profile?.bio ? acc.profile.bio : "ظ…ظ„ظپ ط´ط®طµظٹ";
 
       info.appendChild(titleLine);
       info.appendChild(sub);
@@ -1416,7 +1416,7 @@
     });
   }
 
-  دالة renderAll() {
+  function renderAll() {
     renderShellState();
     renderHomeView();
     renderProfileView();
@@ -1427,35 +1427,35 @@
     renderUserSearchResults();
   }
 
-  دالة handleProfileSave(event) {
+  function handleProfileSave(event) {
     event.preventDefault();
 
     const current = getCurrentAccount();
-    إذا لم يكن (الحالي) {
-      showToast("ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.");
-      يعود؛
+    if (!current) {
+      showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
+      return;
     }
 
     const newName = clampText(els.profileName?.value || "", CONFIG.MAX_NAME_LENGTH);
     const newPass = normalizeText(els.profilePassword?.value || "");
     const newAge = normalizeText(els.profileAge?.value || "");
-    const newGender = NormalizeText(els.profileGender?.value || "");
+    const newGender = normalizeText(els.profileGender?.value || "");
     const newNationality = normalizeText(els.profileNationality?.value || "");
     const newBio = normalizeText(els.profileBio?.value || "");
 
-    إذا لم يكن الاسم الجديد موجودًا {
+    if (!newName) {
       showToast("ط§ظ„ط§ط³ظ… ظ…ط·ظ„ظˆط¨.");
-      يعود؛
+      return;
     }
 
     const existing = getAccountByUsername(newName);
-    إذا كان (موجود && معرف الموجود !== معرف الحالي) {
-      showToast("ط§ظ„ط§ط³ظ… ط¯ظ‡ ظ…ط³طھط®ط¯ظ… ط¨ط§ظ„ظپط¹ظ„.”);
-      يعود؛
+    if (existing && existing.id !== current.id) {
+      showToast("ط§ظ„ط§ط³ظ… ط¯ظ‡ ظ…ط³طھط®ط¯ظ… ط¨ط§ظ„ظپط¹ظ„.");
+      return;
     }
 
     current.username = newName;
-    كلمة المرور الحالية = كلمة المرور الجديدة؛
+    current.password = newPass;
     current.profile.name = newName;
     current.profile.age = newAge;
     current.profile.gender = newGender;
@@ -1463,30 +1463,30 @@
     current.profile.bio = newBio;
     current.lastSeenAt = now();
 
-    إذا كان (current.id === state.currentAccountId) {
+    if (current.id === state.currentAccountId) {
       current.sessionStartedAt = current.sessionStartedAt || now();
       current.sessionExpiresAt = current.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS);
     }
 
     writeStorage();
-    استدعاء الكل();
-    showToast("طھظ… طظپط¸ ط§ظ„ظ…ظ„ظپ.");
+    renderAll();
+    showToast("طھظ… ط­ظپط¸ ط§ظ„ظ…ظ„ظپ.");
   }
 
-  دالة handleProfileImagePick(event) {
+  function handleProfileImagePick(event) {
     const file = event.target.files?.[0];
-    إذا لم يكن الملف موجودًا، فقم بالخروج.
+    if (!file) return;
 
-    إذا كان حجم الملف أكبر من 800 × 1024 {
-      showToast("ط§ظ„طμظˆط±ط© ظƒط¨ظٹط±ط© ط¬ط¯ظ‹ط§.ط§ط®طھط§ط± طμظˆط±ط© ط £ط®ظپ.");
+    if (file.size > 800 * 1024) {
+      showToast("ط§ظ„طµظˆط±ط© ظƒط¨ظٹط±ط© ط¬ط¯ظ‹ط§. ط§ط®طھط§ط± طµظˆط±ط© ط£ط®ظپ.");
       event.target.value = "";
-      يعود؛
+      return;
     }
 
     const current = getCurrentAccount();
-    إذا لم يكن (الحالي) {
-      showToast("ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.");
-      يعود؛
+    if (!current) {
+      showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
+      return;
     }
 
     const reader = new FileReader();
@@ -1495,71 +1495,71 @@
       writeStorage();
       renderProfileView();
       renderShellState();
-      showToast("طھظ… طھطط¯ظٹط« ط§ظ„طµظˆط±ط©.");
+      showToast("طھظ… طھط­ط¯ظٹط« ط§ظ„طµظˆط±ط©.");
     };
     reader.readAsDataURL(file);
   }
 
-  دالة handlePublicSubmit(event) {
+  function handlePublicSubmit(event) {
     event.preventDefault();
     const text = normalizeText(els.publicMessageInput?.value || "");
-    إذا لم يكن النص موجودًا {
+    if (!text) {
       showToast("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
-      يعود؛
+      return;
     }
 
-    إذا لم يكن بالإمكان استخدام الجلسة الحالية،
-      showToast("ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.");
-      يعود؛
+    if (!canUseCurrentSession()) {
+      showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
+      return;
     }
 
     sendPublicMessage(text);
-    إذا (els.publicMessageInput) els.publicMessageInput.value = ""؛
+    if (els.publicMessageInput) els.publicMessageInput.value = "";
     markActivity();
   }
 
-  دالة handlePrivateSubmit(event) {
+  function handlePrivateSubmit(event) {
     event.preventDefault();
     const text = normalizeText(els.privateMessageInput?.value || "");
-    constpeerId =state.selectedPrivatePeerId;
+    const peerId = state.selectedPrivatePeerId;
 
-    إذا لم يكن (peerId) {
-      showToast("ط§ط®طھط± ط´ط®ططط £ظˆظ"ط§ظ‹.");
-      يعود؛
+    if (!peerId) {
+      showToast("ط§ط®طھط± ط´ط®طµ ط£ظˆظ„ط§ظ‹.");
+      return;
     }
 
-    إذا لم يكن النص موجودًا {
+    if (!text) {
       showToast("ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط£ظˆظ„ط§ظ‹.");
-      يعود؛
+      return;
     }
 
-    إذا لم يكن بالإمكان استخدام الجلسة الحالية،
-      showToast("ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.");
-      يعود؛
+    if (!canUseCurrentSession()) {
+      showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
+      return;
     }
 
     sendPrivateMessage(peerId, text);
-    إذا (els.privateMessageInput) els.privateMessageInput.value = ""؛
+    if (els.privateMessageInput) els.privateMessageInput.value = "";
     markActivity();
   }
 
-  دالة معالجة النقر على عنوان التطبيق () {
+  function handleAppTitleClick() {
     location.reload();
   }
 
-  دالة معالجة نقرة الاختصار الخاص() {
-    فتح المحادثة الخاصة(state.selectedPrivatePeerId || getPrivateChatsForCurrentUser()[0]?.peerId || null, true);
+  function handlePrivateShortcutClick() {
+    openPrivateChat(state.selectedPrivatePeerId || getPrivateChatsForCurrentUser()[0]?.peerId || null, true);
   }
 
   /* =========================
-     نظام الأحداث
+     âڑ، EVENTS SYSTEM
   ========================= */
 
-  دالة attachEvents() {
-    إذا كان (els.menuBtn) {
+  function attachEvents() {
+    if (els.menuBtn) {
       els.menuBtn.addEventListener("click", (event) => {
         event.stopPropagation();
-        إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
+        if (!els.menuDrawer) return;
         els.menuDrawer.classList.toggle("is-hidden");
         els.menuDrawer.setAttribute(
           "aria-hidden",
@@ -1568,19 +1568,19 @@
       });
     }
 
-    إذا لم يتم ربط حدث النقر على الدرج (window.__drawerClickAttached) {
+    if (!window.__drawerClickAttached) {
       window.__drawerClickAttached = true;
       document.addEventListener("click", (event) => {
-        const draw = els.menuDrawer;
-        إذا لم يكن الدرج موجودًا أو كانت قائمة فئات الدرج تحتوي على "is-hidden"، فسيتم إنهاء العملية.
+        const drawer = els.menuDrawer;
+        if (!drawer || drawer.classList.contains("is-hidden")) return;
 
         const target = event.target;
-        إذا لم يكن الهدف من نوع Node، فقم بالخروج.
+        if (!(target instanceof Node)) return;
 
         const insideDrawer = drawer.contains(target);
         const insideMenuBtn = els.menuBtn?.contains(target);
 
-        إذا لم يكن العنصر داخل الدرج أو داخل زر القائمة، {
+        if (!insideDrawer && !insideMenuBtn) {
           drawer.classList.add("is-hidden");
           drawer.setAttribute("aria-hidden", "true");
         }
@@ -1601,15 +1601,15 @@
     els.profileMonitorBtn?.addEventListener("click", openMonitorPanel);
 
     els.drawerSettingsBtn?.addEventListener("click", () => {
-      showToast("ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ ظ‡طھطھط¶ط§ظپ ظ„ط§طظ‚ظ‹ط§.");
+      showToast("ط§ظ„ط¥ط¹ط¯ط§ط¯ط§طھ ظ‡طھطھط¶ط§ظپ ظ„ط§ط­ظ‚ظ‹ط§.");
     });
 
     els.drawerLogoutBtn?.addEventListener("click", () => {
-      إذا لم يكن الحساب الحالي موجودًا {
-        showToast("ظط§ ظٹظˆط¬ط¯ طط³ط§ط¨ ظ†ط´ط·.");
-        يعود؛
+      if (!getCurrentAccount()) {
+        showToast("ظ„ط§ ظٹظˆط¬ط¯ ط­ط³ط§ط¨ ظ†ط´ط·.");
+        return;
       }
-      تسجيل الخروج من الحساب الحالي (صحيح)؛
+      logoutCurrentAccount(true);
     });
 
     els.backFromProfileBtn?.addEventListener("click", () => openHome());
@@ -1620,8 +1620,8 @@
 
     els.startPrivateChatBtn?.addEventListener("click", () => {
       const targetId = els.startPrivateChatBtn?.dataset?.targetId;
-      إذا لم يكن (targetId) موجودًا، فقم بالخروج؛
-      فتح المحادثة الخاصة (معرف الهدف، صحيح)؛
+      if (!targetId) return;
+      openPrivateChat(targetId, true);
     });
 
     els.userSearchInput?.addEventListener("input", () => {
@@ -1634,9 +1634,9 @@
     const activityEvents = ["pointerdown", "keydown", "touchstart", "scroll", "mousemove"];
     activityEvents.forEach((type) => {
       document.addEventListener(
-        يكتب،
+        type,
         () => {
-          إذا كان بالإمكان استخدام الجلسة الحالية، فقم بتحديد النشاط.
+          if (canUseCurrentSession()) markActivity();
         },
         { passive: true }
       );
@@ -1644,13 +1644,13 @@
 
     window.addEventListener("storage", () => {
       readStorage();
-      تأكد من الحساب الحالي();
-      استدعاء الكل();
+      ensureCurrentAccount();
+      renderAll();
     });
   }
 
-  دالة إنشاء لوحة المراقبة() {
-    إذا لم يكن عنصر القائمة موجودًا، فقم بالخروج.
+  function createMonitorPanel() {
+    if (!els.menuDrawer) return;
 
     const panel = document.createElement("section");
     panel.className = "drawer-section monitor-panel";
@@ -1661,37 +1661,37 @@
         <span class="tiny-count" data-monitor-count>0</span>
       </div>
       <div class="monitor-panel-body">
-        <div class="empty-state empty-state-small" data-monitor-empty>ط³ط¬ظ'ظ„ ط¯ط®ظˆظ„ظƒ ط¹ط´ط§ظ† ظٹط¸ظ‡ط± ط³ط¬ظ„ ط§ظ„ط²ظٹط§ط±ط§طھ.</div>
+        <div class="empty-state empty-state-small" data-monitor-empty>ط³ط¬ظ‘ظ„ ط¯ط®ظˆظ„ظƒ ط¹ط´ط§ظ† ظٹط¸ظ‡ط± ط³ط¬ظ„ ط§ظ„ط²ظٹط§ط±ط§طھ.</div>
         <div class="monitor-list" data-monitor-list></div>
       </div>
     `;
 
     const firstSection = els.menuDrawer.querySelector(".drawer-section");
-    إذا كان (firstSection && firstSection.parentElement === els.menuDrawer) {
+    if (firstSection && firstSection.parentElement === els.menuDrawer) {
       els.menuDrawer.insertBefore(panel, firstSection);
-    } آخر {
+    } else {
       els.menuDrawer.appendChild(panel);
     }
 
     state.monitorPanelEl = panel;
   }
 
-  دالة إعداد الفترات الزمنية() {
-    إذا كان (state.intervalTimer) قم بمسح الفاصل الزمني(state.intervalTimer)؛
+  function setupIntervals() {
+    if (state.intervalTimer) clearInterval(state.intervalTimer);
 
     state.intervalTimer = setInterval(() => {
       const session = getCurrentSession();
       const acc = getCurrentAccount();
 
-      إذا (الجلسة && الحساب) {
-        إذا كانت الجلسة منتهية الصلاحية {
+      if (session && acc) {
+        if (isSessionExpired(session)) {
           commitCurrentSession(true);
-          showToast("ط§ظ†طھظ‡طھ ط§ظ"ط¬ظ"ط³ط© ط¨ط¹ط¯ 24 ط³ط§ط¹ط©.");
-          استدعاء الكل();
-          يعود؛
+          showToast("ط§ظ†طھظ‡طھ ط§ظ„ط¬ظ„ط³ط© ط¨ط¹ط¯ 24 ط³ط§ط¹ط©.");
+          renderAll();
+          return;
         }
 
-        إذا كان (الوقت الحالي - رقم (آخر ظهور للحساب || 0) > CONFIG.ONLINE_WINDOW_MS) {
+        if (now() - Number(acc.lastSeenAt || 0) > CONFIG.ONLINE_WINDOW_MS) {
           renderShellState();
           renderOnlineUsers();
           renderFeaturedUsers();
@@ -1699,7 +1699,7 @@
         }
       }
 
-      حذف الرسائل العامة();
+      prunePublicMessages();
       prunePrivateThreads();
       writeStorage();
       renderShellState();
@@ -1711,58 +1711,58 @@
     }, 30000);
   }
 
-  دالة tryBindExternalDB() {
+  function tryBindExternalDB() {
     const db = window.KAREEM3_DB;
-    إذا لم تكن قاعدة البيانات موجودة أو كان نوع `db.init` ليس دالة، فسيتم إرجاع `Promise.resolve(null)`.
+    if (!db || typeof db.init !== "function") return Promise.resolve(null);
 
     state.externalDB = db;
-    إرجاع قاعدة البيانات
+    return db
       .init({ mode: "auto" })
       .then(() => db.getStatus?.() || null)
       .catch((err) => {
-        console.warn("[KAREEM3] ظپط´ظ„ طھظ‡ظٹط¦ط© ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط®ط§ط±ط¬ظٹط©طŒ ط¬ط§ط±ظچ ظ…طھط§ط¨ط¹ط© ط§ظ„ظˆط¶ط¹ ط§ظ„ظ…طظ„ظٹ”، يخطئ)؛
-        أعد قيمة فارغة (null).
+        console.warn("[KAREEM3] ظپط´ظ„ طھظ‡ظٹط¦ط© ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط®ط§ط±ط¬ظٹط©طŒ ط¬ط§ط±ظچ ظ…طھط§ط¨ط¹ط© ط§ظ„ظˆط¶ط¹ ط§ظ„ظ…ط­ظ„ظٹ", err);
+        return null;
       });
   }
 
-  دالة initLocalData() {
+  function initLocalData() {
     readStorage();
-    const guest = ensureCurrentCaccount();
+    const guest = ensureCurrentAccount();
 
-    إذا لم تكن المصفوفة `state.publicMessages` مصفوفة أو لم تكن `state.publicMessages` طويلة،
+    if (!Array.isArray(state.publicMessages) || !state.publicMessages.length) {
       state.publicMessages = [
         {
           id: createId("msg"),
-          معرّف المرسل: guest.id،
+          senderId: guest.id,
           senderLabel: getDisplayName(guest),
-          text: "ط £ظ‡ظ"ط§ظ‹ ط¨ظƒ ظپظٹ ط´ط§طھ ظ†ط§ط±.ط¬ط±ظ'ط¨ ط§ظƒطھط¨ ط±ط³ط§ظ„ط©.",
+          text: "ط£ظ‡ظ„ط§ظ‹ ط¨ظƒ ظپظٹ ط´ط§طھ ظ†ط§ط±. ط¬ط±ظ‘ط¨ ط§ظƒطھط¨ ط±ط³ط§ظ„ط©.",
           at: now() - 5 * 60 * 1000,
         },
       ];
     }
 
-    حذف الرسائل العامة();
+    prunePublicMessages();
     prunePrivateThreads();
     writeStorage();
   }
 
   /* =========================
-     تطبيق أساسي
+     ًں§  APP CORE
   ========================= */
 
   async function init() {
     cacheElements();
-    إنشاء لوحة مراقبة();
+    createMonitorPanel();
     initLocalData();
     attachEvents();
     setupIntervals();
-    استدعاء الكل();
-    افتح الصفحة الرئيسية();
-    انتظر محاولة ربط قاعدة البيانات الخارجية();
-    إذا كان بالإمكان استخدام الجلسة الحالية، فقم بتحديد النشاط.
+    renderAll();
+    openHome();
+    await tryBindExternalDB();
+    if (canUseCurrentSession()) markActivity();
   }
 
-  دالة cacheElements() {
+  function cacheElements() {
     els.app = $("app");
     els.privateShortcutBtn = $("privateShortcutBtn");
     els.appTitleBtn = $("appTitleBtn");
@@ -1841,22 +1841,22 @@
   }
 
   window.KAREEM3 = {
-    تحديث: عرض الكل،
-    تسجيل الخروج: تسجيل الخروج من الحساب الحالي،
-    فتح الملف الشخصي: فتح الملف الشخصي،
-    فتح ملف تعريف المستخدم بواسطة المعرف،
-    فتح محادثة خاصة،
-    الحالة: () => ({
-      الحساب الحالي: getCurrentAccount(),
-      الجلسة الحالية: getCurrentSession(),
+    refresh: renderAll,
+    logout: logoutCurrentAccount,
+    openProfile: openProfile,
+    openUserProfileById,
+    openPrivateChat,
+    state: () => ({
+      currentAccount: getCurrentAccount(),
+      currentSession: getCurrentSession(),
       unreadNotifications: getUnreadNotificationCount(),
-      عرض: state.view،
+      view: state.view,
     }),
   };
 
-  إذا كانت حالة تحميل المستند هي "جارٍ التحميل" {
+  if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
-  } آخر {
+  } else {
     init();
   }
 })();
