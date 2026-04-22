@@ -102,12 +102,23 @@ function setView(view) {
   state.view = view;
   els.app.dataset.view = view;
 
-  document.querySelectorAll(".page").forEach(p => p.classList.add("is-hidden"));
-  document.querySelectorAll("main").forEach(p => p.classList.add("is-hidden"));
+  // اخفاء كل الصفحات
+  document.getElementById("homeView")?.classList.add("is-hidden");
+  document.getElementById("profileView")?.classList.add("is-hidden");
+  document.getElementById("privateView")?.classList.add("is-hidden");
 
-  if (view === "home") $("homeView")?.classList.remove("is-hidden");
-  if (view === "profile") $("profileView")?.classList.remove("is-hidden");
-  if (view === "private") $("privateView")?.classList.remove("is-hidden");
+  // إظهار المطلوب
+  if (view === "home") {
+    document.getElementById("homeView")?.classList.remove("is-hidden");
+  }
+
+  if (view === "profile") {
+    document.getElementById("profileView")?.classList.remove("is-hidden");
+  }
+
+  if (view === "private") {
+    document.getElementById("privateView")?.classList.remove("is-hidden");
+  }
 }
 
 /* =========================
