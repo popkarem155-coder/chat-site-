@@ -104,13 +104,7 @@
     grid-template-columns: 1fr;
   }
 
-.chat-panel {
-  grid-template-rows: auto 1fr auto;
-}
-
- .messages-stream {
-  height: 200px;
-  background: rgba(255,0,0,0.1);
+   .chat-panel {
+     grid-template-rows: auto 1fr auto;
+   }
  }
-
-}
