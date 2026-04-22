@@ -108,6 +108,8 @@
   grid-template-rows: auto 1fr auto;
 }
 
-body {
+ body {
   outline: 5px solid red;
+ }
+
 }
