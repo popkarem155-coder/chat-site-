@@ -1,6 +1,6 @@
 /* =========================
    KAREEM CHAT MAIN.JS
-   FULL WORKING CORE
+   CLEAN FULL VERSION
 ========================= */
 
 const state = {
@@ -14,7 +14,7 @@ const state = {
 };
 
 /* =========================
-   ELEMENTS CACHE
+   HELPERS
 ========================= */
 const $ = (id) => document.getElementById(id);
 
@@ -25,8 +25,8 @@ const els = {};
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
   cache();
-  bindEvents();
   loadData();
+  bindEvents();
   renderAll();
   setView("home");
 });
@@ -37,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
 function cache() {
   els.app = $("app");
 
-  els.menuBtn = $("menuBtn");
   els.menuDrawer = $("menuDrawer");
 
   els.publicForm = $("publicMessageForm");
@@ -60,8 +59,6 @@ function cache() {
   els.profileGender = $("profileGender");
   els.profileNationality = $("profileNationality");
   els.profileBio = $("profileBio");
-
-  els.profileAvatar = $("profileAvatarPreview");
 }
 
 /* =========================
@@ -78,36 +75,31 @@ function bindEvents() {
     setView("profile");
   });
 
-  $("backFromProfileBtn")?.addEventListener("click", () => {
-    setView("home");
-  });
-
+  $("backFromProfileBtn")?.addEventListener("click", () => setView("home"));
   $("backFromPrivateBtn")?.addEventListener("click", () => setView("home"));
 
-  els.publicForm?.addEventListener("submit", sendPublicMessage);
-
-  els.privateForm?.addEventListener("submit", sendPrivateMessage);
-
-  els.profileForm?.addEventListener("submit", saveProfile);
-
   $("closeProfileBtn")?.addEventListener("click", () => setView("home"));
+
+  els.publicForm?.addEventListener("submit", sendPublicMessage);
+  els.privateForm?.addEventListener("submit", sendPrivateMessage);
+  els.profileForm?.addEventListener("submit", saveProfile);
 
   els.drawerLogoutBtn?.addEventListener("click", logout);
 }
 
 /* =========================
-   VIEW SYSTEM
+   VIEW SYSTEM (FIXED)
 ========================= */
 function setView(view) {
   state.view = view;
   els.app.dataset.view = view;
 
-  // اخفاء كل الصفحات
-  document.getElementById("homeView")?.classList.add("is-hidden");
-  document.getElementById("profileView")?.classList.add("is-hidden");
-  document.getElementById("privateView")?.classList.add("is-hidden");
+  const views = ["homeView", "profileView", "privateView"];
 
-  // إظهار المطلوب
+  views.forEach(v => {
+    document.getElementById(v)?.classList.add("is-hidden");
+  });
+
   if (view === "home") {
     document.getElementById("homeView")?.classList.remove("is-hidden");
   }
@@ -119,6 +111,8 @@ function setView(view) {
   if (view === "private") {
     document.getElementById("privateView")?.classList.remove("is-hidden");
   }
+
+  els.menuDrawer?.classList.add("is-hidden");
 }
 
 /* =========================
@@ -129,28 +123,27 @@ function toggleMenu() {
 }
 
 /* =========================
-   DATA STORAGE
+   DATA
 ========================= */
 function loadData() {
   state.messages = JSON.parse(localStorage.getItem("publicMessages") || "[]");
   state.privateChats = JSON.parse(localStorage.getItem("privateChats") || "{}");
-
   state.users = JSON.parse(localStorage.getItem("users") || "[]");
 
-  if (!state.currentUser) {
-    state.currentUser = {
+  state.currentUser =
+    JSON.parse(localStorage.getItem("currentUser")) || {
       id: Date.now(),
       name: "زائر",
       bio: "",
       online: true
     };
-  }
 }
 
 function saveData() {
   localStorage.setItem("publicMessages", JSON.stringify(state.messages));
   localStorage.setItem("privateChats", JSON.stringify(state.privateChats));
   localStorage.setItem("users", JSON.stringify(state.users));
+  localStorage.setItem("currentUser", JSON.stringify(state.currentUser));
 }
 
 /* =========================
@@ -162,14 +155,12 @@ function sendPublicMessage(e) {
   const text = els.publicInput.value.trim();
   if (!text) return;
 
-  const msg = {
+  state.messages.push({
     id: Date.now(),
     text,
     user: state.currentUser.name,
     time: new Date().toLocaleTimeString()
-  };
-
-  state.messages.push(msg);
+  });
 
   if (state.messages.length > 70) {
     state.messages.shift();
@@ -185,7 +176,8 @@ function renderPublicMessages() {
   els.publicMessages.innerHTML = "";
 
   if (!state.messages.length) {
-    els.publicMessages.innerHTML = `<div class="messages-placeholder">لسه ما فيش رسائل ظاهرة هنا.</div>`;
+    els.publicMessages.innerHTML =
+      `<div class="messages-placeholder">لسه ما فيش رسائل</div>`;
     return;
   }
 
@@ -195,9 +187,9 @@ function renderPublicMessages() {
 
     div.innerHTML = `
       <div class="message-head">
-        <div class="message-avatar">${m.user[0]}</div>
+        <div class="message-avatar">${m.user?.[0] || "?"}</div>
         <div class="message-meta-wrap">
-          <button class="message-sender">${m.user}</button>
+          <span class="message-sender">${m.user}</span>
           <span class="message-time">${m.time}</span>
         </div>
       </div>
@@ -241,10 +233,12 @@ function sendPrivateMessage(e) {
 
 function renderPrivateMessages() {
   const uid = state.activePrivateUser?.id;
+
   els.privateMessages.innerHTML = "";
 
   if (!uid || !state.privateChats[uid]) {
-    els.privateMessages.innerHTML = `<div class="messages-placeholder">اختار محادثة عشان تبدأ.</div>`;
+    els.privateMessages.innerHTML =
+      `<div class="messages-placeholder">اختار محادثة</div>`;
     return;
   }
 
@@ -254,7 +248,7 @@ function renderPrivateMessages() {
 
     div.innerHTML = `
       <div class="message-head">
-        <div class="message-avatar">${m.from[0]}</div>
+        <div class="message-avatar">${m.from?.[0] || "?"}</div>
         <div class="message-meta-wrap">
           <span class="message-sender">${m.from}</span>
           <span class="message-time">${m.time}</span>
@@ -280,7 +274,7 @@ function renderUsers() {
     div.className = "user-row";
 
     div.innerHTML = `
-      <div class="avatar">${u.name[0]}</div>
+      <div class="avatar">${u.name?.[0] || "?"}</div>
       <div class="user-row-info">
         <strong>${u.name}</strong>
         <span>${u.bio || "بدون وصف"}</span>
@@ -308,7 +302,7 @@ function saveProfile(e) {
     bio: els.profileBio.value
   };
 
-  localStorage.setItem("currentUser", JSON.stringify(state.currentUser));
+  saveData();
 
   alert("تم حفظ الملف");
   renderUsers();
