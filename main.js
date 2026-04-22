@@ -33,7 +33,12 @@
     intervalTimer: null,
     view: "home",
     searchQuery: "",
+    privateSearchQuery: "",
     externalDB: null,
+    homePrivatePanelEl: null,
+    homePrivateChatsList: null,
+    homePrivateChatsEmpty: null,
+    privateSearchInputHome: null,
   };
 
   const els = {};
@@ -72,7 +77,9 @@
   }
 
   function createId(prefix = "id") {
-    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
   }
 
   function hashString(str) {
@@ -134,12 +141,19 @@
   function getAccountByUsername(username) {
     const key = normalizeText(username).toLowerCase();
     if (!key) return null;
-    return getAccounts().find((acc) => normalizeText(acc.username).toLowerCase() === key) || null;
+    return (
+      getAccounts().find(
+        (acc) => normalizeText(acc.username).toLowerCase() === key
+      ) || null
+    );
   }
 
   function getDisplayName(account) {
     if (!account) return "مستخدم";
-    const name = clampText(account.profile?.name || account.username || "مستخدم", CONFIG.MAX_NAME_LENGTH);
+    const name = clampText(
+      account.profile?.name || account.username || "مستخدم",
+      CONFIG.MAX_NAME_LENGTH
+    );
     return name || "مستخدم";
   }
 
@@ -181,7 +195,8 @@
 
     const session = getCurrentSession();
     const startedAt = Number(session?.startedAt || 0);
-    const total = Number(acc.totalActiveMs || 0) + Math.max(0, now() - startedAt);
+    const total =
+      Number(acc.totalActiveMs || 0) + Math.max(0, now() - startedAt);
     return total >= CONFIG.FEATURED_WINDOW_MS;
   }
 
@@ -194,7 +209,10 @@
       session.accountId === acc.id &&
       !isSessionExpired(session)
     ) {
-      return Number(acc.totalActiveMs || 0) + Math.max(0, now() - Number(session.startedAt || now()));
+      return (
+        Number(acc.totalActiveMs || 0) +
+        Math.max(0, now() - Number(session.startedAt || now()))
+      );
     }
 
     return Number(acc.totalActiveMs || 0);
@@ -222,26 +240,45 @@
 
   function readStorage() {
     state.accounts = safeJSONParse(localStorage.getItem(KEYS.accounts), []);
-    state.publicMessages = safeJSONParse(localStorage.getItem(KEYS.publicMessages), []);
-    state.privateThreads = safeJSONParse(localStorage.getItem(KEYS.privateThreads), {});
+    state.publicMessages = safeJSONParse(
+      localStorage.getItem(KEYS.publicMessages),
+      []
+    );
+    state.privateThreads = safeJSONParse(
+      localStorage.getItem(KEYS.privateThreads),
+      {}
+    );
   }
 
   function writeStorage() {
     try {
-      localStorage.setItem(KEYS.accounts, safeJSONStringify(state.accounts, "[]"));
-      localStorage.setItem(KEYS.publicMessages, safeJSONStringify(state.publicMessages, "[]"));
-      localStorage.setItem(KEYS.privateThreads, safeJSONStringify(state.privateThreads, "{}"));
+      localStorage.setItem(
+        KEYS.accounts,
+        safeJSONStringify(state.accounts, "[]")
+      );
+      localStorage.setItem(
+        KEYS.publicMessages,
+        safeJSONStringify(state.publicMessages, "[]")
+      );
+      localStorage.setItem(
+        KEYS.privateThreads,
+        safeJSONStringify(state.privateThreads, "{}")
+      );
 
       if (state.currentAccountId) {
         const acc = getCurrentAccount();
         if (acc) {
           localStorage.setItem(
             KEYS.currentSession,
-            safeJSONStringify({
-              accountId: state.currentAccountId,
-              startedAt: acc.sessionStartedAt || now(),
-              expiresAt: acc.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS),
-            }, "{}")
+            safeJSONStringify(
+              {
+                accountId: state.currentAccountId,
+                startedAt: acc.sessionStartedAt || now(),
+                expiresAt:
+                  acc.sessionExpiresAt || now() + CONFIG.SESSION_TTL_MS,
+              },
+              "{}"
+            )
           );
         }
       } else {
@@ -256,7 +293,9 @@
   function prunePublicMessages() {
     if (!Array.isArray(state.publicMessages)) state.publicMessages = [];
     if (state.publicMessages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
-      state.publicMessages = state.publicMessages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
+      state.publicMessages = state.publicMessages.slice(
+        -CONFIG.PUBLIC_MESSAGE_CAP
+      );
     }
   }
 
@@ -273,7 +312,9 @@
 
     const messages = Array.isArray(thread.messages) ? thread.messages : [];
     return {
-      participants: Array.isArray(thread.participants) ? thread.participants : [],
+      participants: Array.isArray(thread.participants)
+        ? thread.participants
+        : [],
       messages,
       updatedAt: Number(thread.updatedAt || 0),
     };
@@ -368,7 +409,9 @@
       if (acc && !isSessionExpired(session)) {
         state.currentAccountId = acc.id;
         acc.sessionStartedAt = Number(session.startedAt || now());
-        acc.sessionExpiresAt = Number(session.expiresAt || (now() + CONFIG.SESSION_TTL_MS));
+        acc.sessionExpiresAt = Number(
+          session.expiresAt || now() + CONFIG.SESSION_TTL_MS
+        );
         acc.lastSeenAt = acc.lastSeenAt || now();
         return acc;
       }
@@ -378,11 +421,14 @@
     state.currentAccountId = guest.id;
     localStorage.setItem(
       KEYS.currentSession,
-      safeJSONStringify({
-        accountId: guest.id,
-        startedAt: now(),
-        expiresAt: now() + CONFIG.SESSION_TTL_MS,
-      }, "{}")
+      safeJSONStringify(
+        {
+          accountId: guest.id,
+          startedAt: now(),
+          expiresAt: now() + CONFIG.SESSION_TTL_MS,
+        },
+        "{}"
+      )
     );
     return guest;
   }
@@ -609,6 +655,32 @@
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
+  function getPrivateChatMatches(query = state.privateSearchQuery) {
+    const current = getCurrentAccount();
+    if (!current) return [];
+
+    const q = normalizeText(query || "").toLowerCase();
+    const chats = getPrivateChatsForCurrentUser();
+
+    if (!q) return chats;
+
+    return chats.filter((item) => {
+      const peer = item.peer;
+      const peerName = normalizeText(peer?.username || "").toLowerCase();
+      const profileName = normalizeText(peer?.profile?.name || "").toLowerCase();
+      const bio = normalizeText(peer?.profile?.bio || "").toLowerCase();
+      const nationality = normalizeText(peer?.profile?.nationality || "").toLowerCase();
+      const lastMessage = normalizeText(item.lastMessage?.text || "").toLowerCase();
+      return (
+        peerName.includes(q) ||
+        profileName.includes(q) ||
+        bio.includes(q) ||
+        nationality.includes(q) ||
+        lastMessage.includes(q)
+      );
+    });
+  }
+
   function addPrivateMessage(peerId, text, senderId = null, senderLabel = "مستخدم") {
     const current = getCurrentAccount();
     if (!current || !peerId) return null;
@@ -635,6 +707,7 @@
     state.privateThreads[getThreadKey(current.id, peerId)] = thread;
     prunePrivateThreads();
     writeStorage();
+    renderHomePrivateChatsList?.();
     renderPrivateChatsList?.();
     renderPrivateConversation?.();
     renderShellState?.();
@@ -683,6 +756,119 @@
     const acc = getCurrentAccount();
     if (!acc || !Array.isArray(acc.notifications)) return [];
     return [...acc.notifications].sort((a, b) => Number(b.at) - Number(a.at));
+  }
+
+  function createHomePrivatePanel() {
+    if (!els.homeView || state.homePrivatePanelEl) return;
+
+    const panel = document.createElement("section");
+    panel.className = "panel panel-soft";
+    panel.id = "homePrivatePanel";
+    panel.innerHTML = `
+      <div class="panel-head">
+        <h2 id="homePrivateTitle">الرسائل الخاصة</h2>
+        <span class="panel-chip">DM</span>
+      </div>
+
+      <label class="search-box" for="privateSearchInputHome">
+        <span class="search-label">بحث في المحادثات</span>
+        <input id="privateSearchInputHome" type="search" placeholder="ابحث بين الأشخاص اللي كلمتهم..." autocomplete="off" />
+      </label>
+
+      <div id="homePrivateChatsEmpty" class="empty-state empty-state-small">لسه ما كلمتش حد في الخاص.</div>
+      <div id="homePrivateChatsList" class="private-chats-list" role="list"></div>
+    `;
+
+    const publicChatPanel = els.publicMessages?.closest(".chat-panel");
+    if (publicChatPanel && publicChatPanel.parentElement === els.homeView) {
+      els.homeView.insertBefore(panel, publicChatPanel);
+    } else {
+      els.homeView.appendChild(panel);
+    }
+
+    state.homePrivatePanelEl = panel;
+    els.privateSearchInputHome = panel.querySelector("#privateSearchInputHome");
+    els.homePrivateChatsEmpty = panel.querySelector("#homePrivateChatsEmpty");
+    els.homePrivateChatsList = panel.querySelector("#homePrivateChatsList");
+
+    if (els.privateSearchInputHome) {
+      els.privateSearchInputHome.value = state.privateSearchQuery || "";
+      els.privateSearchInputHome.addEventListener("input", (event) => {
+        state.privateSearchQuery = normalizeText(event.target.value || "");
+        renderHomePrivateChatsList();
+      });
+    }
+  }
+
+  function renderHomePrivateChatsList() {
+    if (!state.homePrivatePanelEl) createHomePrivatePanel();
+    if (!els.homePrivateChatsList || !els.homePrivateChatsEmpty) return;
+
+    const current = getCurrentAccount();
+    els.homePrivateChatsList.innerHTML = "";
+
+    if (!current) {
+      els.homePrivateChatsEmpty.classList.remove("is-hidden");
+      els.homePrivateChatsEmpty.textContent = "لا يوجد حساب نشط حاليًا.";
+      return;
+    }
+
+    const chats = getPrivateChatMatches(state.privateSearchQuery);
+    if (!chats.length) {
+      els.homePrivateChatsEmpty.classList.remove("is-hidden");
+      els.homePrivateChatsEmpty.textContent = state.privateSearchQuery
+        ? "مافيش محادثات مطابقة."
+        : "لسه ما كلمتش حد في الخاص.";
+      return;
+    }
+
+    els.homePrivateChatsEmpty.classList.add("is-hidden");
+
+    chats.forEach((item) => {
+      const peer = item.peer;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "private-chat-item";
+      if (
+        state.selectedPrivatePeerId &&
+        state.selectedPrivatePeerId === item.peerId
+      ) {
+        btn.classList.add("is-active");
+      }
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      setAvatar(avatar, peer, peer ? getAvatarInitial(peer) : "؟");
+
+      const info = document.createElement("div");
+      info.className = "private-chat-item-info";
+
+      const name = document.createElement("strong");
+      name.textContent = peer ? getDisplayName(peer) : "مستخدم غير معروف";
+
+      const preview = document.createElement("span");
+      const lastMessage = item.lastMessage;
+      preview.textContent = lastMessage
+        ? (lastMessage.senderId === current.id ? "أنت: " : "") +
+          (lastMessage.text || "")
+        : "ابدأ المحادثة";
+
+      info.appendChild(name);
+      info.appendChild(preview);
+
+      const time = document.createElement("time");
+      time.className = "private-chat-item-time";
+      time.textContent = lastMessage ? formatTime(lastMessage.at) : "";
+
+      btn.appendChild(avatar);
+      btn.appendChild(info);
+      btn.appendChild(time);
+      btn.addEventListener("click", () => {
+        if (item.peerId) openPrivateChat(item.peerId, true);
+      });
+
+      els.homePrivateChatsList.appendChild(btn);
+    });
   }
 
   function openHome() {
@@ -871,7 +1057,9 @@
 
     if (els.menuUserMeta) {
       els.menuUserMeta.textContent = current
-        ? `اضغط لفتح الملف وتعديل البيانات • ${featured ? "مستخدم مميز" : "حساب عادي"}`
+        ? `اضغط لفتح الملف وتعديل البيانات • ${
+            featured ? "مستخدم مميز" : "حساب عادي"
+          }`
         : "سجل دخول أو أنشئ حساب تجريبي";
     }
 
@@ -879,8 +1067,10 @@
       setAvatar(els.menuAvatar, current, current ? getAvatarInitial(current) : "ز");
     }
 
-    if (els.profileMonitorCount) els.profileMonitorCount.textContent = String(getUnreadNotificationCount());
-    if (els.drawerMonitorBadge) els.drawerMonitorBadge.textContent = String(getUnreadNotificationCount());
+    if (els.profileMonitorCount)
+      els.profileMonitorCount.textContent = String(getUnreadNotificationCount());
+    if (els.drawerMonitorBadge)
+      els.drawerMonitorBadge.textContent = String(getUnreadNotificationCount());
 
     if (els.publicMessageInput) {
       els.publicMessageInput.placeholder = current
@@ -894,11 +1084,17 @@
 
   function buildMessageElement(message) {
     const sender = getAccountById(message.senderId);
-    const senderName = normalizeText(sender ? getDisplayName(sender) : message.senderLabel || "مستخدم");
+    const senderName = normalizeText(
+      sender ? getDisplayName(sender) : message.senderLabel || "مستخدم"
+    );
 
     const article = document.createElement("article");
     article.className = "message-item";
-    if (message.senderId && state.currentAccountId && message.senderId === state.currentAccountId) {
+    if (
+      message.senderId &&
+      state.currentAccountId &&
+      message.senderId === state.currentAccountId
+    ) {
       article.classList.add("is-own");
     }
 
@@ -1067,11 +1263,12 @@
   }
 
   function renderHomeView() {
+    createHomePrivatePanel();
     renderShellState();
+    renderHomePrivateChatsList();
     renderPublicMessages();
     renderOnlineUsers();
     renderFeaturedUsers();
-    renderPrivateChatsList();
     renderMonitorPanel();
     renderUserSearchResults();
   }
@@ -1084,17 +1281,23 @@
     if (els.profilePassword) els.profilePassword.value = current.password || "";
     if (els.profileAge) els.profileAge.value = current.profile?.age || "";
     if (els.profileGender) els.profileGender.value = current.profile?.gender || "";
-    if (els.profileNationality) els.profileNationality.value = current.profile?.nationality || "";
+    if (els.profileNationality) els.profileNationality.value =
+      current.profile?.nationality || "";
     if (els.profileBio) els.profileBio.value = current.profile?.bio || "";
 
-    if (els.profileAvatarPreview) setAvatar(els.profileAvatarPreview, current, getAvatarInitial(current));
+    if (els.profileAvatarPreview)
+      setAvatar(els.profileAvatarPreview, current, getAvatarInitial(current));
     if (els.profileOnlineState) {
-      els.profileOnlineState.textContent = isCurrentAccountOnline() ? "متصل الآن" : "غير نشط";
+      els.profileOnlineState.textContent = isCurrentAccountOnline()
+        ? "متصل الآن"
+        : "غير نشط";
     }
 
     if (els.profileLastSeen) {
       els.profileLastSeen.textContent = current.lastSeenAt
-        ? `${durationLabel(getActiveDurationForAccount(current))} • آخر ظهور ${timeAgo(current.lastSeenAt)}`
+        ? `${durationLabel(getActiveDurationForAccount(current))} • آخر ظهور ${timeAgo(
+            current.lastSeenAt
+          )}`
         : "لا يوجد نشاط مسجل";
     }
   }
@@ -1125,7 +1328,10 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "private-chat-item";
-      if (state.selectedPrivatePeerId && state.selectedPrivatePeerId === item.peerId) {
+      if (
+        state.selectedPrivatePeerId &&
+        state.selectedPrivatePeerId === item.peerId
+      ) {
         btn.classList.add("is-active");
       }
 
@@ -1142,7 +1348,8 @@
       const preview = document.createElement("span");
       const lastMessage = item.lastMessage;
       preview.textContent = lastMessage
-        ? (lastMessage.senderId === current.id ? "أنت: " : "") + (lastMessage.text || "")
+        ? (lastMessage.senderId === current.id ? "أنت: " : "") +
+          (lastMessage.text || "")
         : "ابدأ المحادثة";
 
       info.appendChild(name);
@@ -1164,7 +1371,13 @@
   }
 
   function renderPrivateConversation() {
-    if (!els.privateMessages || !els.privateChatTitle || !els.privateChatMeta || !els.privateChatAvatar) return;
+    if (
+      !els.privateMessages ||
+      !els.privateChatTitle ||
+      !els.privateChatMeta ||
+      !els.privateChatAvatar
+    )
+      return;
 
     const current = getCurrentAccount();
     const peer = getAccountById(state.selectedPrivatePeerId);
@@ -1178,7 +1391,8 @@
       placeholder.className = "messages-placeholder";
       placeholder.textContent = "لا يوجد حساب نشط حاليًا.";
       els.privateMessages.appendChild(placeholder);
-      if (els.privateMessageInput) els.privateMessageInput.placeholder = "لا يوجد حساب نشط";
+      if (els.privateMessageInput)
+        els.privateMessageInput.placeholder = "لا يوجد حساب نشط";
       if (els.privateSendBtn) els.privateSendBtn.disabled = true;
       return;
     }
@@ -1192,14 +1406,19 @@
       placeholder.className = "messages-placeholder";
       placeholder.textContent = "اختار شخص من القائمة أو من البحث.";
       els.privateMessages.appendChild(placeholder);
-      if (els.privateMessageInput) els.privateMessageInput.placeholder = "اكتب رسالتك الخاصة...";
+      if (els.privateMessageInput)
+        els.privateMessageInput.placeholder = "اكتب رسالتك الخاصة...";
       if (els.privateSendBtn) els.privateSendBtn.disabled = true;
       return;
     }
 
     els.privateChatTitle.textContent = getDisplayName(peer);
     els.privateChatMeta.textContent = peer.lastSeenAt
-      ? `${isCurrentAccountOnline() && state.selectedPrivatePeerId === peer.id ? "متصل الآن" : "آخر ظهور"} ${timeAgo(peer.lastSeenAt)}`
+      ? `${
+          isCurrentAccountOnline() && state.selectedPrivatePeerId === peer.id
+            ? "متصل الآن"
+            : "آخر ظهور"
+        } ${timeAgo(peer.lastSeenAt)}`
       : "مستخدم جديد";
 
     setAvatar(els.privateChatAvatar, peer, getAvatarInitial(peer));
@@ -1237,15 +1456,20 @@
       return;
     }
 
-    if (els.userViewTitle) els.userViewTitle.textContent = `ملف ${getDisplayName(target)}`;
+    if (els.userViewTitle)
+      els.userViewTitle.textContent = `ملف ${getDisplayName(target)}`;
     if (els.userViewName) els.userViewName.textContent = getDisplayName(target);
     if (els.userViewAge) els.userViewAge.textContent = target.profile?.age || "—";
-    if (els.userViewGender) els.userViewGender.textContent = target.profile?.gender || "—";
-    if (els.userViewNationality) els.userViewNationality.textContent = target.profile?.nationality || "—";
-    if (els.userViewBio) els.userViewBio.textContent = target.profile?.bio || "لا توجد نبذة بعد.";
+    if (els.userViewGender)
+      els.userViewGender.textContent = target.profile?.gender || "—";
+    if (els.userViewNationality)
+      els.userViewNationality.textContent = target.profile?.nationality || "—";
+    if (els.userViewBio)
+      els.userViewBio.textContent = target.profile?.bio || "لا توجد نبذة بعد.";
 
     if (els.userViewStatus) {
-      const online = target.id === state.currentAccountId && isCurrentAccountOnline();
+      const online =
+        target.id === state.currentAccountId && isCurrentAccountOnline();
       if (online) {
         els.userViewStatus.textContent = "متصل الآن";
       } else if (target.lastSeenAt) {
@@ -1256,7 +1480,9 @@
     }
 
     if (els.userViewActivity) {
-      els.userViewActivity.textContent = durationLabel(getActiveDurationForAccount(target));
+      els.userViewActivity.textContent = durationLabel(
+        getActiveDurationForAccount(target)
+      );
     }
 
     setAvatar(els.userViewAvatar, target, getAvatarInitial(target));
@@ -1271,8 +1497,10 @@
 
     const current = getCurrentAccount();
     const unreadCount = getUnreadNotificationCount();
-    if (els.profileMonitorCount) els.profileMonitorCount.textContent = String(unreadCount);
-    if (els.drawerMonitorBadge) els.drawerMonitorBadge.textContent = String(unreadCount);
+    if (els.profileMonitorCount)
+      els.profileMonitorCount.textContent = String(unreadCount);
+    if (els.drawerMonitorBadge)
+      els.drawerMonitorBadge.textContent = String(unreadCount);
 
     const titleEl = state.monitorPanelEl.querySelector("[data-monitor-title]");
     const countEl = state.monitorPanelEl.querySelector("[data-monitor-count]");
@@ -1326,11 +1554,31 @@
     });
   }
 
+  function syncUserSearchInputs(value) {
+    const normalized = normalizeText(value || "");
+    state.searchQuery = normalized;
+    if (els.userSearchInputHome && els.userSearchInputHome.value !== normalized)
+      els.userSearchInputHome.value = normalized;
+    if (
+      els.userSearchInputDrawer &&
+      els.userSearchInputDrawer.value !== normalized
+    )
+      els.userSearchInputDrawer.value = normalized;
+    renderUserSearchResults();
+  }
+
   function renderUserSearchResults() {
     if (!els.userSearchResults || !els.searchResultCount) return;
 
-    const query = normalizeText(els.userSearchInput?.value || "");
+    const query = normalizeText(
+      els.userSearchInputHome?.value || els.userSearchInputDrawer?.value || ""
+    );
     state.searchQuery = query;
+
+    if (els.userSearchInputHome && els.userSearchInputHome.value !== query)
+      els.userSearchInputHome.value = query;
+    if (els.userSearchInputDrawer && els.userSearchInputDrawer.value !== query)
+      els.userSearchInputDrawer.value = query;
 
     els.userSearchResults.innerHTML = "";
 
@@ -1348,8 +1596,15 @@
       const name = normalizeText(acc.username).toLowerCase();
       const profileName = normalizeText(acc.profile?.name || "").toLowerCase();
       const bio = normalizeText(acc.profile?.bio || "").toLowerCase();
-      const nationality = normalizeText(acc.profile?.nationality || "").toLowerCase();
-      return name.includes(q) || profileName.includes(q) || bio.includes(q) || nationality.includes(q);
+      const nationality = normalizeText(
+        acc.profile?.nationality || ""
+      ).toLowerCase();
+      return (
+        name.includes(q) ||
+        profileName.includes(q) ||
+        bio.includes(q) ||
+        nationality.includes(q)
+      );
     });
 
     els.searchResultCount.textContent = String(results.length);
@@ -1449,7 +1704,8 @@
 
     if (current.id === state.currentAccountId) {
       current.sessionStartedAt = current.sessionStartedAt || now();
-      current.sessionExpiresAt = current.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS);
+      current.sessionExpiresAt =
+        current.sessionExpiresAt || now() + CONFIG.SESSION_TTL_MS;
     }
 
     writeStorage();
@@ -1532,7 +1788,15 @@
   }
 
   function handlePrivateShortcutClick() {
-    setView("private");
+    setView("home");
+    renderHomePrivateChatsList();
+
+    requestAnimationFrame(() => {
+      state.homePrivatePanelEl?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
   }
 
   function attachEvents() {
@@ -1604,14 +1868,29 @@
       openPrivateChat(targetId, true);
     });
 
-    els.userSearchInput?.addEventListener("input", () => {
-      renderUserSearchResults();
+    els.userSearchInputHome?.addEventListener("input", (e) => {
+      syncUserSearchInputs(e.target.value);
+    });
+
+    els.userSearchInputDrawer?.addEventListener("input", (e) => {
+      syncUserSearchInputs(e.target.value);
+    });
+
+    els.privateSearchInputHome?.addEventListener("input", (e) => {
+      state.privateSearchQuery = normalizeText(e.target.value || "");
+      renderHomePrivateChatsList();
     });
 
     els.publicMessageInput?.addEventListener("focus", () => markActivity());
     els.privateMessageInput?.addEventListener("focus", () => markActivity());
 
-    const activityEvents = ["pointerdown", "keydown", "touchstart", "scroll", "mousemove"];
+    const activityEvents = [
+      "pointerdown",
+      "keydown",
+      "touchstart",
+      "scroll",
+      "mousemove",
+    ];
     activityEvents.forEach((type) => {
       document.addEventListener(
         type,
@@ -1685,6 +1964,7 @@
       renderShellState();
       renderOnlineUsers();
       renderFeaturedUsers();
+      renderHomePrivateChatsList();
       renderPrivateChatsList();
       renderPrivateConversation();
       renderMonitorPanel();
@@ -1700,14 +1980,38 @@
       .init({ mode: "auto" })
       .then(() => db.getStatus?.() || null)
       .catch((err) => {
-        console.warn("[KAREEM3] فشل تهيئة قاعدة البيانات الخارجية، جاري متابعة الوضع المحلي", err);
+        console.warn(
+          "[KAREEM3] فشل تهيئة قاعدة البيانات الخارجية، جاري متابعة الوضع المحلي",
+          err
+        );
         return null;
       });
+  }
+
+  function ensureDemoPeerForTesting() {
+    const current = getCurrentAccount();
+    if (!current) return null;
+
+    const demoPeerName = "صديق تجريبي";
+    let demo = getAccountByUsername(demoPeerName);
+    if (!demo) {
+      demo = createAccount(demoPeerName, "");
+      demo.isDemo = true;
+      demo.profile.name = demoPeerName;
+      demo.profile.bio = "حساب تجريبي لاختبار الرسائل الخاصة.";
+      demo.profile.nationality = "تجريبي";
+      demo.lastSeenAt = now() - 20 * 60 * 1000;
+      demo.totalActiveMs = 3 * 60 * 60 * 1000;
+      pruneNotifications(demo);
+      writeStorage();
+    }
+    return demo;
   }
 
   function initLocalData() {
     readStorage();
     const guest = ensureCurrentAccount();
+    ensureDemoPeerForTesting();
 
     if (!Array.isArray(state.publicMessages) || !state.publicMessages.length) {
       state.publicMessages = [
@@ -1728,6 +2032,7 @@
 
   async function init() {
     cacheElements();
+    createHomePrivatePanel();
     createMonitorPanel();
     initLocalData();
     attachEvents();
@@ -1762,7 +2067,8 @@
     els.menuAvatar = $("menuAvatar");
     els.menuUserName = $("menuUserName");
     els.menuUserMeta = $("menuUserMeta");
-    els.userSearchInput = $("userSearchInput");
+    els.userSearchInputHome = $("userSearchInputHome");
+    els.userSearchInputDrawer = $("userSearchInputDrawer");
     els.searchResultCount = $("searchResultCount");
     els.userSearchResults = $("userSearchResults");
     els.drawerProfileBtn = $("drawerProfileBtn");
@@ -1814,6 +2120,10 @@
     els.userViewBio = $("userViewBio");
     els.startPrivateChatBtn = $("startPrivateChatBtn");
     els.closeUserViewBtn = $("closeUserViewBtn");
+
+    els.privateSearchInputHome = null;
+    els.homePrivateChatsList = null;
+    els.homePrivateChatsEmpty = null;
   }
 
   window.KAREEM3 = {
