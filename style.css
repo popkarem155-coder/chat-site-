@@ -247,6 +247,7 @@ min-width: 0;
   display: grid;
   gap: 12px;
   min-width: 0;
+  margin-top: 12px;
 }
 
 .home-view {
@@ -778,6 +779,24 @@ min-width: 0;
   min-width: 0;
 }
 
+#profileView .profile-form {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+#privateView .private-list-panel,
+#privateView .private-chat-panel {
+  overflow-y: auto;
+  min-height: 0;
+}
+
+#privateView .private-layout {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .profile-card-block {
   display: grid;
   grid-template-columns: 150px minmax(0, 1fr);
@@ -929,8 +948,6 @@ min-width: 0;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 12px;
-  align-items: stretch;
-  min-width: 0;
 }
 
 .private-list-panel,
@@ -1026,8 +1043,8 @@ min-width: 0;
 }
 
 .private-messages-stream {
-  height: auto;
-  min-height: 0;
+  height: var(--chat-height);
+  overflow: auto;
 }
 
 .drawer {
