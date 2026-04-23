@@ -106,9 +106,11 @@ a {
 }
 
 .page {
-  display: none;
-  width: 100%;
-  min-height: 100%;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
 }
    
 .topbar {
