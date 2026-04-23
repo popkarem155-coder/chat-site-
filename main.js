@@ -901,20 +901,23 @@
     updateBodyScrollLock();
   }
 
-  function setView(viewName) {
-    state.view = viewName;
+ function setView(viewName) {
+   state.view = viewName;
 
-    const sections = {
-      home: els.homeView,
-      profile: els.profileView,
-      private: els.privateView,
-      user: els.userView,
-    };
+   const sections = {
+     home: els.homeView,
+     profile: els.profileView,
+     private: els.privateView,
+     user: els.userView,
+   };
 
-    Object.entries(sections).forEach(([name, el]) => {
-      if (!el) return;
-      el.classList.toggle("is-hidden", name !== viewName);
-    });
+   Object.values(sections).forEach(el => {
+     if (!el) return;
+     el.classList.add("is-hidden");
+   });
+
+   sections[viewName]?.classList.remove("is-hidden");
+ }
 
     if (els.app) els.app.dataset.view = viewName;
     closeMenuDrawer();
