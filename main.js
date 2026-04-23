@@ -931,7 +931,26 @@
     }
   }
 
-  state.selectedUserId
+  function openHome() {
+    state.selectedUserId = null;
+    state.selectedPrivatePeerId = null;
+    setView("home");
+    renderHomeView();
+  }
+
+  function openProfile() {
+    if (!canUseCurrentSession()) return;
+
+    window.scrollTo(0, 0);
+
+    state.selectedUserId = null;
+    setView("profile");
+
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+        document.activeElement?.blur();
+    }, 10);
+  }
     
 
   function openUserProfileById(userId) {
