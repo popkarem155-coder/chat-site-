@@ -1499,4 +1499,54 @@ min-width: 0;
   height: var(--featured-height);
 }
 
-  
+/* 1. اجعل صفحات الملف الشخصي والرسائل تتبع نفس قواعد الصفحة العامة */
+#profileView .profile-form,
+#privateView .private-list-panel,
+#privateView .private-chat-panel,
+.page {
+  /* نفس خلفية وقيود الحاوية مثل الهوم */
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(23, 23, 35, 0.94), rgba(17, 17, 25, 0.94));
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+
+/* 2. ضبط السلوك العمودي والتمرير لمنع "الانزلاق" */
+#profileView,
+#privateView {
+  display: block;
+  overflow: hidden; /* يمنع التمرير المزدوج */
+  min-height: 0;
+}
+
+/* 3. اجعل اللوحات الداخلية قابلة للتمرير بشكل مستقل */
+#profileView .profile-form,
+#privateView .private-list-panel,
+#privateView .private-chat-panel {
+  max-height: calc(100dvh - var(--header-h) - 120px);
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.18) transparent;
+}
+
+/* 4. مزامنة ارتفاع صندوق الرسائل مع متغير الهوم */
+.private-chat-panel .messages-stream,
+.messages-stream {
+  height: var(--chat-height);
+  min-height: 260px;
+  overflow: auto;
+}
+
+/* 5. تحسين التخطيط الشبكي ليكون مرنًا مثل الهوم */
+.private-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* افتراضي على عمود واحد في الشاشات الصغيرة */
+  gap: 12px;
+}
+@media (min-width: 980px) {
+  .private-layout {
+    grid-template-columns: 300px minmax(0, 1fr); /* سلوك سطح المكتب كما في الملف */
+  }
+}  
