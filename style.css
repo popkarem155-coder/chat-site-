@@ -931,7 +931,6 @@ min-width: 0;
   gap: 12px;
   align-items: stretch;
   min-width: 0;
-  height: calc(100dvh - 140px);
   overflow: hidden;
 }
 
