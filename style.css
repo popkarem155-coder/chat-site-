@@ -39,7 +39,7 @@
   --chat-height: clamp(320px, 20vh, 600px);
   --online-height: clamp(200px, 50vh, 360px);
   --featured-height: clamp(140px, 20vh, 260px);
-  --users-gap: 10px;
+  --users-gap: 3px;
 }
 * {
   box-sizing: border-box;
@@ -247,7 +247,6 @@ min-width: 0;
   display: grid;
   gap: 12px;
   min-width: 0;
-  margin-top: 12px;
 }
 
 .home-view {
@@ -779,24 +778,6 @@ min-width: 0;
   min-width: 0;
 }
 
-#profileView .profile-form {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-}
-
-#privateView .private-list-panel,
-#privateView .private-chat-panel {
-  overflow-y: auto;
-  min-height: 0;
-}
-
-#privateView .private-layout {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
 .profile-card-block {
   display: grid;
   grid-template-columns: 150px minmax(0, 1fr);
@@ -948,6 +929,8 @@ min-width: 0;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 12px;
+  align-items: stretch;
+  min-width: 0;
 }
 
 .private-list-panel,
@@ -1043,8 +1026,8 @@ min-width: 0;
 }
 
 .private-messages-stream {
-  height: var(--chat-height);
-  overflow: auto;
+  height: auto;
+  min-height: 0;
 }
 
 .drawer {
@@ -1499,53 +1482,4 @@ min-width: 0;
   height: var(--featured-height);
 }
 
-/* 1. اجعل صفحات الملف الشخصي والرسائل تتبع نفس قواعد الصفحة العامة */
-#profileView .profile-form,
-#privateView .private-list-panel,
-#privateView .private-chat-panel,
-.page {
-  /* نفس خلفية وقيود الحاوية مثل الهوم */
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(23, 23, 35, 0.94), rgba(17, 17, 25, 0.94));
-  box-shadow: var(--shadow-soft);
-  min-width: 0;
-}
-
-/* 2. ضبط السلوك العمودي والتمرير لمنع "الانزلاق" */
-#profileView,
-#privateView {
-  display: block;
-  overflow: hidden; /* يمنع التمرير المزدوج */
-  min-height: 0;
-}
-
-/* 3. اجعل اللوحات الداخلية قابلة للتمرير بشكل مستقل */
-#profileView .profile-form,
-#privateView .private-list-panel,
-#privateView .private-chat-panel {
-  max-height: calc(100dvh - var(--header-h) - 120px);
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.18) transparent;
-}
-
-/* 4. مزامنة ارتفاع صندوق الرسائل مع متغير الهوم */
-.private-chat-panel .messages-stream,
-.messages-stream {
-  height: var(--chat-height);
-  min-height: 260px;
-  overflow: auto;
-}
-
-/* 5. تحسين التخطيط الشبكي ليكون مرنًا مثل الهوم */
-.private-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr); /* افتراضي على عمود واحد في الشاشات الصغيرة */
-  gap: 12px;
-}
-@media (min-width: 980px) {
-  .private-layout {
-    grid-template-columns: 300px minmax(0, 1fr); /* سلوك سطح المكتب كما في الملف */
-  }
+  
