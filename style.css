@@ -107,13 +107,12 @@ a {
 
 .app {
   width: 100%;
-  height: 100dvh; /* بدل min-height */
+  min-height: 100dvh;
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 10px; /* شيلنا الزيادة اللي تحت */
+  padding: 10px;
   position: relative;
   min-width: 0;
-  overflow: hidden; /* يمنع أي سحب وهمي */
 }
    
 .topbar {
