@@ -931,29 +931,7 @@
     }
   }
 
-  function openProfile(user = null) {
-  setView("profile");
-
-  const target = user || getCurrentAccount();
-  if (!target) return;
-
-  els.profileName.value = target.username || target.name || "";
-  els.profileAge.value = target.profile?.age || "";
-  els.profileGender.value = target.profile?.gender || "";
-  els.profileNationality.value = target.profile?.nationality || "";
-  els.profileBio.value = target.profile?.bio || "";
-
-  els.profileAvatarPreview.textContent =
-    target.username?.[0] ||
-    target.name?.[0] ||
-    "؟";
-
-  window.scrollTo(0, 0);
-
-  setTimeout(() => {
-    document.activeElement?.blur();
-  }, 10);
-  }
+  state.selectedUserId
     
 
   function openUserProfileById(userId) {
