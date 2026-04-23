@@ -1549,4 +1549,3 @@ min-width: 0;
   .private-layout {
     grid-template-columns: 300px minmax(0, 1fr); /* سلوك سطح المكتب كما في الملف */
   }
-}  
