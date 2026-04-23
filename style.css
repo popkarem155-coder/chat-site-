@@ -110,7 +110,7 @@ width: 100%;
 min-height: 100dvh;
 max-width: var(--maxw);
 margin: 0 auto;
-padding: relative;
+padding: 10px 10px 24px;
 position: relative;
 min-width: 0;
 }
