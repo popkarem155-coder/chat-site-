@@ -105,14 +105,15 @@ a {
   direction: rtl;
 }
 
-.page {
-  margin-top: 12px;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(23, 23, 35, 0.94), rgba(17, 17, 25, 0.94));
-  box-shadow: var(--shadow-soft);
+.app {
+  width: 100%;
+  height: 100dvh; /* بدل min-height */
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 10px; /* شيلنا الزيادة اللي تحت */
+  position: relative;
   min-width: 0;
+  overflow: hidden; /* يمنع أي سحب وهمي */
 }
    
 .topbar {
