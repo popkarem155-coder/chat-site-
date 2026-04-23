@@ -106,11 +106,15 @@ a {
 }
 
 .page {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(23, 23, 35, 0.94), rgba(17, 17, 25, 0.94));
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
   display: grid;
   gap: 12px;
-  min-width: 0;
-  flex: 1;
-  min-height: 0;
 }
    
 .topbar {
