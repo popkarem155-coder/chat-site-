@@ -1,5 +1,5 @@
 /* =========================
-   KAREEM LAYOUT CORE v1.1
+   KAREEM LAYOUT CORE v1.2 (FIXED SCROLL)
    Stable Structure Layer
    ========================= */
 
@@ -37,6 +37,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: auto;
   order: 1;
 }
 
@@ -45,6 +46,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: auto;
   order: 2;
 }
 
@@ -61,6 +63,7 @@
   display: flex;
   flex-direction: column;
   overflow: auto;
+  min-height: 0;
 }
 
 /* ===== COMPOSER ALWAYS BOTTOM ===== */
@@ -92,9 +95,68 @@
   z-index: 150;
 }
 
-/* ===== RESPONSIVE RULES (SAFE ONLY) ===== */
+/* =========================
+   FIX 1: PAGE SCROLL SYSTEM
+   (IMPORTANT FOR PROFILE + PRIVATE)
+   ========================= */
+.page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 90px);
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ===== CONTENT INSIDE PAGE SHOULD SCROLL ===== */
+.page > * {
+  min-height: 0;
+}
+
+/* =========================
+   FIX 2: PROFILE SCROLL SAFETY
+   ========================= */
+.profile-form,
+.public-profile-card {
+  min-height: 0;
+  overflow: auto;
+}
+
+/* =========================
+   FIX 3: PRIVATE CHAT SCROLL FIX
+   ========================= */
+.private-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.private-chat-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.private-messages-stream {
+  overflow: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================
+   RESPONSIVE RULES
+   ========================= */
 @media (max-width: 980px) {
   .main-section {
+    grid-template-columns: 1fr;
+  }
+
+  .private-layout {
     grid-template-columns: 1fr;
   }
 }
@@ -104,7 +166,7 @@
     grid-template-columns: 1fr;
   }
 
-   .chat-panel {
-     grid-template-rows: auto 1fr auto;
-   }
- }
+  .chat-panel {
+    grid-template-rows: auto 1fr auto;
+  }
+}
