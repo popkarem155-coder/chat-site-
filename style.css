@@ -39,7 +39,7 @@
   --chat-height: clamp(320px, 20vh, 600px);
   --online-height: clamp(200px, 50vh, 360px);
   --featured-height: clamp(140px, 20vh, 260px);
-  --users-gap: 3px;
+  --users-gap: 10px;
 }
 * {
   box-sizing: border-box;
