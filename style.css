@@ -243,7 +243,6 @@ min-width: 0;
   color: #fff;
 }
 
-.home-view,
 .page {
   display: grid;
   gap: 12px;
@@ -251,6 +250,9 @@ min-width: 0;
 }
 
 .home-view {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
   grid-template-columns: minmax(0, 1fr);
 }
 
