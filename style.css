@@ -931,7 +931,7 @@ min-width: 0;
   gap: 12px;
   align-items: stretch;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .private-list-panel,
