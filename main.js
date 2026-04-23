@@ -931,25 +931,28 @@
     }
   }
 
-  function openHome() {
-    state.selectedUserId = null;
-    state.selectedPrivatePeerId = null;
-    setView("home");
-    renderHomeView();
-  }
+  function openProfile(user = null) {
+  setView("profile");
 
-  function openProfile() {
-    if (!canUseCurrentSession()) return;
+  const target = user || getCurrentAccount();
+  if (!target) return;
 
-    window.scrollTo(0, 0);
+  els.profileName.value = target.username || target.name || "";
+  els.profileAge.value = target.profile?.age || "";
+  els.profileGender.value = target.profile?.gender || "";
+  els.profileNationality.value = target.profile?.nationality || "";
+  els.profileBio.value = target.profile?.bio || "";
 
-    state.selectedUserId = null;
-    setView("profile");
+  els.profileAvatarPreview.textContent =
+    target.username?.[0] ||
+    target.name?.[0] ||
+    "؟";
 
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-        document.activeElement?.blur();
-    }, 10);
+  window.scrollTo(0, 0);
+
+  setTimeout(() => {
+    document.activeElement?.blur();
+  }, 10);
   }
     
 
