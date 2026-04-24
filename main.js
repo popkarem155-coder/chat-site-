@@ -2015,4 +2015,7 @@ return true;
 
 }
 
-document.addEventListener("DOMContentLoaded", async () => { await init(); bindLowLevelAliases(); }); })();
+document.addEventListener("DOMContentLoaded", async () => {
+  await init();
+  bindLowLevelAliases();
+});
