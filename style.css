@@ -751,6 +751,15 @@ min-width: 0;
   background: linear-gradient(180deg, rgba(23, 23, 35, 0.94), rgba(17, 17, 25, 0.94));
   box-shadow: var(--shadow-soft);
   min-width: 0;
+  min-height: calc(100dvh - var(--header-h) - 40px);
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-form,
+.private-layout,
+.public-profile-card {
+  flex: 1;
 }
 
 .page-head {
