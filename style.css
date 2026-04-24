@@ -758,6 +758,7 @@ a {
 .private-layout,
 .public-profile-card {
   flex: 1;
+  min-height: 0;
 }
 
 .page-head {
