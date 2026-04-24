@@ -103,6 +103,8 @@ a {
 
 .app-shell {
   direction: rtl;
+  display: flex;
+  align-items: flex-start;
 }
 
 .app {
@@ -110,7 +112,7 @@ a {
   min-height: 100dvh;
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 10px 10px 24px;
+  padding: 0 10px 24px;
   position: relative;
   min-width: 0;
 }
