@@ -103,19 +103,19 @@ a {
 
 .app-shell {
   direction: rtl;
-  display: block;
+  display: flex;
+  min-height: 100dvh;
 }
 
 .app {
-  width: 100%;
-  min-height: 100dvh;
+  flex: 1;
+  min-height: 0;
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 10px 10px 24px;
-  position: relative;
-  min-width: 0;
-
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .topbar {
