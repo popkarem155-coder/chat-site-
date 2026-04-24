@@ -1455,8 +1455,7 @@ a {
     top: 8px;
     inset-inline-end: 8px;
   }
-}
-
+  
 @media (max-width: 480px) {
   .profile-details-grid {
     grid-template-columns: 1fr;
@@ -1478,18 +1477,16 @@ a {
   }
 
   .messages-stream {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
   }
-  
- .online-users-wrapper {
-  height: var(--online-height);
- }
 
-.featured-users-wrapper {
-  height: var(--featured-height);
+  .online-users-wrapper {
+    height: var(--online-height);
+  }
 
-body { overflow: hidden; }
-.app { height: 100dvh; overflow-y: auto; }
-  
+  .featured-users-wrapper {
+    height: var(--featured-height);
+  }
+}
