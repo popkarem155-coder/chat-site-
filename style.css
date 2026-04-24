@@ -104,18 +104,19 @@ a {
 .app-shell {
   direction: rtl;
   display: flex;
+  align-items: flex-start;
 }
 
 .app {
-  flex: 1;
-  min-height: 0;
+  width: 100%;
+  min-height: 100dvh;
   max-width: var(--maxw);
-  margin: 0 auto;
+  margin: 6px auto 0;
   padding: 10px 10px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  position: relative;
+  min-width: 0;
 }
+   
 
 .topbar {
   height: var(--header-h);
@@ -246,9 +247,9 @@ a {
 
 .home-view,
 .page {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
 }
 
 .home-view {
@@ -1006,7 +1007,7 @@ a {
 
 .private-chat-panel {
   width: 100%;
-  height: auto;
+  height: 100%;
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 10px 10px 24px;
