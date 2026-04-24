@@ -2,332 +2,458 @@
   "use strict";
 
   const STORAGE_KEYS = {
-    state: "kareem3_state_v2",
-    currentSession: "kareem3_session_v2",
+    accounts: "kareem3_accounts",
+    publicMessages: "kareem3_publicMessages",
+    privateThreads: "kareem3_privateThreads",
+    currentSession: "kareem3_currentSession",
+    guestSeed: "kareem3_guestSeed",
   };
 
   const CONFIG = {
+    SESSION_TTL_MS: 24 * 60 * 60 * 1000,
+    ONLINE_WINDOW_MS: 15 * 60 * 1000,
+    FEATURED_WINDOW_MS: 2 * 60 * 60 * 1000,
     PUBLIC_MESSAGE_CAP: 70,
-    PRIVATE_MESSAGE_CAP: 70,
-    MAX_NOTIFICATIONS: 70,
-    SESSION_TTL_MS: 1000 * 60 * 60 * 12,
-    TOAST_MS: 2200,
-    DEMO_REPLY_DELAY_MS: 900,
+    MAX_NOTIFICATIONS: 20,
+    TOAST_MS: 2400,
+    MAX_NAME_LENGTH: 40,
   };
 
-  const els = {};
   const state = {
     ready: false,
-    view: "home",
-    menuOpen: false,
-    privateDrawerOpen: false,
-    currentAccountId: null,
-    selectedUserId: null,
-    selectedPrivatePeerId: null,
-    searchQuery: "",
-    privateSearchQuery: "",
     accounts: [],
     publicMessages: [],
     privateThreads: {},
-    toastHostEl: null,
-    menuDrawerOverlay: null,
-    privateDrawerOverlay: null,
-    menuDrawer: null,
-    privateDrawerEl: null,
-    monitorPanelEl: null,
+    currentAccountId: null,
+    selectedPrivatePeerId: null,
+    selectedUserId: null,
+    pendingAction: null,
+    activitySaveTimer: null,
+    intervalTimer: null,
+    view: "home",
+    searchQuery: "",
+    privateSearchQuery: "",
     bridge: null,
     bridgeStatus: null,
-    activitySaveTimer: null,
-    pullRefresh: { tracking: false, startY: 0, startX: 0 },
+    monitorPanelEl: null,
+    menuOverlayEl: null,
+    privateOverlayEl: null,
+    privateDrawerEl: null,
+    toastHostEl: null,
+    pullRefresh: {
+      tracking: false,
+      startY: 0,
+      startX: 0,
+    },
   };
 
-  const $ = (id) => document.getElementById(id);
+  const els = {};
+
+  function $(id) {
+    return document.getElementById(id);
+  }
 
   function now() {
     return Date.now();
   }
 
-  function normalizeText(value) {
-    return String(value ?? "").replace(/\s+/g, " ").trim();
+  function safeJSONParse(value, fallback) {
+    try {
+      if (value === null || value === undefined || value === "") return fallback;
+      return JSON.parse(value);
+    } catch {
+      return fallback;
+    }
   }
 
-  function clampText(value, maxLen) {
-    return normalizeText(value).slice(0, maxLen);
+  function safeJSONStringify(value, fallback = "{}") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return fallback;
+    }
+  }
+
+  function normalizeText(value) {
+    return String(value ?? "").trim().replace(/\s+/g, " ");
+  }
+
+  function clampText(value, max = CONFIG.MAX_NAME_LENGTH) {
+    return normalizeText(value).slice(0, max);
   }
 
   function createId(prefix = "id") {
-    return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   }
 
   function hashString(str) {
-    let hash = 0;
-    const input = String(str || "");
-    for (let i = 0; i < input.length; i += 1) {
-      hash = (hash << 5) - hash + input.charCodeAt(i);
-      hash |= 0;
+    let h = 0;
+    const s = String(str || "");
+    for (let i = 0; i < s.length; i++) {
+      h = (h << 5) - h + s.charCodeAt(i);
+      h |= 0;
     }
-    return Math.abs(hash);
+    return Math.abs(h);
+  }
+
+  function colorFromText(text) {
+    const h = hashString(text) % 360;
+    return `hsl(${h} 35% 28%)`;
   }
 
   function formatTime(ts) {
-    const d = new Date(Number(ts || now()));
-    return new Intl.DateTimeFormat("ar-EG", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(d);
+    try {
+      return new Date(ts).toLocaleTimeString("ar-EG", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "";
+    }
   }
 
   function timeAgo(ts) {
     const diff = Math.max(0, now() - Number(ts || 0));
-    const sec = Math.floor(diff / 1000);
-    if (sec < 10) return "الآن";
-    if (sec < 60) return `منذ ${sec} ث`;
-    const min = Math.floor(sec / 60);
-    if (min < 60) return `منذ ${min} د`;
-    const hr = Math.floor(min / 60);
-    if (hr < 24) return `منذ ${hr} س`;
-    const day = Math.floor(hr / 24);
-    return `منذ ${day} ي`;
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+
+    if (diff < minute) return "منذ لحظات";
+    if (diff < hour) return `منذ ${Math.floor(diff / minute)} دقيقة`;
+    if (diff < day) return `منذ ${Math.floor(diff / hour)} ساعة`;
+    return `منذ ${Math.floor(diff / day)} يوم`;
   }
 
   function durationLabel(ms) {
-    const totalMinutes = Math.floor(Math.max(0, Number(ms || 0)) / 60000);
+    const totalMinutes = Math.floor(Math.max(0, ms) / 60000);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    if (!hours && !minutes) return "أقل من دقيقة";
-    if (!hours) return `${minutes} دقيقة`;
-    if (!minutes) return `${hours} ساعة`;
-    return `${hours} س ${minutes} د`;
-  }
-
-  function getThreadKey(a, b) {
-    return [String(a), String(b)].sort().join("__");
-  }
-
-  function normalizeAccount(acc) {
-    if (!acc || typeof acc !== "object") return null;
-
-    const profile = acc.profile && typeof acc.profile === "object" ? acc.profile : {};
-    const cleaned = {
-      id: String(acc.id || createId("acc")),
-      username: clampText(acc.username || profile.name || "مستخدم", 40) || "مستخدم",
-      password: normalizeText(acc.password || ""),
-      profile: {
-        name: clampText(profile.name || acc.username || "مستخدم", 40) || "مستخدم",
-        age: normalizeText(profile.age || ""),
-        gender: normalizeText(profile.gender || ""),
-        nationality: clampText(profile.nationality || "", 40),
-        bio: clampText(profile.bio || "", 280),
-        avatar: typeof profile.avatar === "string" ? profile.avatar : "",
-      },
-      lastSeenAt: Number(acc.lastSeenAt || 0),
-      sessionStartedAt: acc.sessionStartedAt ? Number(acc.sessionStartedAt) : null,
-      sessionExpiresAt: acc.sessionExpiresAt ? Number(acc.sessionExpiresAt) : null,
-      totalActiveMs: Number(acc.totalActiveMs || 0),
-      notifications: Array.isArray(acc.notifications) ? acc.notifications : [],
-      isDemo: Boolean(acc.isDemo),
-    };
-
-    if (!cleaned.profile.name) cleaned.profile.name = cleaned.username || "مستخدم";
-    return cleaned;
-  }
-
-  function normalizeThread(thread) {
-    if (!thread || typeof thread !== "object") return null;
-    const participants = Array.isArray(thread.participants) ? thread.participants.map(String) : [];
-    const messages = Array.isArray(thread.messages) ? thread.messages.map(normalizeMessage).filter(Boolean) : [];
-    return {
-      participants,
-      messages,
-      updatedAt: Number(thread.updatedAt || 0),
-    };
-  }
-
-  function normalizeMessage(message) {
-    if (!message || typeof message !== "object") return null;
-    return {
-      id: String(message.id || createId("msg")),
-      senderId: message.senderId == null ? null : String(message.senderId),
-      senderLabel: clampText(message.senderLabel || "مستخدم", 50) || "مستخدم",
-      text: clampText(message.text || "", 500),
-      at: Number(message.at || now()),
-    };
+    if (hours <= 0) return `نشط منذ ${minutes} دقيقة`;
+    if (minutes <= 0) return `نشط منذ ${hours} ساعة`;
+    return `نشط منذ ${hours} ساعة و${minutes} دقيقة`;
   }
 
   function getAccounts() {
     return Array.isArray(state.accounts) ? state.accounts : [];
   }
 
-  function setAccounts(list) {
-    state.accounts = Array.isArray(list) ? list.map(normalizeAccount).filter(Boolean) : [];
-  }
-
   function getAccountById(id) {
-    if (!id) return null;
-    return getAccounts().find((acc) => acc.id === String(id)) || null;
+    return getAccounts().find((acc) => acc.id === id) || null;
   }
 
   function getAccountByUsername(username) {
-    const q = normalizeText(username).toLowerCase();
-    if (!q) return null;
-    return getAccounts().find((acc) => normalizeText(acc.username).toLowerCase() === q) || null;
+    const key = normalizeText(username).toLowerCase();
+    if (!key) return null;
+    return getAccounts().find((acc) => normalizeText(acc.username).toLowerCase() === key) || null;
   }
 
-  function getCurrentAccount() {
-    return getAccountById(state.currentAccountId);
+  function getDisplayName(account) {
+    if (!account) return "مستخدم";
+    const name = clampText(
+      account.profile?.name || account.username || "مستخدم",
+      CONFIG.MAX_NAME_LENGTH
+    );
+    return name || "مستخدم";
   }
 
-  function isSessionExpired(session) {
-    if (!session) return true;
-    return Number(session.expiresAt || 0) > 0 && now() > Number(session.expiresAt || 0);
+  function getAvatarInitial(account) {
+    const name = getDisplayName(account);
+    return name ? name[0] : "؟";
   }
 
   function getCurrentSession() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.currentSession);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return null;
-      return {
-        accountId: String(parsed.accountId || ""),
-        startedAt: Number(parsed.startedAt || 0),
-        expiresAt: Number(parsed.expiresAt || 0),
-      };
-    } catch {
-      return null;
-    }
+    return safeJSONParse(localStorage.getItem(STORAGE_KEYS.currentSession), null);
+  }
+
+  function isSessionExpired(session) {
+    if (!session || !session.expiresAt) return true;
+    return now() > Number(session.expiresAt);
   }
 
   function saveCurrentSession(session) {
     try {
-      localStorage.setItem(STORAGE_KEYS.currentSession, JSON.stringify(session));
+      localStorage.setItem(
+        STORAGE_KEYS.currentSession,
+        safeJSONStringify(session, "{}")
+      );
     } catch {}
   }
 
-  function readStorage() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.state);
-      if (!raw) return false;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return false;
-
-      setAccounts(parsed.accounts || []);
-      state.publicMessages = Array.isArray(parsed.publicMessages)
-        ? parsed.publicMessages.map(normalizeMessage).filter(Boolean)
-        : [];
-      state.privateThreads = {};
-      if (parsed.privateThreads && typeof parsed.privateThreads === "object") {
-        Object.entries(parsed.privateThreads).forEach(([key, thread]) => {
-          const t = normalizeThread(thread);
-          if (t) state.privateThreads[key] = t;
-        });
-      }
-
-      state.currentAccountId = parsed.currentAccountId ? String(parsed.currentAccountId) : null;
-      state.searchQuery = normalizeText(parsed.searchQuery || "");
-      state.privateSearchQuery = normalizeText(parsed.privateSearchQuery || "");
-      state.view = ["home", "profile", "private", "user"].includes(parsed.view) ? parsed.view : "home";
-      state.selectedUserId = parsed.selectedUserId ? String(parsed.selectedUserId) : null;
-      state.selectedPrivatePeerId = parsed.selectedPrivatePeerId ? String(parsed.selectedPrivatePeerId) : null;
-      return true;
-    } catch (err) {
-      console.warn("Failed to read storage:", err);
-      return false;
-    }
-  }
-
   function saveStorage() {
-    const payload = {
-      accounts: getAccounts(),
-      publicMessages: Array.isArray(state.publicMessages) ? state.publicMessages.slice(-CONFIG.PUBLIC_MESSAGE_CAP) : [],
-      privateThreads: state.privateThreads || {},
-      currentAccountId: state.currentAccountId,
-      searchQuery: state.searchQuery,
-      privateSearchQuery: state.privateSearchQuery,
-      view: state.view,
-      selectedUserId: state.selectedUserId,
-      selectedPrivatePeerId: state.selectedPrivatePeerId,
-    };
-
     try {
-      localStorage.setItem(STORAGE_KEYS.state, JSON.stringify(payload));
+      localStorage.setItem(
+        STORAGE_KEYS.accounts,
+        safeJSONStringify(state.accounts, "[]")
+      );
+      localStorage.setItem(
+        STORAGE_KEYS.publicMessages,
+        safeJSONStringify(state.publicMessages, "[]")
+      );
+      localStorage.setItem(
+        STORAGE_KEYS.privateThreads,
+        safeJSONStringify(state.privateThreads, "{}")
+      );
+
+      if (state.currentAccountId) {
+        const acc = getCurrentAccount();
+        if (acc) {
+          saveCurrentSession({
+            accountId: state.currentAccountId,
+            startedAt: acc.sessionStartedAt || now(),
+            expiresAt: acc.sessionExpiresAt || (now() + CONFIG.SESSION_TTL_MS),
+          });
+        }
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.currentSession);
+      }
     } catch (err) {
-      console.warn("Failed to save storage:", err);
+      showToast("تعذر حفظ البيانات. تأكد أن مساحة التخزين متاحة.");
+      console.error(err);
     }
   }
 
-  function ensureDemoUsers() {
-    if (getAccounts().length) return;
+  function readStorage() {
+    state.accounts = safeJSONParse(localStorage.getItem(STORAGE_KEYS.accounts), []);
+    state.publicMessages = safeJSONParse(
+      localStorage.getItem(STORAGE_KEYS.publicMessages),
+      []
+    );
+    state.privateThreads = safeJSONParse(
+      localStorage.getItem(STORAGE_KEYS.privateThreads),
+      {}
+    );
+  }
 
-    setAccounts([
-      {
-        id: "demo_ahmed",
-        username: "أحمد",
-        password: "1234",
-        profile: {
-          name: "أحمد",
-          age: "24",
-          gender: "ذكر",
-          nationality: "مصري",
-          bio: "حساب تجريبي",
-          avatar: "",
-        },
-        lastSeenAt: now(),
-        totalActiveMs: 1000 * 60 * 42,
-        notifications: [],
-        isDemo: true,
-      },
-      {
-        id: "demo_mona",
-        username: "منى",
-        password: "1234",
-        profile: {
-          name: "منى",
-          age: "22",
-          gender: "أنثى",
-          nationality: "مصري",
-          bio: "حساب تجريبي",
-          avatar: "",
-        },
-        lastSeenAt: now() - 1000 * 60 * 18,
-        totalActiveMs: 1000 * 60 * 128,
-        notifications: [],
-        isDemo: true,
-      },
-    ]);
-    saveStorage();
+  function getCurrentAccount() {
+    if (!state.currentAccountId) return null;
+    return getAccountById(state.currentAccountId);
+  }
+
+  function isAccountOnline(acc) {
+    if (!acc) return false;
+
+    if (acc.id === state.currentAccountId) {
+      const session = getCurrentSession();
+      if (!session || isSessionExpired(session)) return false;
+      return now() - Number(acc.lastSeenAt || 0) <= CONFIG.ONLINE_WINDOW_MS;
+    }
+
+    return now() - Number(acc.lastSeenAt || 0) <= CONFIG.ONLINE_WINDOW_MS;
+  }
+
+  function isAccountFeatured(acc) {
+    if (!acc) return false;
+    if (!isAccountOnline(acc)) return false;
+    return getActiveDurationForAccount(acc) >= CONFIG.FEATURED_WINDOW_MS;
+  }
+
+  function getActiveDurationForAccount(acc) {
+    if (!acc) return 0;
+
+    const session = getCurrentSession();
+    if (
+      session &&
+      session.accountId === acc.id &&
+      !isSessionExpired(session)
+    ) {
+      return (
+        Number(acc.totalActiveMs || 0) +
+        Math.max(0, now() - Number(session.startedAt || now()))
+      );
+    }
+
+    return Number(acc.totalActiveMs || 0);
+  }
+
+  function setAvatar(el, account, fallbackLabel = "؟") {
+    if (!el) return;
+
+    const initial = account ? getAvatarInitial(account) : fallbackLabel;
+    const avatarUrl = account?.profile?.avatar || "";
+
+    el.textContent = initial;
+    el.style.backgroundImage = "";
+    el.style.backgroundSize = "cover";
+    el.style.backgroundPosition = "center";
+    el.style.backgroundColor = colorFromText(account?.username || fallbackLabel);
+    el.style.color = "";
+
+    if (avatarUrl) {
+      el.style.backgroundImage = `url("${avatarUrl}")`;
+      el.textContent = "";
+      el.style.backgroundColor = "#222";
+    }
   }
 
   function ensureCurrentAccount() {
     const session = getCurrentSession();
-    if (!session || isSessionExpired(session)) {
-      state.currentAccountId = null;
-      return null;
+
+    if (session && session.accountId) {
+      const acc = getAccountById(session.accountId);
+      if (acc && !isSessionExpired(session)) {
+        state.currentAccountId = acc.id;
+        acc.sessionStartedAt = Number(session.startedAt || now());
+        acc.sessionExpiresAt = Number(
+          session.expiresAt || (now() + CONFIG.SESSION_TTL_MS)
+        );
+        acc.lastSeenAt = acc.lastSeenAt || now();
+        return acc;
+      }
     }
 
-    const account = getAccountById(session.accountId);
-    if (!account) {
-      state.currentAccountId = null;
-      return null;
+    const guestSeed =
+      safeJSONParse(localStorage.getItem(STORAGE_KEYS.guestSeed), null) || {
+        id: createId("acc"),
+        createdAt: now(),
+      };
+
+    try {
+      localStorage.setItem(
+        STORAGE_KEYS.guestSeed,
+        safeJSONStringify(guestSeed, "{}")
+      );
+    } catch {}
+
+    let guest = getAccountById(guestSeed.id);
+    if (!guest) {
+      guest = {
+        id: guestSeed.id,
+        username: "زائر",
+        password: "",
+        createdAt: guestSeed.createdAt,
+        lastSeenAt: now(),
+        totalActiveMs: 0,
+        sessionStartedAt: now(),
+        sessionExpiresAt: now() + CONFIG.SESSION_TTL_MS,
+        profile: {
+          name: "زائر",
+          age: "",
+          gender: "",
+          nationality: "",
+          bio: "حساب افتراضي للتجربة.",
+          avatar: "",
+        },
+        notifications: [],
+        isDemo: false,
+      };
+      state.accounts.push(guest);
     }
 
-    state.currentAccountId = account.id;
-    return account;
+    state.currentAccountId = guest.id;
+    saveCurrentSession({
+      accountId: guest.id,
+      startedAt: now(),
+      expiresAt: now() + CONFIG.SESSION_TTL_MS,
+    });
+
+    return guest;
+  }
+
+  function ensureDemoUsers() {
+    const demoSet = [
+      {
+        username: "صديق تجريبي",
+        profile: {
+          name: "صديق تجريبي",
+          bio: "حساب تجريبي لاختبار الرسائل الخاصة.",
+          nationality: "تجريبي",
+        },
+        lastSeenOffsetMs: 4 * 60 * 1000,
+        activeMs: 3 * 60 * 60 * 1000,
+      },
+      {
+        username: "سارة",
+        profile: {
+          name: "سارة",
+          bio: "جاهزة لتجربة الدردشة.",
+          nationality: "مصرية",
+        },
+        lastSeenOffsetMs: 9 * 60 * 1000,
+        activeMs: 4 * 60 * 60 * 1000,
+      },
+      {
+        username: "أحمد",
+        profile: {
+          name: "أحمد",
+          bio: "مستخدم تجريبي إضافي.",
+          nationality: "مصري",
+        },
+        lastSeenOffsetMs: 3 * 60 * 60 * 1000,
+        activeMs: 90 * 60 * 1000,
+      },
+    ];
+
+    demoSet.forEach((item) => {
+      let acc = getAccountByUsername(item.username);
+      if (!acc) {
+        acc = {
+          id: createId("acc"),
+          username: item.username,
+          password: "",
+          createdAt: now(),
+          lastSeenAt: now(),
+          totalActiveMs: 0,
+          sessionStartedAt: null,
+          sessionExpiresAt: null,
+          profile: {
+            name: item.profile.name,
+            age: "",
+            gender: "",
+            nationality: item.profile.nationality || "",
+            bio: item.profile.bio || "",
+            avatar: "",
+          },
+          notifications: [],
+          isDemo: true,
+        };
+        state.accounts.push(acc);
+      }
+
+      acc.isDemo = true;
+      acc.username = item.username;
+      acc.profile = acc.profile || {};
+      acc.profile.name = item.profile.name;
+      acc.profile.bio = item.profile.bio || acc.profile.bio || "";
+      acc.profile.nationality = item.profile.nationality || acc.profile.nationality || "";
+      acc.lastSeenAt = now() - item.lastSeenOffsetMs;
+      acc.totalActiveMs = Math.max(Number(acc.totalActiveMs || 0), item.activeMs);
+      acc.notifications = Array.isArray(acc.notifications) ? acc.notifications : [];
+    });
   }
 
   function ensureWelcomePublicMessage() {
-    if (Array.isArray(state.publicMessages) && state.publicMessages.length) return;
+    if (!Array.isArray(state.publicMessages) || !state.publicMessages.length) {
+      const current = getCurrentAccount();
+      const sender = current || state.accounts[0] || null;
 
-    state.publicMessages = [
-      {
-        id: createId("msg"),
-        senderId: null,
-        senderLabel: "شات نار",
-        text: "أهلًا بك في شات نار. جرّب اكتب رسالة.",
-        at: now() - 5 * 60 * 1000,
-      },
-    ];
+      if (sender) {
+        state.publicMessages = [
+          {
+            id: createId("msg"),
+            senderId: sender.id,
+            senderLabel: getDisplayName(sender),
+            text: "أهلًا بك في شات نار. جرّب اكتب رسالة.",
+            at: now() - 5 * 60 * 1000,
+          },
+        ];
+      }
+    }
+  }
+
+  function getThreadKey(a, b) {
+    return [a, b].sort().join("__");
+  }
+
+  function normalizeThread(thread) {
+    if (!thread || typeof thread !== "object") return null;
+
+    const messages = Array.isArray(thread.messages) ? thread.messages : [];
+    return {
+      participants: Array.isArray(thread.participants) ? thread.participants : [],
+      messages,
+      updatedAt: Number(thread.updatedAt || 0),
+    };
   }
 
   function getThread(a, b, createIfMissing = false) {
@@ -366,8 +492,8 @@
       const t = normalizeThread(thread);
       if (!t) return;
 
-      if (t.messages.length > CONFIG.PRIVATE_MESSAGE_CAP) {
-        t.messages = t.messages.slice(-CONFIG.PRIVATE_MESSAGE_CAP);
+      if (t.messages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
+        t.messages = t.messages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
       }
 
       cleaned[key] = t;
@@ -507,8 +633,8 @@
     thread.messages = Array.isArray(thread.messages) ? thread.messages : [];
     thread.messages.push(message);
 
-    if (thread.messages.length > CONFIG.PRIVATE_MESSAGE_CAP) {
-      thread.messages = thread.messages.slice(-CONFIG.PRIVATE_MESSAGE_CAP);
+    if (thread.messages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
+      thread.messages = thread.messages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
     }
 
     thread.updatedAt = now();
@@ -535,7 +661,7 @@
     window.setTimeout(() => {
       const reply = replies[hashString(originalText + peer.id) % replies.length];
       addPrivateMessage(peerId, reply, peer.id, getDisplayName(peer));
-    }, CONFIG.DEMO_REPLY_DELAY_MS);
+    }, 900);
   }
 
   function setBridgeUser() {
@@ -1000,6 +1126,30 @@
         state.bridgeStatus = { ready: false, mode: "local-fallback" };
         return state.bridgeStatus;
       });
+  }
+
+  function showToast(message) {
+    if (!state.toastHostEl) {
+      state.toastHostEl = document.createElement("div");
+      state.toastHostEl.id = "toastHost";
+      state.toastHostEl.className = "toast-host";
+      document.body.appendChild(state.toastHostEl);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+
+    state.toastHostEl.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.classList.add("is-visible");
+    });
+
+    window.setTimeout(() => {
+      toast.classList.remove("is-visible");
+      window.setTimeout(() => toast.remove(), 220);
+    }, CONFIG.TOAST_MS);
   }
 
   function getDisplayModeLabel() {
@@ -2295,100 +2445,6 @@
         menuOpen: state.menuOpen,
       }),
     };
-  }
-
-  function isAccountOnline(acc) {
-    if (!acc) return false;
-    const current = getCurrentAccount();
-    if (current && current.id === acc.id) return true;
-    return Boolean(acc.lastSeenAt && now() - Number(acc.lastSeenAt) < 1000 * 60 * 60 * 2);
-  }
-
-  function isAccountFeatured(acc) {
-    if (!acc) return false;
-    return Number(acc.totalActiveMs || 0) >= 1000 * 60 * 60 * 2;
-  }
-
-  function getDisplayName(acc) {
-    if (!acc) return "مستخدم";
-    return normalizeText(acc.profile?.name || acc.username || "مستخدم") || "مستخدم";
-  }
-
-  function getAvatarInitial(acc) {
-    const name = getDisplayName(acc);
-    return name ? name[0] : "؟";
-  }
-
-  function setAvatar(el, acc, fallback = "؟") {
-    if (!el) return;
-    const avatar = acc?.profile?.avatar;
-    if (avatar) {
-      el.style.backgroundImage = `url(${avatar})`;
-      el.textContent = "";
-    } else {
-      el.style.backgroundImage = "";
-      el.textContent = fallback || getAvatarInitial(acc);
-    }
-  }
-
-  function getActiveDurationForAccount(acc) {
-    if (!acc) return 0;
-    let total = Number(acc.totalActiveMs || 0);
-    if (state.currentAccountId && state.currentAccountId === acc.id) {
-      const session = getCurrentSession();
-      if (session && session.accountId === acc.id && !isSessionExpired(session)) {
-        total += Math.max(0, now() - Number(session.startedAt || now()));
-      }
-    }
-    return total;
-  }
-
-  function sendPublicMessage(text, silent = false) {
-    const messageText = normalizeText(text);
-
-    if (!messageText) {
-      if (!silent) showToast("اكتب رسالة أولًا.");
-      return false;
-    }
-
-    const current = getCurrentAccount();
-    if (!current) {
-      if (!silent) showToast("لا يوجد حساب نشط.");
-      return false;
-    }
-
-    addPublicMessage(messageText, current.id, getDisplayName(current));
-    markActivity();
-    focusInput(els.publicMessageInput);
-    return true;
-  }
-
-  function sendPrivateMessage(peerId, text, silent = false) {
-    const messageText = normalizeText(text);
-
-    if (!peerId) {
-      if (!silent) showToast("اختر شخصًا أولًا.");
-      return false;
-    }
-
-    if (!messageText) {
-      if (!silent) showToast("اكتب رسالة أولًا.");
-      return false;
-    }
-
-    const current = getCurrentAccount();
-    const peer = getAccountById(peerId);
-
-    if (!current || !peer) {
-      if (!silent) showToast("تعذر إرسال الرسالة.");
-      return false;
-    }
-
-    addPrivateMessage(peerId, messageText, current.id, getDisplayName(current));
-    scheduleDemoReply(peerId, messageText);
-    markActivity();
-    focusInput(els.privateMessageInput);
-    return true;
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
