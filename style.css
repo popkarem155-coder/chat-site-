@@ -103,8 +103,7 @@ a {
 
 .app-shell {
   direction: rtl;
-  display: flex;
-  align-items: flex-start;
+  display: block;
 }
 
 .app {
