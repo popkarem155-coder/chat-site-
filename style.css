@@ -753,15 +753,13 @@ a {
   background: linear-gradient(180deg, rgba(23, 23, 35, 0.94), rgba(17, 17, 25, 0.94));
   box-shadow: var(--shadow-soft);
   min-width: 0;
+  min-height: 0;
 }
 
 .page-head {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  min-width: 0;
 }
 
 .back-btn {
