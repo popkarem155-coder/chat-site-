@@ -111,8 +111,8 @@ a {
   width: 100%;
   min-height: 100dvh;
   max-width: var(--maxw);
-  margin: 8px auto 0;
-  padding: 0 10px 24px;
+  margin: 6px auto 0;
+  padding: 10px 10px 24px;
   position: relative;
   min-width: 0;
 }
