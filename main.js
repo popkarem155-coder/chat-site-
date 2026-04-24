@@ -1576,6 +1576,8 @@
   function renderUserView() {
     const target = getAccountById(state.selectedUserId);
 
+    console.log("selectedUserId =", state.selectedUserId);
+console.log("target =", target);
     if (!target) {
       if (els.userViewTitle) els.userViewTitle.textContent = "ملف المستخدم";
       if (els.userViewName) els.userViewName.textContent = "اسم المستخدم";
