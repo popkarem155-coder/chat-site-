@@ -111,6 +111,9 @@ a {
   width: 100%;
   height: 100dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 10px 10px 24px;
@@ -1039,6 +1042,9 @@ a {
 .private-messages-stream {
   height: auto;
   min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .drawer {
