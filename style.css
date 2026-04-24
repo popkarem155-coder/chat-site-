@@ -1037,7 +1037,7 @@ min-width: 0;
   width: min(88vw, var(--drawer-w));
   max-height: calc(100dvh - 24px);
   z-index: 90;
-  overflow: auto;
+  overflow: hidden;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(24, 24, 36, 0.98), rgba(15, 15, 22, 0.98));
@@ -1048,8 +1048,10 @@ min-width: 0;
   min-width: 0;
 }
 
-.drawer-head {
-  margin-bottom: 10px;
+.drawer {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .profile-card {
@@ -1088,6 +1090,10 @@ min-width: 0;
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .drawer-subhead {
