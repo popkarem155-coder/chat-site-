@@ -104,7 +104,6 @@ a {
 .app-shell {
   direction: rtl;
   display: flex;
-  min-height: 100dvh;
 }
 
 .app {
