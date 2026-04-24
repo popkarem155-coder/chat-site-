@@ -1478,7 +1478,9 @@ a {
   }
 
   .messages-stream {
-    height: 42vh;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   }
   
  .online-users-wrapper {
