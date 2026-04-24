@@ -948,10 +948,11 @@ a {
   min-width: 0;
 }
 
-.private-list-panel {
+.private-chat-panel {
   display: grid;
-  align-content: start;
-  gap: 10px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: calc(100dvh - 120px);
+  overflow: hidden;
 }
 
 .private-chats-list {
@@ -1362,15 +1363,16 @@ a {
   }
 
   .private-layout {
-    grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  height: 100%;
   }
 
-  .private-list-panel,
-  .private-chat-panel {
-    min-height: auto;
-  }
+.private-list-panel,
+.private-chat-panel {
+  min-height: 0;
+  height: 100%;
 }
-
+  
 @media (max-width: 720px) {
   .app {
     padding: 8px 8px 18px;
