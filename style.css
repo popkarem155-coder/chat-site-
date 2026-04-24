@@ -1482,4 +1482,33 @@ min-width: 0;
   height: var(--featured-height);
 }
 
+  .profile-form,
+.private-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* يخلي المحتوى الداخلي هو اللي يعمل scroll زي الهوم */
+.profile-form {
+  overflow: auto;
+}
+
+.private-list-panel,
+.private-chat-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* نفس فكرة الهوم: scroll داخل العناصر فقط */
+.private-chats-list,
+.private-messages-stream {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
   
