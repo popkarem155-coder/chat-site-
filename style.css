@@ -243,6 +243,7 @@ min-width: 0;
   color: #fff;
 }
 
+.home-view,
 .page {
   display: grid;
   gap: 12px;
@@ -250,9 +251,6 @@ min-width: 0;
 }
 
 .home-view {
-  display: grid;
-  gap: 12px;
-  min-width: 0;
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -1037,7 +1035,7 @@ min-width: 0;
   width: min(88vw, var(--drawer-w));
   max-height: calc(100dvh - 24px);
   z-index: 90;
-  overflow: hidden;
+  overflow: auto;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(24, 24, 36, 0.98), rgba(15, 15, 22, 0.98));
@@ -1048,10 +1046,8 @@ min-width: 0;
   min-width: 0;
 }
 
-.drawer {
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+.drawer-head {
+  margin-bottom: 10px;
 }
 
 .profile-card {
@@ -1086,38 +1082,19 @@ min-width: 0;
   line-height: 1.5;
 }
 
-.drawer {
-  position: fixed;
-  top: 12px;
-  inset-inline-end: 12px;
-  width: min(88vw, var(--drawer-w));
-  height: calc(100dvh - 24px); /* 👈 ثابت مش max */
-
-  z-index: 90;
-
-  display: flex;            /* 👈 مهم */
-  flex-direction: column;   /* 👈 مهم */
-
-  overflow: hidden;         /* 👈 يمنع السكرول الخارجي */
-
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(24, 24, 36, 0.98), rgba(15, 15, 22, 0.98));
-  box-shadow: var(--shadow);
-  padding: 12px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  min-width: 0;
-}
-
 .drawer-section {
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
 
-  flex: 1;           /* 👈 يملى المساحة */
-  min-height: 0;     /* 👈 أهم سطر */
-  overflow-y: auto;  /* 👈 السكرول هنا بس */
+.drawer-subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  min-width: 0;
 }
 
 .drawer-subhead h3 {
