@@ -41,6 +41,7 @@
   --featured-height: clamp(140px, 20vh, 260px);
   --users-gap: 3px;
 }
+
 * {
   box-sizing: border-box;
 }
@@ -63,6 +64,7 @@ body {
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow: hidden;
 }
 
 button,
@@ -109,14 +111,12 @@ a {
   width: 100%;
   height: 100dvh;
   overflow-y: auto;
-
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 10px 10px 24px;
   position: relative;
   min-width: 0;
 }
-   
 
 .topbar {
   height: var(--header-h);
@@ -324,6 +324,7 @@ a {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
   min-width: 0;
+  overscroll-behavior: contain;
 }
 
 #onlineUsersList,
@@ -336,6 +337,7 @@ a {
   overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  overscroll-behavior: contain;
 }
 
 .user-list {
@@ -357,6 +359,7 @@ a {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
   scrollbar-gutter: stable;
+  overscroll-behavior: contain;
 }
 
 .featured-users-wrapper {
@@ -368,6 +371,7 @@ a {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
   scrollbar-gutter: stable;
+  overscroll-behavior: contain;
 }
 
 .messages-stream::-webkit-scrollbar,
@@ -1364,16 +1368,17 @@ a {
   }
 
   .private-layout {
-  grid-template-columns: minmax(0, 1fr);
-  height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    height: 100%;
   }
 
-.private-list-panel,
-.private-chat-panel {
-  min-height: 0;
-  height: 100%;
+  .private-list-panel,
+  .private-chat-panel {
+    min-height: 0;
+    height: 100%;
+  }
 }
-  
+
 @media (max-width: 720px) {
   .app {
     padding: 8px 8px 18px;
@@ -1413,13 +1418,13 @@ a {
     height: 48vh;
   }
 
- .online-users-wrapper {
-   height: var(--online-height);
- }
-  
-.featured-users-wrapper {
-  height: var(--featured-height);
-}
+  .online-users-wrapper {
+    height: var(--online-height);
+  }
+
+  .featured-users-wrapper {
+    height: var(--featured-height);
+  }
 
   .profile-card-block {
     grid-template-columns: 1fr;
@@ -1456,7 +1461,8 @@ a {
     top: 8px;
     inset-inline-end: 8px;
   }
-  
+}
+
 @media (max-width: 480px) {
   .profile-details-grid {
     grid-template-columns: 1fr;
