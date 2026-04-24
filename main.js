@@ -25,7 +25,7 @@
     ready: false,
     view: "home",
     menuOpen: false,
-    privateDrawerOpen: false,
+    guestMode: false,
     currentAccountId: null,
     selectedUserId: null,
     selectedPrivatePeerId: null,
@@ -37,13 +37,16 @@
     bridge: null,
     bridgeStatus: null,
     toastHostEl: null,
-    menuOverlayEl: null,
-    privateOverlayEl: null,
     activitySaveTimer: null,
+    monitorPanelEl: null,
     pullRefresh: { tracking: false, startY: 0, startX: 0 },
   };
 
   const $ = (id) => document.getElementById(id);
+
+  /* =========================
+     UTILITIES
+  ========================= */
 
   function now() {
     return Date.now();
@@ -106,6 +109,14 @@
     return [String(a), String(b)].sort().join("__");
   }
 
+  function safeArray(value) {
+    return Array.isArray(value) ? value : [];
+  }
+
+  /* =========================
+     NORMALIZERS
+  ========================= */
+
   function normalizeMessage(message) {
     if (!message || typeof message !== "object") return null;
     return {
@@ -120,6 +131,7 @@
   function normalizeAccount(acc) {
     if (!acc || typeof acc !== "object") return null;
     const profile = acc.profile && typeof acc.profile === "object" ? acc.profile : {};
+
     const cleaned = {
       id: String(acc.id || createId("acc")),
       username: clampText(acc.username || profile.name || "مستخدم", CONFIG.MAX_NAME_LENGTH) || "مستخدم",
@@ -146,21 +158,23 @@
 
   function normalizeThread(thread) {
     if (!thread || typeof thread !== "object") return null;
-    const participants = Array.isArray(thread.participants) ? thread.participants.map(String) : [];
-    const messages = Array.isArray(thread.messages) ? thread.messages.map(normalizeMessage).filter(Boolean) : [];
     return {
-      participants,
-      messages,
+      participants: safeArray(thread.participants).map(String),
+      messages: safeArray(thread.messages).map(normalizeMessage).filter(Boolean),
       updatedAt: Number(thread.updatedAt || 0),
     };
   }
+
+  /* =========================
+     STATE HELPERS
+  ========================= */
 
   function getAccounts() {
     return Array.isArray(state.accounts) ? state.accounts : [];
   }
 
   function setAccounts(list) {
-    state.accounts = Array.isArray(list) ? list.map(normalizeAccount).filter(Boolean) : [];
+    state.accounts = safeArray(list).map(normalizeAccount).filter(Boolean);
   }
 
   function getAccountById(id) {
@@ -178,11 +192,61 @@
     return getAccountById(state.currentAccountId);
   }
 
+  function getDisplayName(acc) {
+    if (!acc) return "مستخدم";
+    return normalizeText(acc.profile?.name || acc.username || "مستخدم") || "مستخدم";
+  }
+
+  function getAvatarInitial(acc) {
+    const name = getDisplayName(acc);
+    return name ? name[0] : "؟";
+  }
+
   function isSessionExpired(session) {
     if (!session) return true;
     const expiresAt = Number(session.expiresAt || 0);
     return expiresAt > 0 && now() > expiresAt;
   }
+
+  function isAccountOnline(acc) {
+    if (!acc) return false;
+    const current = getCurrentAccount();
+    if (current && current.id === acc.id) return true;
+    return Boolean(acc.lastSeenAt && now() - Number(acc.lastSeenAt) < CONFIG.ONLINE_WINDOW_MS);
+  }
+
+  function isAccountFeatured(acc) {
+    if (!acc) return false;
+    return Number(acc.totalActiveMs || 0) >= CONFIG.FEATURED_WINDOW_MS;
+  }
+
+  function getActiveDurationForAccount(acc) {
+    if (!acc) return 0;
+    let total = Number(acc.totalActiveMs || 0);
+    if (state.currentAccountId && state.currentAccountId === acc.id) {
+      const session = getCurrentSession();
+      if (session && session.accountId === acc.id && !isSessionExpired(session)) {
+        total += Math.max(0, now() - Number(session.startedAt || now()));
+      }
+    }
+    return total;
+  }
+
+  function getUnreadNotificationCount() {
+    const current = getCurrentAccount();
+    if (!current || !Array.isArray(current.notifications)) return 0;
+    return current.notifications.filter((n) => !n.read).length;
+  }
+
+  function getMonitorItems() {
+    const current = getCurrentAccount();
+    if (!current || !Array.isArray(current.notifications)) return [];
+    return [...current.notifications].sort((a, b) => Number(b.at) - Number(a.at));
+  }
+
+  /* =========================
+     STORAGE
+  ========================= */
 
   function getCurrentSession() {
     try {
@@ -206,45 +270,30 @@
     } catch {}
   }
 
-  function saveStorage() {
-    prunePublicMessages();
-    prunePrivateThreads();
-
-    const payload = {
-      accounts: getAccounts(),
-      publicMessages: Array.isArray(state.publicMessages) ? state.publicMessages.slice(-CONFIG.PUBLIC_MESSAGE_CAP) : [],
-      privateThreads: state.privateThreads || {},
-      currentAccountId: state.currentAccountId,
-      searchQuery: state.searchQuery,
-      privateSearchQuery: state.privateSearchQuery,
-      view: state.view,
-      selectedUserId: state.selectedUserId,
-      selectedPrivatePeerId: state.selectedPrivatePeerId,
-    };
-
+  function clearCurrentSession() {
     try {
-      localStorage.setItem(STORAGE_KEYS.state, JSON.stringify(payload));
-    } catch (err) {
-      console.warn("Failed to save storage:", err);
-    }
+      localStorage.removeItem(STORAGE_KEYS.session);
+    } catch {}
   }
 
   function readStorage() {
     try {
       const raw = localStorage.getItem(STORAGE_KEYS.state);
       if (!raw) return false;
+
       const parsed = JSON.parse(raw);
       if (!parsed || typeof parsed !== "object") return false;
 
       setAccounts(parsed.accounts || []);
-      state.publicMessages = Array.isArray(parsed.publicMessages)
-        ? parsed.publicMessages.map(normalizeMessage).filter(Boolean)
-        : [];
+      state.publicMessages = safeArray(parsed.publicMessages)
+        .map(normalizeMessage)
+        .filter(Boolean);
+
       state.privateThreads = {};
       if (parsed.privateThreads && typeof parsed.privateThreads === "object") {
         Object.entries(parsed.privateThreads).forEach(([key, thread]) => {
-          const t = normalizeThread(thread);
-          if (t) state.privateThreads[key] = t;
+          const normalized = normalizeThread(thread);
+          if (normalized) state.privateThreads[key] = normalized;
         });
       }
 
@@ -261,7 +310,50 @@
     }
   }
 
-  function ensureDemoUsers() {
+  function saveStorage() {
+    prunePublicMessages();
+    prunePrivateThreads();
+
+    const payload = {
+      accounts: getAccounts(),
+      publicMessages: safeArray(state.publicMessages).slice(-CONFIG.PUBLIC_MESSAGE_CAP),
+      privateThreads: state.privateThreads || {},
+      currentAccountId: state.currentAccountId,
+      searchQuery: state.searchQuery,
+      privateSearchQuery: state.privateSearchQuery,
+      view: state.view,
+      selectedUserId: state.selectedUserId,
+      selectedPrivatePeerId: state.selectedPrivatePeerId,
+    };
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.state, JSON.stringify(payload));
+    } catch (err) {
+      console.warn("Failed to save storage:", err);
+    }
+  }
+
+  function prunePublicMessages() {
+    if (!Array.isArray(state.publicMessages)) state.publicMessages = [];
+    if (state.publicMessages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
+      state.publicMessages = state.publicMessages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
+    }
+  }
+
+  function prunePrivateThreads() {
+    const cleaned = {};
+    Object.entries(state.privateThreads || {}).forEach(([key, thread]) => {
+      const normalized = normalizeThread(thread);
+      if (!normalized) return;
+      if (normalized.messages.length > CONFIG.PRIVATE_MESSAGE_CAP) {
+        normalized.messages = normalized.messages.slice(-CONFIG.PRIVATE_MESSAGE_CAP);
+      }
+      cleaned[key] = normalized;
+    });
+    state.privateThreads = cleaned;
+  }
+
+  function ensureDemoAccounts() {
     if (getAccounts().length) return;
 
     setAccounts([
@@ -318,6 +410,11 @@
   }
 
   function ensureCurrentAccount() {
+    if (state.guestMode) {
+      state.currentAccountId = null;
+      return null;
+    }
+
     const session = getCurrentSession();
     if (session && !isSessionExpired(session)) {
       const acc = getAccountById(session.accountId);
@@ -327,44 +424,33 @@
       }
     }
 
-    if (!localStorage.getItem(STORAGE_KEYS.loggedOut)) {
-      const first = getAccounts()[0];
-      if (first) {
-        const startedAt = now();
-        first.lastSeenAt = startedAt;
-        first.sessionStartedAt = startedAt;
-        first.sessionExpiresAt = startedAt + CONFIG.SESSION_TTL_MS;
-        state.currentAccountId = first.id;
-        saveCurrentSession({
-          accountId: first.id,
-          startedAt,
-          expiresAt: first.sessionExpiresAt,
-        });
-        saveStorage();
-        return first;
-      }
+    const first = getAccounts()[0];
+    if (first) {
+      const startedAt = now();
+      first.lastSeenAt = startedAt;
+      first.sessionStartedAt = startedAt;
+      first.sessionExpiresAt = startedAt + CONFIG.SESSION_TTL_MS;
+      state.currentAccountId = first.id;
+      saveCurrentSession({
+        accountId: first.id,
+        startedAt,
+        expiresAt: first.sessionExpiresAt,
+      });
+      saveStorage();
+      return first;
     }
 
     state.currentAccountId = null;
     return null;
   }
 
-  function loginAccount(account) {
-    if (!account) return;
-    const startedAt = now();
-    account.lastSeenAt = startedAt;
-    account.sessionStartedAt = startedAt;
-    account.sessionExpiresAt = startedAt + CONFIG.SESSION_TTL_MS;
-    state.currentAccountId = account.id;
-    localStorage.removeItem(STORAGE_KEYS.loggedOut);
-    saveCurrentSession({
-      accountId: account.id,
-      startedAt,
-      expiresAt: account.sessionExpiresAt,
-    });
-    saveStorage();
-    renderAll();
-    setBridgeUser();
+  function canUseCurrentSession() {
+    const acc = getCurrentAccount();
+    const session = getCurrentSession();
+    if (!acc || !session) return false;
+    if (session.accountId !== acc.id) return false;
+    if (isSessionExpired(session)) return false;
+    return true;
   }
 
   function commitCurrentSession(force = false) {
@@ -380,19 +466,40 @@
     acc.lastSeenAt = now();
     acc.sessionStartedAt = null;
     acc.sessionExpiresAt = null;
-    localStorage.removeItem(STORAGE_KEYS.session);
+    clearCurrentSession();
     state.currentAccountId = null;
     saveStorage();
   }
 
-  function logoutCurrentAccount(showMessage = true) {
-    commitCurrentSession(true);
-    localStorage.setItem(STORAGE_KEYS.loggedOut, "1");
-    state.selectedUserId = null;
-    state.selectedPrivatePeerId = null;
+  function loginAccount(account) {
+    if (!account) return;
+    const startedAt = now();
+    account.lastSeenAt = startedAt;
+    account.sessionStartedAt = startedAt;
+    account.sessionExpiresAt = startedAt + CONFIG.SESSION_TTL_MS;
+    state.currentAccountId = account.id;
+    state.guestMode = false;
+    saveCurrentSession({
+      accountId: account.id,
+      startedAt,
+      expiresAt: account.sessionExpiresAt,
+    });
+    saveStorage();
     renderAll();
     setBridgeUser();
-    if (showMessage) showToast("تم تسجيل الخروج.");
+  }
+
+  function logoutCurrentAccount(showMessage = true) {
+    commitCurrentSession(true);
+    state.guestMode = true;
+    state.currentAccountId = null;
+    state.selectedUserId = null;
+    state.selectedPrivatePeerId = null;
+    clearCurrentSession();
+    saveStorage();
+    renderAll();
+    setBridgeUser();
+    if (showMessage) showToast("تم تسجيل الخروج مؤقتًا. أعد تحميل الصفحة للرجوع.");
   }
 
   function ensureThread(a, b, createIfMissing = false) {
@@ -415,162 +522,9 @@
     return thread;
   }
 
-  function prunePublicMessages() {
-    if (!Array.isArray(state.publicMessages)) state.publicMessages = [];
-    if (state.publicMessages.length > CONFIG.PUBLIC_MESSAGE_CAP) {
-      state.publicMessages = state.publicMessages.slice(-CONFIG.PUBLIC_MESSAGE_CAP);
-    }
-  }
-
-  function prunePrivateThreads() {
-    const cleaned = {};
-    Object.entries(state.privateThreads || {}).forEach(([key, thread]) => {
-      const t = normalizeThread(thread);
-      if (!t) return;
-      if (t.messages.length > CONFIG.PRIVATE_MESSAGE_CAP) {
-        t.messages = t.messages.slice(-CONFIG.PRIVATE_MESSAGE_CAP);
-      }
-      cleaned[key] = t;
-    });
-    state.privateThreads = cleaned;
-  }
-
-  function getCurrentPublicMessages() {
-    return Array.isArray(state.publicMessages) ? state.publicMessages : [];
-  }
-
-  function getPrivateChatsForCurrentUser() {
-    const current = getCurrentAccount();
-    if (!current) return [];
-
-    return Object.entries(state.privateThreads || {})
-      .map(([key, thread]) => {
-        const t = normalizeThread(thread);
-        if (!t || !Array.isArray(t.participants)) return null;
-        if (!t.participants.includes(current.id)) return null;
-
-        const peerId = t.participants.find((id) => id !== current.id);
-        const peer = getAccountById(peerId);
-
-        const lastMessage = Array.isArray(t.messages) && t.messages.length ? t.messages[t.messages.length - 1] : null;
-
-        return {
-          key,
-          thread: t,
-          peerId,
-          peer,
-          lastMessage,
-          updatedAt: Number(t.updatedAt || lastMessage?.at || lastMessage?.time || 0),
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) => b.updatedAt - a.updatedAt);
-  }
-
-  function getPrivateChatMatches(query = state.privateSearchQuery) {
-    const current = getCurrentAccount();
-    if (!current) return [];
-
-    const q = normalizeText(query || "").toLowerCase();
-    const chats = getPrivateChatsForCurrentUser();
-
-    if (!q) return chats;
-
-    return chats.filter((item) => {
-      const peer = item.peer;
-      const peerName = normalizeText(peer?.username || "").toLowerCase();
-      const profileName = normalizeText(peer?.profile?.name || "").toLowerCase();
-      const bio = normalizeText(peer?.profile?.bio || "").toLowerCase();
-      const nationality = normalizeText(peer?.profile?.nationality || "").toLowerCase();
-      const lastMessage = normalizeText(item.lastMessage?.text || "").toLowerCase();
-
-      return (
-        peerName.includes(q) ||
-        profileName.includes(q) ||
-        bio.includes(q) ||
-        nationality.includes(q) ||
-        lastMessage.includes(q)
-      );
-    });
-  }
-
-  function getUnreadNotificationCount() {
-    const current = getCurrentAccount();
-    if (!current || !Array.isArray(current.notifications)) return 0;
-    return current.notifications.filter((n) => !n.read).length;
-  }
-
-  function getMonitorItems() {
-    const current = getCurrentAccount();
-    if (!current || !Array.isArray(current.notifications)) return [];
-    return [...current.notifications].sort((a, b) => Number(b.at) - Number(a.at));
-  }
-
-  function notifyProfileViewed(targetAccountId, viewerLabel, viewerId = null) {
-    const target = getAccountById(targetAccountId);
-    if (!target) return;
-    if (viewerId && viewerId === targetAccountId) return;
-
-    if (!Array.isArray(target.notifications)) target.notifications = [];
-    target.notifications.push({
-      id: createId("noti"),
-      type: "profile_view",
-      viewerId,
-      viewerLabel: normalizeText(viewerLabel) || "زائر",
-      at: now(),
-      read: false,
-    });
-
-    if (target.notifications.length > CONFIG.MAX_NOTIFICATIONS) {
-      target.notifications = target.notifications.slice(-CONFIG.MAX_NOTIFICATIONS);
-    }
-  }
-
-  function getDisplayName(acc) {
-    if (!acc) return "مستخدم";
-    return normalizeText(acc.profile?.name || acc.username || "مستخدم") || "مستخدم";
-  }
-
-  function getAvatarInitial(acc) {
-    const name = getDisplayName(acc);
-    return name ? name[0] : "؟";
-  }
-
-  function setAvatar(el, acc, fallback = "؟") {
-    if (!el) return;
-    const avatar = acc?.profile?.avatar;
-    if (avatar) {
-      el.style.backgroundImage = `url("${avatar}")`;
-      el.textContent = "";
-    } else {
-      el.style.backgroundImage = "";
-      el.textContent = fallback || getAvatarInitial(acc);
-    }
-  }
-
-  function isAccountOnline(acc) {
-    if (!acc) return false;
-    const current = getCurrentAccount();
-    if (current && current.id === acc.id) return true;
-    return Boolean(acc.lastSeenAt && now() - Number(acc.lastSeenAt) < CONFIG.ONLINE_WINDOW_MS);
-  }
-
-  function isAccountFeatured(acc) {
-    if (!acc) return false;
-    return Number(acc.totalActiveMs || 0) >= CONFIG.FEATURED_WINDOW_MS;
-  }
-
-  function getActiveDurationForAccount(acc) {
-    if (!acc) return 0;
-    let total = Number(acc.totalActiveMs || 0);
-    if (state.currentAccountId && state.currentAccountId === acc.id) {
-      const session = getCurrentSession();
-      if (session && session.accountId === acc.id && !isSessionExpired(session)) {
-        total += Math.max(0, now() - Number(session.startedAt || now()));
-      }
-    }
-    return total;
-  }
+  /* =========================
+     TOASTS / AVATAR
+  ========================= */
 
   function showToast(message) {
     if (!state.toastHostEl) {
@@ -585,14 +539,24 @@
     toast.textContent = message;
     state.toastHostEl.appendChild(toast);
 
-    requestAnimationFrame(() => {
-      toast.classList.add("is-visible");
-    });
+    requestAnimationFrame(() => toast.classList.add("is-visible"));
 
     window.setTimeout(() => {
       toast.classList.remove("is-visible");
       window.setTimeout(() => toast.remove(), 220);
     }, CONFIG.TOAST_MS);
+  }
+
+  function setAvatar(el, acc, fallback = "؟") {
+    if (!el) return;
+    const avatar = acc?.profile?.avatar;
+    if (avatar) {
+      el.style.backgroundImage = `url("${avatar}")`;
+      el.textContent = "";
+    } else {
+      el.style.backgroundImage = "";
+      el.textContent = fallback || getAvatarInitial(acc);
+    }
   }
 
   function focusInput(input) {
@@ -610,296 +574,9 @@
     });
   }
 
-  function makeOverlay(id, zIndex) {
-    let overlay = $(id);
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = id;
-      overlay.className = "drawer-overlay";
-      document.body.appendChild(overlay);
-    }
-
-    overlay.style.position = "fixed";
-    overlay.style.inset = "0";
-    overlay.style.background = "rgba(7, 7, 10, 0.72)";
-    overlay.style.backdropFilter = "blur(14px)";
-    overlay.style.webkitBackdropFilter = "blur(14px)";
-    overlay.style.zIndex = String(zIndex);
-    overlay.style.display = "none";
-    overlay.style.pointerEvents = "auto";
-    return overlay;
-  }
-
-  function setOverlayVisible(overlay, visible) {
-    if (!overlay) return;
-    overlay.style.display = visible ? "block" : "none";
-  }
-
-  function updateBodyScrollLock() {
-    const locked = state.menuOpen || state.privateDrawerOpen;
-    document.body.style.overflow = locked ? "hidden" : "";
-  }
-
-  function positionDrawerSide(drawer, side = "right") {
-    if (!drawer) return;
-
-    const gap = window.innerWidth <= 720 ? "8px" : "12px";
-    drawer.style.position = "fixed";
-    drawer.style.top = gap;
-    drawer.style.maxHeight = `calc(100dvh - ${window.innerWidth <= 720 ? "16px" : "24px"})`;
-
-    if (side === "right") {
-      drawer.style.right = gap;
-      drawer.style.left = "auto";
-    } else {
-      drawer.style.left = gap;
-      drawer.style.right = "auto";
-    }
-  }
-
-  function ensurePrivateDrawer() {
-    if (state.privateDrawerEl) return state.privateDrawerEl;
-
-    const drawer = document.createElement("aside");
-    drawer.id = "privateDrawer";
-    drawer.className = "drawer private-drawer is-hidden";
-    drawer.setAttribute("aria-hidden", "true");
-    drawer.setAttribute("role", "dialog");
-    drawer.innerHTML = `
-      <div class="drawer-head">
-        <button id="privateDrawerCloseBtn" class="profile-card" type="button">
-          <div class="avatar avatar-lg">✉</div>
-          <div class="profile-card-text">
-            <strong>الرسائل الخاصة</strong>
-            <span>ابحث بين الأشخاص اللي كلمتهم</span>
-          </div>
-        </button>
-      </div>
-
-      <div class="drawer-section">
-        <label class="search-box" for="privateSearchInput">
-          <span class="search-label">بحث في المحادثات</span>
-          <input id="privateSearchInput" type="search" placeholder="ابحث بين الأشخاص اللي كلمتهم..." autocomplete="off" />
-        </label>
-
-        <div class="drawer-subhead">
-          <h3>آخر المحادثات</h3>
-          <span id="privateChatsCount" class="tiny-count">0</span>
-        </div>
-
-        <div id="privateChatsEmpty" class="empty-state empty-state-small">لسه ما كلمتش حد في الخاص.</div>
-        <div id="privateChatsList" class="private-chats-list" role="list"></div>
-      </div>
-    `;
-
-    document.body.appendChild(drawer);
-
-    state.privateDrawerEl = drawer;
-    els.privateDrawerCloseBtn = drawer.querySelector("#privateDrawerCloseBtn");
-    els.privateSearchInput = drawer.querySelector("#privateSearchInput");
-    els.privateChatsCount = drawer.querySelector("#privateChatsCount");
-    els.privateChatsEmpty = drawer.querySelector("#privateChatsEmpty");
-    els.privateChatsList = drawer.querySelector("#privateChatsList");
-
-    positionDrawerSide(drawer, "left");
-    return drawer;
-  }
-
-  function ensureMonitorPanel() {
-    if (state.monitorPanelEl) return state.monitorPanelEl;
-    if (!els.menuDrawer) return null;
-
-    const panel = document.createElement("section");
-    panel.className = "drawer-section monitor-panel";
-    panel.id = "monitorPanel";
-    panel.innerHTML = `
-      <div class="drawer-subhead">
-        <h3 data-monitor-title>منظار ملفك</h3>
-        <span class="tiny-count" data-monitor-count>0</span>
-      </div>
-      <div class="monitor-panel-body">
-        <div class="empty-state empty-state-small" data-monitor-empty>سجّل دخولك عشان يظهر سجل الزيارات.</div>
-        <div class="monitor-list" data-monitor-list></div>
-      </div>
-    `;
-
-    const firstSection = els.menuDrawer.querySelector(".drawer-section");
-    if (firstSection && firstSection.parentElement === els.menuDrawer) {
-      els.menuDrawer.insertBefore(panel, firstSection);
-    } else {
-      els.menuDrawer.appendChild(panel);
-    }
-
-    state.monitorPanelEl = panel;
-    return panel;
-  }
-
-  function openMenuDrawer() {
-    if (!els.menuDrawer) return;
-    ensurePrivateDrawer();
-    closePrivateDrawer();
-    state.menuOpen = true;
-    els.menuDrawer.classList.remove("is-hidden");
-    els.menuDrawer.setAttribute("aria-hidden", "false");
-    if (els.menuOverlayEl) setOverlayVisible(els.menuOverlayEl, true);
-    updateBodyScrollLock();
-    renderMonitorPanel();
-  }
-
-  function closeMenuDrawer() {
-    if (!els.menuDrawer) return;
-    state.menuOpen = false;
-    els.menuDrawer.classList.add("is-hidden");
-    els.menuDrawer.setAttribute("aria-hidden", "true");
-    if (els.menuOverlayEl) setOverlayVisible(els.menuOverlayEl, false);
-    updateBodyScrollLock();
-  }
-
-  function openPrivateDrawer() {
-    const drawer = ensurePrivateDrawer();
-    if (!drawer) return;
-    closeMenuDrawer();
-    state.privateDrawerOpen = true;
-    drawer.classList.remove("is-hidden");
-    drawer.setAttribute("aria-hidden", "false");
-    if (els.privateOverlayEl) setOverlayVisible(els.privateOverlayEl, true);
-    updateBodyScrollLock();
-    renderPrivateDrawerChatsList();
-  }
-
-  function closePrivateDrawer() {
-    const drawer = state.privateDrawerEl;
-    if (!drawer) return;
-    state.privateDrawerOpen = false;
-    drawer.classList.add("is-hidden");
-    drawer.setAttribute("aria-hidden", "true");
-    if (els.privateOverlayEl) setOverlayVisible(els.privateOverlayEl, false);
-    updateBodyScrollLock();
-  }
-
-  function setView(viewName) {
-    state.view = viewName;
-
-    const sections = {
-      home: els.homeView,
-      profile: els.profileView,
-      private: els.privateView,
-      user: els.userView,
-    };
-
-    Object.entries(sections).forEach(([name, el]) => {
-      if (!el) return;
-      el.classList.toggle("is-hidden", name !== viewName);
-    });
-
-    if (els.app) els.app.dataset.view = viewName;
-    closeMenuDrawer();
-    closePrivateDrawer();
-
-    if (viewName === "home") {
-      renderHomeView();
-    } else if (viewName === "profile") {
-      renderProfileView();
-    } else if (viewName === "private") {
-      renderPrivateConversation();
-    } else if (viewName === "user") {
-      renderUserView();
-    }
-  }
-
-  function openHome() {
-    state.selectedUserId = null;
-    state.selectedPrivatePeerId = null;
-    setView("home");
-    renderHomeView();
-  }
-
-  function canUseCurrentSession() {
-    const acc = getCurrentAccount();
-    const session = getCurrentSession();
-    if (!acc || !session) return false;
-    if (session.accountId !== acc.id) return false;
-    if (isSessionExpired(session)) return false;
-    return true;
-  }
-
-  function openProfile() {
-    if (!canUseCurrentSession()) return;
-    window.scrollTo(0, 0);
-    state.selectedUserId = null;
-    setView("profile");
-    renderProfileView();
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-      document.activeElement?.blur();
-    }, 10);
-  }
-
-  function openUserProfileById(userId) {
-    if (!userId) return;
-
-    const target = getAccountById(userId);
-    if (!target) {
-      showToast("المستخدم غير موجود.");
-      return;
-    }
-
-    const current = getCurrentAccount();
-    const viewerLabel = current ? getDisplayName(current) : "زائر";
-
-    if (current && current.id === target.id) {
-      openProfile();
-      return;
-    }
-
-    state.selectedUserId = target.id;
-    notifyProfileViewed(target.id, viewerLabel, current?.id || null);
-    saveStorage();
-    setView("user");
-    renderUserView();
-    renderMonitorPanel();
-    setBridgeUser();
-  }
-
-  function openPrivateChat(peerId, silent = false) {
-    const peer = getAccountById(peerId);
-
-    if (!peer) {
-      if (!silent) showToast("الشخص غير موجود.");
-      return;
-    }
-
-    state.selectedPrivatePeerId = peer.id;
-    state.selectedUserId = null;
-    closePrivateDrawer();
-    setView("private");
-    renderPrivateConversation();
-    focusInput(els.privateMessageInput);
-  }
-
-  function openMonitorPanel() {
-    if (!canUseCurrentSession()) return;
-    openMenuDrawer();
-    markCurrentNotificationsRead();
-    renderMonitorPanel();
-    if (state.monitorPanelEl) {
-      state.monitorPanelEl.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }
-
-  function markCurrentNotificationsRead() {
-    const current = getCurrentAccount();
-    if (!current || !Array.isArray(current.notifications)) return;
-    current.notifications.forEach((n) => {
-      n.read = true;
-    });
-    saveStorage();
-    renderShellState();
-    renderMonitorPanel();
-  }
+  /* =========================
+     PUBLIC / PRIVATE MESSAGES
+  ========================= */
 
   function addPublicMessage(text, senderId = null, senderLabel = "مستخدم") {
     const message = {
@@ -967,114 +644,70 @@
     }, CONFIG.DEMO_REPLY_DELAY_MS);
   }
 
-  function sendPublicMessage(text, silent = false) {
-    const messageText = normalizeText(text);
-
-    if (!messageText) {
-      if (!silent) showToast("اكتب رسالة أولًا.");
-      return false;
-    }
-
+  function getPrivateChatMatches(query = state.privateSearchQuery) {
     const current = getCurrentAccount();
-    if (!current) {
-      if (!silent) showToast("لا يوجد حساب نشط.");
-      return false;
-    }
+    if (!current) return [];
 
-    addPublicMessage(messageText, current.id, getDisplayName(current));
-    markActivity();
-    focusInput(els.publicMessageInput);
-    return true;
-  }
+    const q = normalizeText(query || "").toLowerCase();
+    const chats = getPrivateChatsForCurrentUser();
 
-  function sendPrivateMessage(peerId, text, silent = false) {
-    const messageText = normalizeText(text);
+    if (!q) return chats;
 
-    if (!peerId) {
-      if (!silent) showToast("اختر شخصًا أولًا.");
-      return false;
-    }
+    return chats.filter((item) => {
+      const peer = item.peer;
+      const peerName = normalizeText(peer?.username || "").toLowerCase();
+      const profileName = normalizeText(peer?.profile?.name || "").toLowerCase();
+      const bio = normalizeText(peer?.profile?.bio || "").toLowerCase();
+      const nationality = normalizeText(peer?.profile?.nationality || "").toLowerCase();
+      const lastMessage = normalizeText(item.lastMessage?.text || "").toLowerCase();
 
-    if (!messageText) {
-      if (!silent) showToast("اكتب رسالة أولًا.");
-      return false;
-    }
-
-    const current = getCurrentAccount();
-    const peer = getAccountById(peerId);
-
-    if (!current || !peer) {
-      if (!silent) showToast("تعذر إرسال الرسالة.");
-      return false;
-    }
-
-    addPrivateMessage(peerId, messageText, current.id, getDisplayName(current));
-    scheduleDemoReply(peerId, messageText);
-    markActivity();
-    focusInput(els.privateMessageInput);
-    return true;
-  }
-
-  function handleAppTitleClick() {
-    softRefresh();
-  }
-
-  function handlePrivateShortcutClick() {
-    if (!state.privateDrawerOpen) openPrivateDrawer();
-    else closePrivateDrawer();
-  }
-
-  function handleBackFromPrivate() {
-    closePrivateDrawer();
-    openHome();
-  }
-
-  function handleBackFromUserView() {
-    openHome();
-  }
-
-  function attachSendButtonKeyboardProtection() {
-    [els.publicSendBtn, els.privateSendBtn].forEach((btn) => {
-      if (!btn) return;
-      btn.addEventListener("pointerdown", (e) => e.preventDefault());
-      btn.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+      return (
+        peerName.includes(q) ||
+        profileName.includes(q) ||
+        bio.includes(q) ||
+        nationality.includes(q) ||
+        lastMessage.includes(q)
+      );
     });
   }
 
-  function attachPullToRefresh() {
-    const root = els.appMain || els.app || document.body;
-    if (!root) return;
+  function getPrivateChatsForCurrentUser() {
+    const current = getCurrentAccount();
+    if (!current) return [];
 
-    root.addEventListener(
-      "touchstart",
-      (e) => {
-        if (window.scrollY > 0) return;
-        state.pullRefresh.tracking = true;
-        state.pullRefresh.startY = e.touches[0].clientY;
-        state.pullRefresh.startX = e.touches[0].clientX;
-      },
-      { passive: true }
-    );
+    return Object.entries(state.privateThreads || {})
+      .map(([key, thread]) => {
+        const t = normalizeThread(thread);
+        if (!t || !Array.isArray(t.participants)) return null;
+        if (!t.participants.includes(current.id)) return null;
 
-    root.addEventListener(
-      "touchmove",
-      (e) => {
-        if (!state.pullRefresh.tracking) return;
-        const dy = e.touches[0].clientY - state.pullRefresh.startY;
-        const dx = Math.abs(e.touches[0].clientX - state.pullRefresh.startX);
+        const peerId = t.participants.find((id) => id !== current.id);
+        const peer = getAccountById(peerId);
+        const lastMessage = Array.isArray(t.messages) && t.messages.length ? t.messages[t.messages.length - 1] : null;
 
-        if (dy > 110 && dx < 90) {
-          state.pullRefresh.tracking = false;
-          softRefresh();
-        }
-      },
-      { passive: true }
-    );
-
-    root.addEventListener("touchend", () => {
-      state.pullRefresh.tracking = false;
-    });
+        return {
+          key,
+          thread: t,
+          peerId,
+          peer,
+          lastMessage,
+          updatedAt: Number(t.updatedAt || lastMessage?.at || 0),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.updatedAt - a.updatedAt);
   }
+
+  function getThreadMessagesForPeer(peerId) {
+    const current = getCurrentAccount();
+    if (!current || !peerId) return [];
+    const thread = ensureThread(current.id, peerId, false);
+    return Array.isArray(thread?.messages) ? thread.messages : [];
+  }
+
+  /* =========================
+     RENDERERS
+  ========================= */
 
   function renderShellState() {
     const current = getCurrentAccount();
@@ -1092,8 +725,8 @@
 
     if (els.menuUserMeta) {
       els.menuUserMeta.textContent = current
-        ? `اضغط لفتح الملف وتعديل البيانات • ${isAccountFeatured(current) ? "مستخدم مميز" : "حساب عادي"}`
-        : "سجل دخول أو أنشئ حساب تجريبي";
+        ? `اضغط لفتح ملفك وتعديل البيانات • ${isAccountFeatured(current) ? "مستخدم مميز" : "حساب عادي"}`
+        : "سيظهر ملفك بعد تفعيل الحساب";
     }
 
     if (els.menuAvatar) {
@@ -1104,24 +737,37 @@
       els.drawerMonitorBadge.textContent = String(getUnreadNotificationCount());
     }
 
-    if (els.profileBadge) {
-      els.profileBadge.textContent = String(getUnreadNotificationCount());
-    }
-
-    if (els.privateChatsCount) {
-      els.privateChatsCount.textContent = String(getPrivateChatMatches().length);
-    }
-
-    if (els.profileSub) {
-      els.profileSub.textContent = current ? `${isAccountFeatured(current) ? "مستخدم مميز" : "حساب عادي"}` : "الملف الشخصي";
+    if (els.searchResultCount) {
+      els.searchResultCount.textContent = String(renderUserSearchResultsCount());
     }
 
     if (els.publicMessageInput) {
-      els.publicMessageInput.placeholder = current ? "اكتب رسالتك في الشات العام" : "جهز حسابًا أولًا";
+      els.publicMessageInput.placeholder = current ? "اكتب رسالتك..." : "لا يوجد حساب نشط";
     }
 
-    if (els.publicSendBtn) els.publicSendBtn.textContent = "إرسال";
-    if (els.privateSendBtn) els.privateSendBtn.textContent = "إرسال";
+    if (els.privateSendBtn) {
+      els.privateSendBtn.textContent = "إرسال";
+    }
+  }
+
+  function renderPublicMessages() {
+    if (!els.publicMessages) return;
+    els.publicMessages.innerHTML = "";
+
+    const messages = safeArray(state.publicMessages);
+    if (!messages.length) {
+      const empty = document.createElement("div");
+      empty.className = "messages-placeholder";
+      empty.textContent = "لسه ما فيش رسائل ظاهرة هنا.";
+      els.publicMessages.appendChild(empty);
+      return;
+    }
+
+    messages.forEach((message) => {
+      els.publicMessages.appendChild(buildMessageElement(message));
+    });
+
+    els.publicMessages.scrollTop = els.publicMessages.scrollHeight;
   }
 
   function buildMessageElement(message) {
@@ -1142,9 +788,9 @@
     avatar.className = "message-avatar";
     setAvatar(avatar, sender, senderName ? senderName[0] : "؟");
     avatar.title = `فتح ملف ${senderName}`;
-    avatar.addEventListener("click", () => {
-      if (message.senderId) openUserProfileById(message.senderId);
-    });
+    if (message.senderId) {
+      avatar.addEventListener("click", () => openUserProfileById(message.senderId));
+    }
 
     const metaWrap = document.createElement("div");
     metaWrap.className = "message-meta-wrap";
@@ -1153,9 +799,9 @@
     senderBtn.type = "button";
     senderBtn.className = "message-sender";
     senderBtn.textContent = senderName;
-    senderBtn.addEventListener("click", () => {
-      if (message.senderId) openUserProfileById(message.senderId);
-    });
+    if (message.senderId) {
+      senderBtn.addEventListener("click", () => openUserProfileById(message.senderId));
+    }
 
     const time = document.createElement("time");
     time.className = "message-time";
@@ -1174,26 +820,6 @@
     article.appendChild(head);
     article.appendChild(body);
     return article;
-  }
-
-  function renderPublicMessages() {
-    if (!els.publicMessages) return;
-    els.publicMessages.innerHTML = "";
-
-    const messages = getCurrentPublicMessages();
-    if (!messages.length) {
-      const empty = document.createElement("div");
-      empty.className = "messages-placeholder";
-      empty.textContent = "لسه ما فيش رسائل ظاهرة هنا.";
-      els.publicMessages.appendChild(empty);
-      return;
-    }
-
-    messages.forEach((message) => {
-      els.publicMessages.appendChild(buildMessageElement(message));
-    });
-
-    els.publicMessages.scrollTop = els.publicMessages.scrollHeight;
   }
 
   function renderOnlineUsers() {
@@ -1298,6 +924,7 @@
 
       info.appendChild(nameLine);
       info.appendChild(sub);
+
       row.appendChild(avatar);
       row.appendChild(info);
       row.addEventListener("click", () => openUserProfileById(acc.id));
@@ -1306,24 +933,34 @@
     });
   }
 
+  function renderUserSearchResultsCount() {
+    const query = normalizeText(els.userSearchInputHome?.value || els.userSearchInputDrawer?.value || state.searchQuery || "");
+    if (!query) return 0;
+
+    const q = query.toLowerCase();
+    return getAccounts().filter((acc) => {
+      const name = normalizeText(acc.username).toLowerCase();
+      const profileName = normalizeText(acc.profile?.name || "").toLowerCase();
+      const bio = normalizeText(acc.profile?.bio || "").toLowerCase();
+      const nationality = normalizeText(acc.profile?.nationality || "").toLowerCase();
+      return name.includes(q) || profileName.includes(q) || bio.includes(q) || nationality.includes(q);
+    }).length;
+  }
+
   function renderUserSearchResults() {
     if (!els.userSearchResults || !els.searchResultCount) return;
 
     const query = normalizeText(els.userSearchInputHome?.value || els.userSearchInputDrawer?.value || "");
     state.searchQuery = query;
 
-    if (els.userSearchInputHome && els.userSearchInputHome.value !== query) {
-      els.userSearchInputHome.value = query;
-    }
-
-    if (els.userSearchInputDrawer && els.userSearchInputDrawer.value !== query) {
-      els.userSearchInputDrawer.value = query;
-    }
+    if (els.userSearchInputHome && els.userSearchInputHome.value !== query) els.userSearchInputHome.value = query;
+    if (els.userSearchInputDrawer && els.userSearchInputDrawer.value !== query) els.userSearchInputDrawer.value = query;
 
     els.userSearchResults.innerHTML = "";
+    const count = renderUserSearchResultsCount();
+    els.searchResultCount.textContent = String(count);
 
     if (!query) {
-      els.searchResultCount.textContent = "0";
       const empty = document.createElement("div");
       empty.className = "empty-state empty-state-small";
       empty.textContent = "اكتب اسم المستخدم عشان يظهر في النتائج.";
@@ -1337,15 +974,8 @@
       const profileName = normalizeText(acc.profile?.name || "").toLowerCase();
       const bio = normalizeText(acc.profile?.bio || "").toLowerCase();
       const nationality = normalizeText(acc.profile?.nationality || "").toLowerCase();
-      return (
-        name.includes(q) ||
-        profileName.includes(q) ||
-        bio.includes(q) ||
-        nationality.includes(q)
-      );
+      return name.includes(q) || profileName.includes(q) || bio.includes(q) || nationality.includes(q);
     });
-
-    els.searchResultCount.textContent = String(results.length);
 
     if (!results.length) {
       const empty = document.createElement("div");
@@ -1393,45 +1023,6 @@
     });
   }
 
-  function renderHomeView() {
-    renderShellState();
-    renderPublicMessages();
-    renderOnlineUsers();
-    renderFeaturedUsers();
-    renderUserSearchResults();
-    renderPrivateDrawerChatsList();
-    renderMonitorPanel();
-  }
-
-  function renderProfileView() {
-    const current = getCurrentAccount();
-    if (!current) {
-      if (els.profileTitle) els.profileTitle.textContent = "ملفي الشخصي";
-      return;
-    }
-
-    if (els.profileTitle) els.profileTitle.textContent = "ملفي الشخصي";
-    if (els.profileName) els.profileName.value = current.username || "";
-    if (els.profilePassword) els.profilePassword.value = current.password || "";
-    if (els.profileAge) els.profileAge.value = current.profile?.age || "";
-    if (els.profileGender) els.profileGender.value = current.profile?.gender || "";
-    if (els.profileNationality) els.profileNationality.value = current.profile?.nationality || "";
-    if (els.profileBio) els.profileBio.value = current.profile?.bio || "";
-
-    if (els.profileAvatarPreview) setAvatar(els.profileAvatarPreview, current, getAvatarInitial(current));
-    if (els.profileOnlineState) {
-      els.profileOnlineState.textContent = isAccountOnline(current) ? "متصل الآن" : "غير نشط";
-    }
-
-    if (els.profileLastSeen) {
-      els.profileLastSeen.textContent = current.lastSeenAt
-        ? `${durationLabel(getActiveDurationForAccount(current))} • آخر ظهور ${timeAgo(current.lastSeenAt)}`
-        : "لا يوجد نشاط مسجل";
-    }
-
-    if (els.saveProfileBtn) els.saveProfileBtn.disabled = false;
-  }
-
   function renderPrivateDrawerChatsList() {
     if (!els.privateChatsList || !els.privateChatsEmpty) return;
 
@@ -1449,9 +1040,7 @@
 
     if (!chats.length) {
       els.privateChatsEmpty.classList.remove("is-hidden");
-      els.privateChatsEmpty.textContent = state.privateSearchQuery
-        ? "مافيش محادثات مطابقة."
-        : "لسه ما كلمتش حد في الخاص.";
+      els.privateChatsEmpty.textContent = state.privateSearchQuery ? "مافيش محادثات مطابقة." : "لسه ما كلمتش حد في الخاص.";
       if (els.privateChatsCount) els.privateChatsCount.textContent = "0";
       return;
     }
@@ -1495,18 +1084,11 @@
       btn.appendChild(info);
       btn.appendChild(time);
       btn.addEventListener("click", () => {
-        if (item.peerId) openPrivateChat(item.peerId, true);
+        if (item.peerId) openPrivateChat(item.peerId);
       });
 
       els.privateChatsList.appendChild(btn);
     });
-  }
-
-  function getThreadMessagesForPeer(peerId) {
-    const current = getCurrentAccount();
-    if (!current || !peerId) return [];
-    const thread = ensureThread(current.id, peerId, false);
-    return Array.isArray(thread?.messages) ? thread.messages : [];
   }
 
   function renderPrivateConversation() {
@@ -1614,6 +1196,7 @@
     }
 
     setAvatar(els.userViewAvatar, target, getAvatarInitial(target));
+
     if (els.startPrivateChatBtn) {
       els.startPrivateChatBtn.dataset.targetId = target.id;
       els.startPrivateChatBtn.textContent = "فتح شات خاص";
@@ -1625,8 +1208,6 @@
 
     const current = getCurrentAccount();
     const unreadCount = getUnreadNotificationCount();
-
-    if (els.drawerMonitorBadge) els.drawerMonitorBadge.textContent = String(unreadCount);
 
     const titleEl = state.monitorPanelEl.querySelector("[data-monitor-title]");
     const countEl = state.monitorPanelEl.querySelector("[data-monitor-count]");
@@ -1681,37 +1262,215 @@
     });
   }
 
+  function renderHomeView() {
+    renderShellState();
+    renderPublicMessages();
+    renderOnlineUsers();
+    renderFeaturedUsers();
+    renderUserSearchResults();
+    renderPrivateDrawerChatsList();
+    renderMonitorPanel();
+  }
+
+  function renderProfileView() {
+    const current = getCurrentAccount();
+    if (!current) return;
+
+    if (els.profileTitle) els.profileTitle.textContent = "ملفي الشخصي";
+    if (els.profileName) els.profileName.value = current.username || "";
+    if (els.profilePassword) els.profilePassword.value = current.password || "";
+    if (els.profileAge) els.profileAge.value = current.profile?.age || "";
+    if (els.profileGender) els.profileGender.value = current.profile?.gender || "";
+    if (els.profileNationality) els.profileNationality.value = current.profile?.nationality || "";
+    if (els.profileBio) els.profileBio.value = current.profile?.bio || "";
+
+    if (els.profileAvatarPreview) setAvatar(els.profileAvatarPreview, current, getAvatarInitial(current));
+    if (els.profileOnlineState) {
+      els.profileOnlineState.textContent = isAccountOnline(current) ? "متصل الآن" : "غير نشط";
+    }
+
+    if (els.profileLastSeen) {
+      els.profileLastSeen.textContent = current.lastSeenAt
+        ? `${durationLabel(getActiveDurationForAccount(current))} • آخر ظهور ${timeAgo(current.lastSeenAt)}`
+        : "لا يوجد نشاط مسجل";
+    }
+
+    if (els.saveProfileBtn) els.saveProfileBtn.disabled = false;
+  }
+
+  function renderPrivateView() {
+    renderPrivateDrawerChatsList();
+    renderPrivateConversation();
+  }
+
   function renderAll() {
     renderShellState();
     renderHomeView();
     renderProfileView();
-    renderPrivateDrawerChatsList();
-    renderPrivateConversation();
+    renderPrivateView();
     renderUserView();
     renderMonitorPanel();
-    positionDrawers();
   }
 
-  function renderPrivateViewIfNeeded() {
-    if (state.view === "private") {
-      renderPrivateConversation();
+  /* =========================
+     VIEW MANAGEMENT
+  ========================= */
+
+  function closeMenuDrawer() {
+    if (!els.menuDrawer) return;
+    state.menuOpen = false;
+    els.menuDrawer.classList.add("is-hidden");
+    els.menuDrawer.setAttribute("aria-hidden", "true");
+  }
+
+  function openMenuDrawer() {
+    if (!els.menuDrawer) return;
+    state.menuOpen = true;
+    els.menuDrawer.classList.remove("is-hidden");
+    els.menuDrawer.setAttribute("aria-hidden", "false");
+    renderMonitorPanel();
+  }
+
+  function setView(viewName) {
+    state.view = viewName;
+
+    const views = {
+      home: els.homeView,
+      profile: els.profileView,
+      private: els.privateView,
+      user: els.userView,
+    };
+
+    Object.entries(views).forEach(([name, el]) => {
+      if (!el) return;
+      el.classList.toggle("is-hidden", name !== viewName);
+    });
+
+    if (els.app) els.app.dataset.view = viewName;
+
+    if (viewName === "home") {
+      renderHomeView();
+    } else if (viewName === "profile") {
+      renderProfileView();
+    } else if (viewName === "private") {
+      renderPrivateView();
+    } else if (viewName === "user") {
+      renderUserView();
+    }
+
+    window.scrollTo(0, 0);
+    closeMenuDrawer();
+  }
+
+  function openHome() {
+    state.selectedUserId = null;
+    state.selectedPrivatePeerId = null;
+    setView("home");
+  }
+
+  function openProfile() {
+    if (!canUseCurrentSession()) {
+      showToast("لا يوجد حساب نشط.");
+      return;
+    }
+    window.scrollTo(0, 0);
+    state.selectedUserId = null;
+    setView("profile");
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.activeElement?.blur();
+    }, 10);
+  }
+
+  function notifyProfileViewed(targetAccountId, viewerLabel, viewerId = null) {
+    const target = getAccountById(targetAccountId);
+    if (!target) return;
+    if (viewerId && viewerId === targetAccountId) return;
+
+    if (!Array.isArray(target.notifications)) target.notifications = [];
+    target.notifications.push({
+      id: createId("noti"),
+      type: "profile_view",
+      viewerId,
+      viewerLabel: normalizeText(viewerLabel) || "زائر",
+      at: now(),
+      read: false,
+    });
+
+    if (target.notifications.length > CONFIG.MAX_NOTIFICATIONS) {
+      target.notifications = target.notifications.slice(-CONFIG.MAX_NOTIFICATIONS);
     }
   }
 
-  function syncUserSearchInputs(value) {
-    const normalized = normalizeText(value || "");
-    state.searchQuery = normalized;
-
-    if (els.userSearchInputHome && els.userSearchInputHome.value !== normalized) {
-      els.userSearchInputHome.value = normalized;
-    }
-
-    if (els.userSearchInputDrawer && els.userSearchInputDrawer.value !== normalized) {
-      els.userSearchInputDrawer.value = normalized;
-    }
-
-    renderUserSearchResults();
+  function markCurrentNotificationsRead() {
+    const current = getCurrentAccount();
+    if (!current || !Array.isArray(current.notifications)) return;
+    current.notifications.forEach((n) => {
+      n.read = true;
+    });
+    saveStorage();
+    renderShellState();
+    renderMonitorPanel();
   }
+
+  function openMonitorPanel() {
+    if (!canUseCurrentSession()) {
+      showToast("لا يوجد حساب نشط.");
+      return;
+    }
+    markCurrentNotificationsRead();
+    const count = getUnreadNotificationCount();
+    if (!count) {
+      showToast("لا توجد زيارات جديدة لملفك.");
+      return;
+    }
+    showToast(`لديك ${count} زيارة/زيارات جديدة لملفك.`);
+  }
+
+  function openUserProfileById(userId) {
+    if (!userId) return;
+
+    const target = getAccountById(userId);
+    if (!target) {
+      showToast("المستخدم غير موجود.");
+      return;
+    }
+
+    const current = getCurrentAccount();
+    const viewerLabel = current ? getDisplayName(current) : "زائر";
+
+    if (current && current.id === target.id) {
+      openProfile();
+      return;
+    }
+
+    state.selectedUserId = target.id;
+    notifyProfileViewed(target.id, viewerLabel, current?.id || null);
+    saveStorage();
+    setView("user");
+    renderUserView();
+    renderMonitorPanel();
+    setBridgeUser();
+  }
+
+  function openPrivateChat(peerId) {
+    if (!peerId) return;
+    const peer = getAccountById(peerId);
+    if (!peer) {
+      showToast("الشخص غير موجود.");
+      return;
+    }
+
+    state.selectedPrivatePeerId = peer.id;
+    state.selectedUserId = null;
+    setView("private");
+    renderPrivateConversation();
+    focusInput(els.privateMessageInput);
+  }
+
+  /* =========================
+     FORMS / INPUTS
+  ========================= */
 
   function handleProfileSave(event) {
     event.preventDefault();
@@ -1788,6 +1547,53 @@
     reader.readAsDataURL(file);
   }
 
+  function sendPublicMessage(text, silent = false) {
+    const messageText = normalizeText(text);
+    if (!messageText) {
+      if (!silent) showToast("اكتب رسالة أولًا.");
+      return false;
+    }
+
+    const current = getCurrentAccount();
+    if (!current) {
+      if (!silent) showToast("لا يوجد حساب نشط.");
+      return false;
+    }
+
+    addPublicMessage(messageText, current.id, getDisplayName(current));
+    markActivity();
+    focusInput(els.publicMessageInput);
+    return true;
+  }
+
+  function sendPrivateMessage(peerId, text, silent = false) {
+    const messageText = normalizeText(text);
+
+    if (!peerId) {
+      if (!silent) showToast("اختر شخصًا أولًا.");
+      return false;
+    }
+
+    if (!messageText) {
+      if (!silent) showToast("اكتب رسالة أولًا.");
+      return false;
+    }
+
+    const current = getCurrentAccount();
+    const peer = getAccountById(peerId);
+
+    if (!current || !peer) {
+      if (!silent) showToast("تعذر إرسال الرسالة.");
+      return false;
+    }
+
+    addPrivateMessage(peerId, messageText, current.id, getDisplayName(current));
+    scheduleDemoReply(peerId, messageText);
+    markActivity();
+    focusInput(els.privateMessageInput);
+    return true;
+  }
+
   function handlePublicSubmit(event) {
     event.preventDefault();
 
@@ -1832,6 +1638,7 @@
     }
 
     sendPrivateMessage(peerId, text);
+
     if (els.privateMessageInput) {
       els.privateMessageInput.value = "";
       els.privateMessageInput.focus();
@@ -1870,9 +1677,7 @@
     if (!bridge || typeof bridge.setUser !== "function") return;
 
     const current = getCurrentAccount();
-    bridge
-      .setUser(current ? { id: current.id, name: getDisplayName(current) } : null)
-      .catch?.(() => {});
+    Promise.resolve(bridge.setUser(current ? { id: current.id, name: getDisplayName(current) } : null)).catch(() => {});
   }
 
   function setupBridge() {
@@ -1894,45 +1699,117 @@
       });
   }
 
-  function softRefresh() {
-    readStorage();
-    ensureCurrentAccount();
-    ensureDemoUsers();
-    ensureWelcomePublicMessage();
-    prunePublicMessages();
-    prunePrivateThreads();
-    saveStorage();
-    renderAll();
-    setBridgeUser();
+  function syncUserSearchInputs(value) {
+    const normalized = normalizeText(value || "");
+    state.searchQuery = normalized;
+
+    if (els.userSearchInputHome && els.userSearchInputHome.value !== normalized) {
+      els.userSearchInputHome.value = normalized;
+    }
+
+    if (els.userSearchInputDrawer && els.userSearchInputDrawer.value !== normalized) {
+      els.userSearchInputDrawer.value = normalized;
+    }
+
+    renderUserSearchResults();
+  }
+
+  function handlePrivateChatListSearch(value) {
+    state.privateSearchQuery = normalizeText(value || "");
+    renderPrivateDrawerChatsList();
+  }
+
+  /* =========================
+     DRAWER PANEL
+  ========================= */
+
+  function ensureMonitorPanel() {
+    if (state.monitorPanelEl || !els.menuDrawer) return state.monitorPanelEl;
+
+    const panel = document.createElement("section");
+    panel.className = "drawer-section monitor-panel";
+    panel.id = "monitorPanel";
+    panel.innerHTML = `
+      <div class="drawer-subhead">
+        <h3 data-monitor-title>منظار ملفك</h3>
+        <span class="tiny-count" data-monitor-count>0</span>
+      </div>
+      <div class="monitor-panel-body">
+        <div class="empty-state empty-state-small" data-monitor-empty>سجّل دخولك عشان يظهر سجل الزيارات.</div>
+        <div class="monitor-list" data-monitor-list></div>
+      </div>
+    `;
+
+    const firstSection = els.menuDrawer.querySelector(".drawer-section");
+    if (firstSection && firstSection.parentElement === els.menuDrawer) {
+      els.menuDrawer.insertBefore(panel, firstSection);
+    } else {
+      els.menuDrawer.appendChild(panel);
+    }
+
+    state.monitorPanelEl = panel;
+    return panel;
+  }
+
+  /* =========================
+     EVENTS / BINDING
+  ========================= */
+
+  function attachSendButtonKeyboardProtection() {
+    [els.publicSendBtn, els.privateSendBtn].forEach((btn) => {
+      if (!btn) return;
+      btn.addEventListener("pointerdown", (e) => e.preventDefault());
+      btn.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+    });
+  }
+
+  function attachPullToRefresh() {
+    const root = els.appMain || els.app || document.body;
+    if (!root) return;
+
+    root.addEventListener(
+      "touchstart",
+      (e) => {
+        if (window.scrollY > 0) return;
+        state.pullRefresh.tracking = true;
+        state.pullRefresh.startY = e.touches[0].clientY;
+        state.pullRefresh.startX = e.touches[0].clientX;
+      },
+      { passive: true }
+    );
+
+    root.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!state.pullRefresh.tracking) return;
+        const dy = e.touches[0].clientY - state.pullRefresh.startY;
+        const dx = Math.abs(e.touches[0].clientX - state.pullRefresh.startX);
+
+        if (dy > 110 && dx < 90) {
+          state.pullRefresh.tracking = false;
+          softRefresh();
+        }
+      },
+      { passive: true }
+    );
+
+    root.addEventListener("touchend", () => {
+      state.pullRefresh.tracking = false;
+    });
   }
 
   function bindEvents() {
-    if (els.menuBtn) {
-      els.menuBtn.addEventListener("click", (event) => {
-        event.stopPropagation();
-        if (state.menuOpen) closeMenuDrawer();
-        else openMenuDrawer();
-      });
-    }
+    els.menuBtn?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (state.menuOpen) closeMenuDrawer();
+      else openMenuDrawer();
+    });
 
-    if (els.privateShortcutBtn) {
-      els.privateShortcutBtn.addEventListener("click", (event) => {
-        event.stopPropagation();
-        handlePrivateShortcutClick();
-      });
-    }
-
-    if (els.menuOverlayEl) {
-      els.menuOverlayEl.addEventListener("click", closeMenuDrawer);
-    }
-
-    if (els.privateOverlayEl) {
-      els.privateOverlayEl.addEventListener("click", closePrivateDrawer);
-    }
-
-    if (els.privateDrawerCloseBtn) {
-      els.privateDrawerCloseBtn.addEventListener("click", closePrivateDrawer);
-    }
+    els.privateShortcutBtn?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setView("private");
+      renderPrivateView();
+    });
 
     els.appTitleBtn?.addEventListener("click", handleAppTitleRefresh);
 
@@ -1944,10 +1821,7 @@
     els.openMyProfileFromMenu?.addEventListener("click", openProfile);
     els.drawerProfileBtn?.addEventListener("click", openProfile);
     els.drawerMonitorBtn?.addEventListener("click", openMonitorPanel);
-    els.drawerSettingsBtn?.addEventListener("click", () => {
-      showToast("الإعدادات هتتضاف لاحقًا.");
-    });
-
+    els.drawerSettingsBtn?.addEventListener("click", () => showToast("الإعدادات هتتضاف لاحقًا."));
     els.drawerLogoutBtn?.addEventListener("click", () => {
       if (!getCurrentAccount()) {
         showToast("لا يوجد حساب نشط.");
@@ -1956,113 +1830,67 @@
       logoutCurrentAccount(true);
     });
 
-    els.backFromProfileBtn?.addEventListener("click", () => openHome());
-    els.closeProfileBtn?.addEventListener("click", () => openHome());
-    els.backFromPrivateBtn?.addEventListener("click", handleBackFromPrivate);
-    els.backFromUserViewBtn?.addEventListener("click", handleBackFromUserView);
-    els.closeUserViewBtn?.addEventListener("click", () => openHome());
+    els.backFromProfileBtn?.addEventListener("click", openHome);
+    els.closeProfileBtn?.addEventListener("click", openHome);
+    els.backFromPrivateBtn?.addEventListener("click", openHome);
+    els.backFromUserViewBtn?.addEventListener("click", openHome);
+    els.closeUserViewBtn?.addEventListener("click", openHome);
 
     els.startPrivateChatBtn?.addEventListener("click", () => {
       const targetId = els.startPrivateChatBtn?.dataset?.targetId;
       if (!targetId) return;
-      openPrivateChat(targetId, true);
+      openPrivateChat(targetId);
     });
 
-    els.userSearchInputHome?.addEventListener("input", (e) => {
-      syncUserSearchInputs(e.target.value);
-    });
+    els.userSearchInputHome?.addEventListener("input", (e) => syncUserSearchInputs(e.target.value));
+    els.userSearchInputDrawer?.addEventListener("input", (e) => syncUserSearchInputs(e.target.value));
 
-    els.userSearchInputDrawer?.addEventListener("input", (e) => {
-      syncUserSearchInputs(e.target.value);
-    });
-
-    els.privateSearchInput?.addEventListener("input", (e) => {
-      state.privateSearchQuery = normalizeText(e.target.value || "");
-      renderPrivateDrawerChatsList();
-    });
+    els.privateSearchInput?.addEventListener("input", (e) => handlePrivateChatListSearch(e.target.value));
 
     els.publicMessageInput?.addEventListener("focus", () => markActivity());
     els.privateMessageInput?.addEventListener("focus", () => markActivity());
 
     document.addEventListener("click", (event) => {
-      if (!state.menuOpen && !state.privateDrawerOpen) return;
+      if (!state.menuOpen) return;
       if (!(event.target instanceof Node)) return;
-
       const insideMenu = els.menuDrawer?.contains(event.target);
-      const insidePrivate = state.privateDrawerEl?.contains(event.target);
       const insideMenuBtn = els.menuBtn?.contains(event.target);
-      const insidePrivateBtn = els.privateShortcutBtn?.contains(event.target);
-      const insideOverlay =
-        els.menuOverlayEl?.contains(event.target) ||
-        els.privateOverlayEl?.contains(event.target);
-
-      if (insideOverlay) return;
-
-      if (state.menuOpen && !insideMenu && !insideMenuBtn) {
-        closeMenuDrawer();
-      }
-
-      if (state.privateDrawerOpen && !insidePrivate && !insidePrivateBtn) {
-        closePrivateDrawer();
-      }
+      if (!insideMenu && !insideMenuBtn) closeMenuDrawer();
     });
 
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
-
-      if (state.privateDrawerOpen) {
-        closePrivateDrawer();
-        return;
-      }
-
       if (state.menuOpen) {
         closeMenuDrawer();
         return;
       }
-
-      if (state.view !== "home") {
-        openHome();
-      }
+      if (state.view !== "home") openHome();
     });
 
     window.addEventListener("storage", () => {
       readStorage();
-      ensureCurrentAccount();
-      ensureDemoUsers();
+      ensureDemoAccounts();
       ensureWelcomePublicMessage();
-      prunePublicMessages();
-      prunePrivateThreads();
-      saveStorage();
+      ensureCurrentAccount();
       renderAll();
       setBridgeUser();
     });
 
     window.addEventListener("resize", () => {
-      positionDrawers();
+      ensureMonitorPanel();
     });
 
     attachSendButtonKeyboardProtection();
     attachPullToRefresh();
   }
 
-  function positionDrawers() {
-    if (els.menuDrawer) {
-      positionDrawerSide(els.menuDrawer, "right");
-    }
-
-    if (state.privateDrawerEl) {
-      positionDrawerSide(state.privateDrawerEl, "left");
-    }
-  }
-
-  function renderPrivateChatHelpers() {
-    renderPrivateDrawerChatsList();
-    renderPrivateConversation();
-  }
+  /* =========================
+     PRIVATE / PUBLIC OPENERS
+  ========================= */
 
   function openPrivatePage() {
     setView("private");
-    renderPrivateConversation();
+    renderPrivateView();
   }
 
   function bindLowLevelAliases() {
@@ -2073,8 +1901,6 @@
       openProfile,
       openUserProfileById,
       openPrivateChat,
-      openPrivateDrawer,
-      closePrivateDrawer,
       openPrivatePage,
       openMenuDrawer,
       closeMenuDrawer,
@@ -2083,10 +1909,17 @@
         currentSession: getCurrentSession(),
         unreadNotifications: getUnreadNotificationCount(),
         view: state.view,
-        privateDrawerOpen: state.privateDrawerOpen,
         menuOpen: state.menuOpen,
       }),
     };
+  }
+
+  /* =========================
+     INITIALIZATION
+  ========================= */
+
+  function initInputsText() {
+    if (els.privateShortcutBtn) els.privateShortcutBtn.setAttribute("aria-label", "الرسائل الخاصة");
   }
 
   function cacheElements() {
@@ -2115,7 +1948,6 @@
     els.menuAvatar = $("menuAvatar");
     els.menuUserName = $("menuUserName");
     els.menuUserMeta = $("menuUserMeta");
-    els.profileSub = $("profileSub");
     els.userSearchInputHome = $("userSearchInputHome");
     els.userSearchInputDrawer = $("userSearchInputDrawer");
     els.searchResultCount = $("searchResultCount");
@@ -2125,7 +1957,6 @@
     els.drawerSettingsBtn = $("drawerSettingsBtn");
     els.drawerLogoutBtn = $("drawerLogoutBtn");
     els.drawerMonitorBadge = $("drawerMonitorBadge");
-    els.profileBadge = $("profileBadge");
 
     els.profileView = $("profileView");
     els.backFromProfileBtn = $("backFromProfileBtn");
@@ -2154,6 +1985,8 @@
     els.privateMessageForm = $("privateMessageForm");
     els.privateMessageInput = $("privateMessageInput");
     els.privateSendBtn = $("privateSendBtn");
+    els.privateChatsEmpty = $("privateChatsEmpty");
+    els.privateChatsList = $("privateChatsList");
 
     els.userView = $("userView");
     els.backFromUserViewBtn = $("backFromUserViewBtn");
@@ -2170,9 +2003,16 @@
     els.closeUserViewBtn = $("closeUserViewBtn");
   }
 
-  function initInputsText() {
-    if (els.privateShortcutBtn) els.privateShortcutBtn.textContent = "✉";
-    if (els.menuBtn) els.menuBtn.textContent = "☰";
+  function softRefresh() {
+    readStorage();
+    ensureDemoAccounts();
+    ensureWelcomePublicMessage();
+    ensureCurrentAccount();
+    prunePublicMessages();
+    prunePrivateThreads();
+    saveStorage();
+    renderAll();
+    setBridgeUser();
   }
 
   async function init() {
@@ -2181,15 +2021,12 @@
 
     cacheElements();
     initInputsText();
-    ensureDemoUsers();
+    readStorage();
+    ensureDemoAccounts();
     ensureWelcomePublicMessage();
     ensureCurrentAccount();
-    els.menuOverlayEl = makeOverlay("menuDrawerOverlay", 88);
-    els.privateOverlayEl = makeOverlay("privateDrawerOverlay", 87);
-    ensurePrivateDrawer();
     ensureMonitorPanel();
     bindEvents();
-    positionDrawers();
     setView(state.view || "home");
     renderAll();
     setBridgeUser();
