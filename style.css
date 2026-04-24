@@ -243,15 +243,11 @@ min-width: 0;
   color: #fff;
 }
 
-.home-view,
-.page {
+.home-view {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   min-width: 0;
-}
-
-.home-view {
-  grid-template-columns: minmax(0, 1fr);
 }
 
 .panel {
