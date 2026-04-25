@@ -110,7 +110,7 @@ a {
   width: 100%;
   min-height: 100dvh;
   max-width: var(--maxw);
-  margin: calc(var(--header-h) + 22px) auto 16px;
+  margin: 16px auto;
   padding: 10px 10px 24px;
   position: relative;
   min-width: 0;
@@ -976,11 +976,17 @@ a {
 .private-chat-panel {
   width: 100%;
   max-width: var(--maxw);
-  margin: auto;
+
+  margin: 0; /* بدل auto عشان مفيش تمركز غريب */
+
   padding: 10px 10px 24px;
+
   position: relative;
   min-width: 0;
-  height: 100%;
+
+  height: auto; /* بدل 100% */
+  min-height: 0;
+
   overflow: hidden;
 }
 
