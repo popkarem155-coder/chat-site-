@@ -111,8 +111,8 @@ a {
   width: 100%;
   min-height: 100dvh;
   max-width: var(--maxw);
-  margin: 0 auto;
-  padding: calc(var(--header-h) + 14px) 10px 24px;
+  margin: 6px auto 0;
+  padding: 10px 10px 24px;
   position: relative;
   min-width: 0;
 }
@@ -250,7 +250,6 @@ a {
   display: grid;
   gap: 12px;
   min-width: 0;
-  margin-top: 14px;
 }
 
 .home-view {
@@ -754,13 +753,15 @@ a {
   background: linear-gradient(180deg, rgba(23, 23, 35, 0.94), rgba(17, 17, 25, 0.94));
   box-shadow: var(--shadow-soft);
   min-width: 0;
-  min-height: 0;
 }
 
 .page-head {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .back-btn {
