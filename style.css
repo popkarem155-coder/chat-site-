@@ -254,7 +254,7 @@ a {
 
   background: var(--bg);
 
-  overflow-y: auto;
+  overflow-y: hidden;
 
   /* حركة فتح/قفل */
   transform: translateX(100%);
