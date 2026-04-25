@@ -1493,14 +1493,8 @@ a {
   height: var(--featured-height);
 }
 
-  #app[data-view="home"] .status-strip {
-  display: flex;
-}
-
-#app:not([data-view="home"]) .status-strip {
-  display: none;
-}
-
-#app[data-view="profile"] .topbar {
+  #app:not([data-view="home"]) .status-strip,
+#app:not([data-view="home"]) .visitor,
+#app:not([data-view="home"]) .topbar {
   display: none !important;
 }
