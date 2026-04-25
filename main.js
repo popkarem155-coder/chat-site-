@@ -902,111 +902,139 @@
   }
 
   function setView(viewName) {
-    state.view = viewName;
+  state.view = viewName;
 
-    const sections = {
-      home: els.homeView,
-      profile: els.profileView,
-      private: els.privateView,
-      user: els.userView,
-    };
+  const sections = {
+    home: els.homeView,
+    profile: els.profileView,
+    private: els.privateView,
+    user: els.userView,
+  };
 
-    Object.entries(sections).forEach(([name, el]) => {
-      if (!el) return;
-      el.classList.toggle("is-hidden", name !== viewName);
-    });
+  Object.entries(sections).forEach(([name, el]) => {
+    if (!el) return;
+    el.classList.toggle("is-hidden", name !== viewName);
+  });
 
-    if (els.app) els.app.dataset.view = viewName;
-    closeMenuDrawer();
-    closePrivateDrawer();
+  if (els.app) els.app.dataset.view = viewName;
 
-    if (viewName === "home") {
+  closeMenuDrawer();
+  closePrivateDrawer();
+
+  switch (viewName) {
+    case "home":
       renderHomeView();
-    } else if (viewName === "profile") {
+      break;
+
+    case "profile":
       renderProfileView();
-    } else if (viewName === "private") {
+      break;
+
+    case "private":
       renderPrivateConversation();
-    } else if (viewName === "user") {
+      break;
+
+    case "user":
       renderUserView();
-    }
+      break;
   }
+}
 
-  function openHome() {
-    state.selectedUserId = null;
-    state.selectedPrivatePeerId = null;
-    setView("home");
-    renderHomeView();
-  }
 
-  function openProfile() {
-    if (!canUseCurrentSession()) return;
+/* ===================== HOME ===================== */
 
+function openHome() {
+  state.selectedUserId = null;
+  state.selectedPrivatePeerId = null;
+  setView("home");
+}
+
+
+/* ===================== PROFILE ===================== */
+
+function openProfile() {
+  if (!canUseCurrentSession()) return;
+
+  window.scrollTo(0, 0);
+
+  state.selectedUserId = null;
+  setView("profile");
+
+  setTimeout(() => {
     window.scrollTo(0, 0);
+    document.activeElement?.blur();
+  }, 10);
+}
 
-    state.selectedUserId = null;
-    setView("profile");
 
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-        document.activeElement?.blur();
-    }, 10);
-  }
-    
+/* ===================== USER PROFILE BY ID ===================== */
 
-  function openUserProfileById(userId) {
-    if (!userId) return;
+function openUserProfileById(userId) {
+  if (!userId) return;
 
-    const target = getAccountById(userId);
-    if (!target) {
-      showToast("المستخدم غير موجود.");
-      return;
-    }
-
-    const current = getCurrentAccount();
-    const viewerLabel = current ? getDisplayName(current) : "زائر";
-
-    if (current && current.id === target.id) {
-      openProfile();
-      return;
-    }
-
-    state.selectedUserId = target.id;
-    notifyProfileViewed(target.id, viewerLabel, current?.id || null);
-    saveStorage();
-    setView("user");
-    renderUserView();
-    renderMonitorPanel();
+  const target = getAccountById(userId);
+  if (!target) {
+    showToast("المستخدم غير موجود.");
+    return;
   }
 
-  function openPrivateChat(peerId, silent = false) {
-    const peer = getAccountById(peerId);
+  const current = getCurrentAccount();
+  const viewerLabel = current ? getDisplayName(current) : "زائر";
 
-    if (!peer) {
-      if (!silent) showToast("الشخص غير موجود.");
-      return;
-    }
-
-    state.selectedPrivatePeerId = peer.id;
-    state.selectedUserId = null;
-    closePrivateDrawer();
-    setView("private");
-    renderPrivateConversation();
-    focusInput(els.privateMessageInput);
+  if (current && current.id === target.id) {
+    openProfile();
+    return;
   }
 
-  function openMonitorPanel() {
-    if (!canUseCurrentSession()) return;
+  state.selectedUserId = target.id;
 
-    openMenuDrawer();
-    markCurrentNotificationsRead();
-    renderMonitorPanel();
-    if (state.monitorPanelEl) {
-      state.monitorPanelEl.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
+  notifyProfileViewed(
+    target.id,
+    viewerLabel,
+    current?.id || null
+  );
+
+  saveStorage();
+  setView("user");
+}
+
+
+/* ===================== PRIVATE CHAT ===================== */
+
+function openPrivateChat(peerId, silent = false) {
+  const peer = getAccountById(peerId);
+
+  if (!peer) {
+    if (!silent) showToast("الشخص غير موجود.");
+    return;
   }
+
+  state.selectedPrivatePeerId = peer.id;
+  state.selectedUserId = null;
+
+  closePrivateDrawer();
+  setView("private");
+
+  focusInput(els.privateMessageInput);
+}
+
+
+/* ===================== MONITOR PANEL ===================== */
+
+function openMonitorPanel() {
+  if (!canUseCurrentSession()) return;
+
+  openMenuDrawer();
+  markCurrentNotificationsRead();
+  renderMonitorPanel();
+
+  if (state.monitorPanelEl) {
+    state.monitorPanelEl.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+}
 
   function markCurrentNotificationsRead() {
     const current = getCurrentAccount();
