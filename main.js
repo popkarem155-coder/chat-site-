@@ -916,7 +916,6 @@
 
     const isActive = name === viewName;
 
-    el.classList.toggle("is-hidden", !isActive);
     el.classList.toggle("is-active", isActive);
   });
 
@@ -929,12 +928,15 @@
     case "home":
       renderHomeView();
       break;
+
     case "profile":
       renderProfileView();
       break;
+
     case "private":
       renderPrivateConversation();
       break;
+
     case "user":
       renderUserView();
       break;
