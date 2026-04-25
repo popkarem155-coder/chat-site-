@@ -111,7 +111,7 @@ a {
   width: 100%;
   min-height: 100dvh;
   max-width: var(--maxw);
-  margin: 6px;
+  margin: 6px auto 0;
   padding: 10px 10px 24px;
   position: relative;
   min-width: 0;
@@ -247,28 +247,9 @@ a {
 
 .home-view,
 .page {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  width: 100%;
-
-  max-width: var(--maxw);
-  margin: 0 auto;
-
-  max-height: 85vh;
-  overflow-y: auto;
-
-  border-radius: 24px 24px 0 0;
-
-  background: linear-gradient(180deg, rgba(23, 23, 35, 0.98), rgba(17, 17, 25, 0.98));
-  box-shadow: 0 -25px 60px rgba(0, 0, 0, 0.55);
-
-  transform: translateY(110%);
-  transition: transform 0.28s ease;
-
-  z-index: 200;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
 }
 
 .home-view {
@@ -1512,11 +1493,14 @@ a {
   height: var(--featured-height);
 }
 
-#app[data-view="home"] .status-strip {
+  #app[data-view="home"] .status-strip {
   display: flex;
 }
 
 #app:not([data-view="home"]) .status-strip {
   display: none;
-} 
-  
+}
+
+#app:not([data-view="home"]) .topbar {
+  display: none;
+}
