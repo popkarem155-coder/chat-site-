@@ -913,7 +913,11 @@
 
   Object.entries(sections).forEach(([name, el]) => {
     if (!el) return;
-    el.classList.toggle("is-hidden", name !== viewName);
+
+    const isActive = name === viewName;
+
+    el.classList.toggle("is-hidden", !isActive);
+    el.classList.toggle("is-active", isActive);
   });
 
   if (els.app) els.app.dataset.view = viewName;
@@ -937,8 +941,8 @@
     case "user":
       renderUserView();
       break;
+   }
   }
-}
 
 
 /* ===================== HOME ===================== */
