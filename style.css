@@ -244,16 +244,27 @@ a {
   color: #fff;
 }
 
-.home-view,
 .page {
-  display: grid;
-  gap: 12px;
-  min-width: 0;
-  margin-top: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--bg);
+
+  overflow-y: auto;
+
+  /* حركة فتح/قفل */
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  will-change: transform;
 }
 
 .home-view {
-  grid-template-columns: minmax(0, 1fr);
+  display: grid;
+  gap: 12px;
 }
 
 .panel {
@@ -743,16 +754,6 @@ a {
   color: var(--soft);
   font-size: 0.8rem;
   line-height: 1.7;
-}
-
-.page {
-  margin-top: 12px;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(23, 23, 35, 0.94), rgba(17, 17, 25, 0.94));
-  box-shadow: var(--shadow-soft);
-  min-width: 0;
 }
 
 .page-head {
