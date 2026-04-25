@@ -267,6 +267,10 @@ a {
   gap: 12px;
 }
 
+.page.is-active {
+  transform: translateX(0);
+}
+
 .panel {
   border-radius: var(--radius);
   border: 1px solid var(--border);
