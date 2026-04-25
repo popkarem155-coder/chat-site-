@@ -1501,6 +1501,6 @@ a {
   display: none;
 }
 
-#app:not([data-view="home"]) .topbar {
-  display: none;
+#app[data-view="profile"] .topbar {
+  display: none !important;
 }
