@@ -1543,9 +1543,3 @@ a {
   height: var(--featured-height);
 }
 
-#app:not([data-view="home"]) .status-strip {
-  display: none !important;
-  height: 0;
-  margin: 0;
-  padding: 0;
-}
