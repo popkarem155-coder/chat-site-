@@ -1493,4 +1493,11 @@ a {
   height: var(--featured-height);
 }
 
+#app[data-view="home"] .status-strip {
+  display: flex;
+}
+
+#app:not([data-view="home"]) .status-strip {
+  display: none;
+}
   
