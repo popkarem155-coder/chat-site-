@@ -929,21 +929,17 @@
     case "home":
       renderHomeView();
       break;
-
     case "profile":
       renderProfileView();
       break;
-
     case "private":
       renderPrivateConversation();
       break;
-
     case "user":
       renderUserView();
       break;
-   }
   }
-
+}
 
 /* ===================== HOME ===================== */
 
