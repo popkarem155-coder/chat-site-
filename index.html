@@ -143,26 +143,63 @@ body{
   margin-bottom:10px;
 }
 
+/* ✨ شريط الكتابة (تصميم حديث بدون تغيير الهيكل) */
 .input-row{
   display:flex;
   gap:10px;
+  padding:12px;
+
+  border-radius:18px;
+
+  background: rgba(20,20,30,0.6);
+  border:1px solid rgba(255,255,255,0.10);
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
+/* ✨ input حديث */
 .input{
   flex:1;
-  padding:10px;
-  border-radius:12px;
-  border:none;
-  background:#111;
+  padding:12px 14px;
+
+  border-radius:14px;
+
+  border:1px solid rgba(255,255,255,0.10);
+  background: rgba(10,10,18,0.6);
+
   color:#fff;
+  outline:none;
+
+  transition:0.25s ease;
 }
 
+/* ✨ عند الكتابة */
+.input:focus{
+  border-color: var(--rose);
+  box-shadow: 0 0 12px rgba(255,45,155,0.35);
+}
+
+/* 🔥 زر الإرسال */
 .send{
-  padding:10px 15px;
+  padding:10px 16px;
+
   border:none;
-  border-radius:12px;
-  background:linear-gradient(45deg,var(--rose),var(--mauve));
+  border-radius:14px;
+
+  background: linear-gradient(45deg, var(--rose), var(--mauve));
   color:#fff;
+
+  cursor:pointer;
+
+  transition:0.2s ease;
+}
+
+/* 👇 إحساس الضغط */
+.send:active{
+  transform: scale(0.95);
 }
 </style>
 
