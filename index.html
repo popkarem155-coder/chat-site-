@@ -3,279 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بدر 2</title>
+
+<title>شات نار</title>
 
 <style>
 :root{
-  --bg:#0b0c10;
-  --panel:#12131a;
-  --panel-2:#161824;
-
-  --text:#f5f6fa;
-  --muted:#9aa3b2;
-
-  --border:rgba(255,255,255,0.06);
-
-  --rose:#e91e63;
-  --mauve:#7c4dff;
-
-  --radius:16px;
-}
-
-*{
-  box-sizing:border-box;
-  font-family:system-ui, Tahoma;
+  --bg:#0e0e12;
+  --panel:#171723;
+  --text:#f3f4f6;
+  --muted:#a7a7bb;
+  --rose:#c2185b;
+  --mauve:#7e57c2;
+  --border:rgba(255,255,255,0.08);
+  --radius:18px;
 }
 
 body{
   margin:0;
-  background:var(--bg);
+  background:linear-gradient(180deg,#0c0c10,var(--bg));
   color:var(--text);
+  font-family:tahoma;
 }
 
 /* HEADER */
 .header{
-  position:sticky;
-  top:0;
-
-  display:grid;
-  grid-template-columns:44px 1fr 44px;
+  display:flex;
+  justify-content:space-between;
   align-items:center;
-
   padding:10px;
-
-  background:rgba(18,19,26,0.85);
-  backdrop-filter:blur(10px);
-
-  border-bottom:1px solid var(--border);
+  margin:10px;
+  border-radius:20px;
+  background:rgba(30,30,40,0.8);
+  border:1px solid var(--border);
 }
 
-.btn{
-  width:38px;
-  height:38px;
+.icon-btn{
+  width:40px;
+  height:40px;
   border-radius:12px;
-
-  border:1px solid var(--border);
-  background:linear-gradient(135deg,var(--rose),var(--mauve));
-  color:white;
-
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,0.05);
   cursor:pointer;
 }
 
 .title{
-  text-align:center;
-  font-weight:700;
-  font-size:15px;
+  font-weight:bold;
+  background:linear-gradient(45deg,var(--rose),var(--mauve));
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+/* SECTIONS */
+.section{
+  margin:10px;
+  padding:12px;
+  border-radius:var(--radius);
+  background:rgba(30,30,40,0.6);
+  border:1px solid var(--border);
 }
 
 /* SEARCH */
 .search{
-  padding:10px;
-}
-
-.search input{
   width:100%;
   padding:12px;
-
   border-radius:14px;
-  border:1px solid var(--border);
-
-  background:var(--panel);
-  color:var(--text);
-
-  outline:none;
+  border:none;
+  background:#111;
+  color:#fff;
 }
 
-.search input:focus{
-  border-color:rgba(124,77,255,0.5);
-}
-
-/* SECTION */
-.section{
-  margin:10px;
-  padding:12px;
-
-  border-radius:var(--radius);
-  background:var(--panel);
-
-  border:1px solid var(--border);
-}
-
-.section h3{
-  margin:0 0 10px;
-  font-size:13px;
-  color:var(--muted);
-}
-
-/* USER ITEM (Telegram style) */
-.item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-
+/* USERS */
+.user{
   padding:10px;
-  border-radius:14px;
-
-  transition:0.15s;
-  cursor:pointer;
-}
-
-.item:hover{
-  background:rgba(255,255,255,0.03);
-}
-
-.avatar{
-  width:38px;
-  height:38px;
-  border-radius:14px;
-
-  background:linear-gradient(135deg,var(--rose),var(--mauve));
-
-  display:grid;
-  place-items:center;
-  font-weight:700;
-}
-
-.info{
-  flex:1;
-  min-width:0;
-}
-
-.name{
-  font-size:14px;
-  font-weight:600;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.sub{
-  font-size:12px;
-  color:var(--muted);
-}
-
-/* DRAWER */
-.drawer{
-  position:fixed;
-  top:0;
-  right:-300px;
-
-  width:280px;
-  height:100%;
-
-  background:var(--panel);
-
-  border-left:1px solid var(--border);
-
-  padding:12px;
-
-  transition:0.25s;
-}
-
-.drawer.open{
-  right:0;
-}
-
-.menu{
-  margin-top:10px;
-}
-
-.menu div{
-  padding:12px;
-  margin:6px 0;
-
+  margin-bottom:5px;
   border-radius:12px;
-  background:var(--panel-2);
-  border:1px solid var(--border);
-
-  cursor:pointer;
+  background:rgba(255,255,255,0.04);
 }
 
-.menu div:hover{
-  background:rgba(233,30,99,0.08);
+/* CHAT */
+.chat-box{
+  height:200px;
+  overflow:auto;
+  margin-bottom:10px;
 }
 
+.input-row{
+  display:flex;
+  gap:10px;
+}
+
+.input{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  background:#111;
+  color:#fff;
+}
+
+.send{
+  padding:10px 15px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(45deg,var(--rose),var(--mauve));
+  color:#fff;
+}
 </style>
-</head>
 
+</head>
 <body>
 
 <!-- HEADER -->
 <div class="header">
-  <button class="btn">💬</button>
-  <div class="title">بدر 2</div>
-  <button class="btn" onclick="toggle()">☰</button>
+  <div class="icon-btn">💬</div>
+  <div class="title">شات نار</div>
+  <div class="icon-btn">☰</div>
 </div>
 
 <!-- SEARCH -->
-<div class="search">
-  <input placeholder="ابحث عن مستخدم...">
+<div class="section">
+  <input class="search" placeholder="ابحث عن مستخدم...">
 </div>
 
 <!-- ONLINE -->
 <div class="section">
-  <h3>🟢 المتصلين الآن</h3>
-
-  <div class="item">
-    <div class="avatar">أ</div>
-    <div class="info">
-      <div class="name">أحمد</div>
-      <div class="sub">متصل الآن</div>
-    </div>
-  </div>
-
-  <div class="item">
-    <div class="avatar">م</div>
-    <div class="info">
-      <div class="name">محمد</div>
-      <div class="sub">منذ دقيقة</div>
-    </div>
-  </div>
+  <h3>المتصلون الآن</h3>
+  <div class="user">مستخدم 1</div>
+  <div class="user">مستخدم 2</div>
 </div>
 
 <!-- FEATURED -->
 <div class="section">
-  <h3>⭐ المميزين</h3>
-
-  <div class="item">
-    <div class="avatar">س</div>
-    <div class="info">
-      <div class="name">سارة</div>
-      <div class="sub">أكثر من ساعتين</div>
-    </div>
-  </div>
+  <h3>المستخدمين المميزين</h3>
+  <div class="user">مستخدم مميز</div>
 </div>
 
 <!-- CHAT -->
 <div class="section">
-  <h3>💬 الشات العام</h3>
+  <h3>الشات العام</h3>
 
-  <div class="item">
-    <div class="avatar">👋</div>
-    <div class="info">
-      <div class="name">رسالة عامة</div>
-      <div class="sub">أهلاً بيكم في بدر 2</div>
-    </div>
+  <div class="chat-box"></div>
+
+  <div class="input-row">
+    <input class="input" placeholder="اكتب رسالة...">
+    <button class="send">إرسال</button>
   </div>
 </div>
-
-<!-- DRAWER -->
-<div class="drawer" id="d">
-  <h3>القائمة</h3>
-
-  <div class="menu">
-    <div>👤 البروفايل</div>
-    <div>🔔 الإشعارات</div>
-    <div>⚙️ الإعدادات</div>
-    <div>🚪 خروج</div>
-  </div>
-</div>
-
-<script>
-function toggle(){
-  document.getElementById('d').classList.toggle('open');
-}
-</script>
 
 </body>
 </html>
