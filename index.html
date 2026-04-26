@@ -231,7 +231,10 @@ chatBox.scrollTop = chatBox.scrollHeight;
 chatInput.focus();
 }
 
-sendBtn.addEventListener("click", sendMessage);
+sendBtn.addEventListener("touchend", function(e){
+  e.preventDefault();
+  sendMessage();
+});
 
 chatInput.addEventListener("keydown", function(e){
   if(e.key === "Enter"){
