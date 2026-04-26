@@ -1,129 +1,183 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>شات نار</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>شات نار - Home</title>
 
 <style>
-/* 🎨 THEME */
-:root {
-  --pink: #b3005f;
-  --purple: #6a00ff;
-  --dark: #140015;
-  --card: #24002a;
-  --text: #ffffff;
+:root{
+  --bg:#0e0e12;
+  --panel:#171723;
+  --text:#f3f4f6;
+  --muted:#a7a7bb;
+
+  --rose:#c2185b;
+  --mauve:#7e57c2;
+
+  --border:rgba(255,255,255,0.08);
+  --radius:18px;
 }
 
-/* 🌑 BODY */
-body {
-  margin: 0;
-  font-family: Arial;
-  background: var(--dark);
-  color: var(--text);
+*{box-sizing:border-box;font-family:tahoma}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#0c0c10,var(--bg));
+  color:var(--text);
 }
 
-/* 🔝 HEADER */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: linear-gradient(90deg, var(--pink), var(--purple));
+/* HEADER */
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  display:grid;
+  grid-template-columns:50px 1fr 50px;
+  align-items:center;
+  padding:10px;
+  background:rgba(23,23,35,0.9);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
 }
 
-.center {
-  font-size: 22px;
-  font-weight: bold;
+.icon-btn{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,var(--rose),var(--mauve));
+  color:white;
+  cursor:pointer;
 }
 
-/* 🔎 SEARCH */
-.search {
-  padding: 10px;
+.title{
+  text-align:center;
+  font-weight:bold;
 }
 
-.search input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
+/* SEARCH */
+.search{
+  margin:10px;
+}
+.search input{
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
 }
 
-/* 📦 BLOCKS */
-.block {
-  margin: 10px;
-  padding: 15px;
-  background: var(--card);
-  border-radius: 10px;
+/* SECTIONS */
+.section{
+  margin:10px;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:var(--panel);
 }
 
-/* 👤 MENU */
-.menu {
-  position: absolute;
-  right: 10px;
-  top: 60px;
-  background: #2a0030;
-  padding: 10px;
-  border-radius: 10px;
-  display: none;
-  flex-direction: column;
-  gap: 8px;
+.section h3{
+  margin:0 0 10px;
+  font-size:14px;
+  color:var(--muted);
 }
 
-.menu button {
-  background: none;
-  border: none;
-  color: white;
-  text-align: left;
-  cursor: pointer;
+.user{
+  padding:10px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.03);
+  margin-bottom:6px;
+}
+
+/* DRAWER */
+.drawer{
+  position:fixed;
+  top:0;
+  right:-300px;
+  width:280px;
+  height:100%;
+  background:var(--panel);
+  border-left:1px solid var(--border);
+  transition:0.3s;
+  padding:15px;
+  z-index:20;
+}
+
+.drawer.open{
+  right:0;
+}
+
+.drawer h3{
+  margin-top:0;
+}
+
+.menu-item{
+  padding:12px;
+  margin:6px 0;
+  border-radius:12px;
+  border:1px solid var(--border);
+  cursor:pointer;
+}
+.menu-item:hover{
+  background:rgba(194,24,91,0.1);
 }
 </style>
-
 </head>
 
 <body>
 
-<!-- 🔝 HEADER -->
-<header class="header">
-
-  <button onclick="openMessages()">💬 الرسائل</button>
-
-  <div class="center">🔥 شات نار</div>
-
-  <button onclick="toggleMenu()">👤</button>
-
-  <!-- 👤 MENU -->
-  <div id="menu" class="menu">
-    <div>👤 اسم المستخدم</div>
-    <button>🔔 الإشعارات</button>
-    <button>⚙️ الإعدادات</button>
-    <button>🚪 تسجيل الخروج</button>
-  </div>
-
+<!-- HEADER -->
+<header>
+  <button class="icon-btn" onclick="goChat()">💬</button>
+  <div class="title">🔥 شات نار</div>
+  <button class="icon-btn" onclick="toggleDrawer()">☰</button>
 </header>
 
-<!-- 🔎 SEARCH -->
+<!-- SEARCH -->
 <div class="search">
-  <input placeholder="ابحث عن مستخدم...">
+  <input type="text" placeholder="ابحث عن مستخدم...">
 </div>
 
-<!-- 🟢 ONLINE -->
-<div class="block">🟢 المتصلين الآن</div>
+<!-- ONLINE USERS -->
+<div class="section">
+  <h3>🟢 المتصلين الآن</h3>
+  <div class="user">أحمد - الآن</div>
+  <div class="user">محمد - منذ دقيقة</div>
+</div>
 
-<!-- ⭐ FEATURED -->
-<div class="block">⭐ المستخدمين المميزين</div>
+<!-- FEATURED -->
+<div class="section">
+  <h3>⭐ المستخدمين المميزين</h3>
+  <div class="user">سارة - 3 ساعات</div>
+  <div class="user">علي - 2 ساعة</div>
+</div>
 
-<!-- 💬 CHAT -->
-<div class="block">💬 الشات العام</div>
+<!-- PUBLIC CHAT -->
+<div class="section">
+  <h3>💬 الشات العام</h3>
+  <div class="user">أهلاً بيكم 👋</div>
+  <div class="user">الموقع شغال!</div>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <h3>القائمة</h3>
+
+  <div class="menu-item">👤 البروفايل</div>
+  <div class="menu-item">🔔 الإشعارات</div>
+  <div class="menu-item">⚙️ الإعدادات</div>
+  <div class="menu-item">🚪 تسجيل الخروج</div>
+</div>
 
 <script>
-function openMessages() {
-  alert("هتفتح صفحة الرسائل لاحقًا");
+function toggleDrawer(){
+  document.getElementById("drawer").classList.toggle("open");
 }
 
-function toggleMenu() {
-  let menu = document.getElementById("menu");
-  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+function goChat(){
+  // لاحقًا هيفتح chat.html
+  alert("هتروح لصفحة الشات الخاص");
 }
 </script>
 
