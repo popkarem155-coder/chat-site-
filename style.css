@@ -245,14 +245,14 @@ a {
   inset: 0;
   z-index: 1000;
 
-  display: none;
+  display: flex;
   flex-direction: column;
 
   background: var(--bg);
 
   overflow-y: auto;
 
-  /* حركة فتح/قفل */
+  /* ط­ط±ظƒط© ظپطھط­/ظ‚ظپظ„ */
   transform: translateX(100%);
   transition: transform 0.25s ease;
   will-change: transform;
@@ -264,7 +264,7 @@ a {
 }
 
 .page.is-active {
-  display: flex;
+  transform: translateX(0);
 }
 
 .panel {
@@ -790,7 +790,7 @@ a {
 
   border-radius: 22px;
 
-  /* 🎯 الغلاف (البرواز) */
+  /* ًںژ¯ ط§ظ„ط؛ظ„ط§ظپ (ط§ظ„ط¨ط±ظˆط§ط²) */
   border: 1px solid var(--border);
   background: linear-gradient(
     180deg,
@@ -804,14 +804,14 @@ a {
 
   backdrop-filter: blur(10px);
 
-  /* 🔥 ده أهم جزء: تحكم في "البرواز" */
+  /* ًں”¥ ط¯ظ‡ ط£ظ‡ظ… ط¬ط²ط،: طھط­ظƒظ… ظپظٹ "ط§ظ„ط¨ط±ظˆط§ط²" */
   transform: translateY(0);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 
   min-width: 0;
 }
 
-/* hover احترافي زي تيليجرام */
+/* hover ط§ط­طھط±ط§ظپظٹ ط²ظٹ طھظٹظ„ظٹط¬ط±ط§ظ… */
 .profile-card-block:hover {
   transform: translateY(-2px);
   border-color: rgba(126, 87, 194, 0.25);
@@ -820,7 +820,7 @@ a {
     0 0 0 1px rgba(126, 87, 194, 0.08);
 }
 
-/* 📱 موبايل */
+/* ًں“± ظ…ظˆط¨ط§ظٹظ„ */
 @media (max-width: 720px) {
   .profile-card-block {
     grid-template-columns: 1fr;
@@ -979,14 +979,14 @@ a {
   width: 100%;
   max-width: var(--maxw);
 
-  margin: 0; /* بدل auto عشان مفيش تمركز غريب */
+  margin: 0; /* ط¨ط¯ظ„ auto ط¹ط´ط§ظ† ظ…ظپظٹط´ طھظ…ط±ظƒط² ط؛ط±ظٹط¨ */
 
   padding: 10px 10px 24px;
 
   position: relative;
   min-width: 0;
 
-  height: auto; /* بدل 100% */
+  height: auto; /* ط¨ط¯ظ„ 100% */
   min-height: 0;
 
   overflow: hidden;
@@ -1538,4 +1538,3 @@ a {
 .featured-users-wrapper {
   height: var(--featured-height);
 }
-
