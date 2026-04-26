@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>شات نار</title>
 
-  <!-- 🎨 CSS -->
+  <!-- CSS -->
   <link rel="stylesheet" href="home.css">
 </head>
 
@@ -13,59 +13,44 @@
 <!-- 🔝 HEADER -->
 <header class="header">
 
-  <div class="left">
+  <!-- 💬 messages -->
+  <div>
     <button onclick="openMessages()">💬 الرسائل</button>
   </div>
 
+  <!-- 🔥 title -->
   <div class="center">
-    🔥 شات نار
+    شات نار
   </div>
 
-  <div class="right">
+  <!-- 👤 menu -->
+  <div>
     <button onclick="toggleMenu()">👤</button>
-
-    <!-- 👤 MENU -->
-    <div id="menu" class="menu hidden">
-      <div class="user">
-        <div class="avatar"></div>
-        <div class="name">اسم المستخدم</div>
-      </div>
-
-      <button>🔔 الإشعارات</button>
-      <button>⚙️ الإعدادات</button>
-      <button>🚪 تسجيل الخروج</button>
-    </div>
-
   </div>
 
 </header>
 
 <!-- 🔎 SEARCH -->
 <div class="search">
-  <input placeholder="ابحث عن مستخدم...">
+  <input type="text" placeholder="ابحث عن مستخدم...">
 </div>
 
 <!-- 🟢 ONLINE -->
-<section class="block">
-  <h2>المتصلين الآن</h2>
-</section>
+<div class="block">
+  🟢 المتصلين الآن
+</div>
 
 <!-- ⭐ FEATURED -->
-<section class="block">
-  <h2>المستخدمين المميزين</h2>
-</section>
+<div class="block">
+  ⭐ المستخدمين المميزين
+</div>
 
-<!-- 💬 PUBLIC CHAT -->
-<section class="block chat">
-  <h2>الشات العام</h2>
+<!-- 💬 CHAT -->
+<div class="block">
+  💬 الشات العام
+</div>
 
-  <div id="chatBox" class="chatBox"></div>
-
-  <input id="msg" placeholder="اكتب رسالة...">
-  <button onclick="sendMsg()">إرسال</button>
-</section>
-
-<!-- ⚙️ JS -->
+<!-- JS -->
 <script src="home.js"></script>
 
 </body>
