@@ -178,7 +178,9 @@ body{
 
 <!-- SEARCH -->
 <div class="section">
-  <input class="search" placeholder="ابحث عن مستخدم...">
+  <form class="search-form" onsubmit="return false;">
+    <input class="search" placeholder="ابحث عن مستخدم...">
+  </form>
 </div>
 
 <!-- ONLINE -->
@@ -205,6 +207,18 @@ body{
     <button class="send">إرسال</button>
   </div>
 </div>
+
+<script>
+const chatInput = document.querySelector(".input");
+const sendBtn = document.querySelector(".send");
+
+chatInput.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+</script>
 
 </body>
 </html>
