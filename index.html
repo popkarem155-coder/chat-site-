@@ -1,253 +1,279 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>بدر 2 - Home</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بدر 2</title>
 
 <style>
 :root{
-  --bg:#0e0e12;
-  --bg-2:#12121a;
-  --panel:#171723;
+  --bg:#0b0c10;
+  --panel:#12131a;
+  --panel-2:#161824;
 
-  --text:#f3f4f6;
-  --muted:#a7a7bb;
+  --text:#f5f6fa;
+  --muted:#9aa3b2;
 
-  --border:rgba(255,255,255,0.08);
+  --border:rgba(255,255,255,0.06);
 
-  --rose:#c2185b;
-  --mauve:#7e57c2;
+  --rose:#e91e63;
+  --mauve:#7c4dff;
 
-  --radius:18px;
-  --shadow:0 16px 34px rgba(0,0,0,0.34);
-
-  --header-h:58px;
-  --font:"Tahoma","Arial",sans-serif;
+  --radius:16px;
 }
 
 *{
   box-sizing:border-box;
-  font-family:var(--font);
+  font-family:system-ui, Tahoma;
 }
 
 body{
   margin:0;
-  background:
-    radial-gradient(circle at top right, rgba(194,24,91,0.12), transparent 30%),
-    radial-gradient(circle at top left, rgba(126,87,194,0.14), transparent 30%),
-    linear-gradient(180deg,#0c0c10,var(--bg));
+  background:var(--bg);
   color:var(--text);
 }
 
-/* TOPBAR */
-.topbar{
-  height:var(--header-h);
+/* HEADER */
+.header{
+  position:sticky;
+  top:0;
+
   display:grid;
-  grid-template-columns:54px 1fr 54px;
+  grid-template-columns:44px 1fr 44px;
   align-items:center;
 
-  padding:6px;
-  margin:10px;
+  padding:10px;
 
-  border:1px solid var(--border);
-  border-radius:22px;
+  background:rgba(18,19,26,0.85);
+  backdrop-filter:blur(10px);
 
-  background:linear-gradient(180deg, rgba(35,35,54,0.94), rgba(22,22,33,0.94));
-  backdrop-filter:blur(14px);
-
-  box-shadow:var(--shadow);
+  border-bottom:1px solid var(--border);
 }
 
-.icon-btn{
-  width:42px;
-  height:42px;
-  border-radius:14px;
+.btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+
   border:1px solid var(--border);
   background:linear-gradient(135deg,var(--rose),var(--mauve));
   color:white;
+
   cursor:pointer;
 }
 
 .title{
   text-align:center;
-  font-weight:800;
-  letter-spacing:0.3px;
+  font-weight:700;
+  font-size:15px;
 }
 
 /* SEARCH */
 .search{
-  margin:10px;
+  padding:10px;
 }
 
 .search input{
   width:100%;
-  padding:12px 14px;
+  padding:12px;
 
-  border-radius:16px;
+  border-radius:14px;
   border:1px solid var(--border);
 
-  background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015));
+  background:var(--panel);
   color:var(--text);
 
   outline:none;
 }
 
 .search input:focus{
-  border-color:rgba(126,87,194,0.5);
-  box-shadow:0 0 0 4px rgba(126,87,194,0.12);
+  border-color:rgba(124,77,255,0.5);
 }
 
-/* PANELS */
+/* SECTION */
 .section{
   margin:10px;
-  padding:14px;
+  padding:12px;
 
   border-radius:var(--radius);
+  background:var(--panel);
+
   border:1px solid var(--border);
-
-  background:linear-gradient(180deg,rgba(23,23,35,0.94),rgba(17,17,25,0.94));
-
-  box-shadow:0 8px 18px rgba(0,0,0,0.18);
 }
 
 .section h3{
   margin:0 0 10px;
-  font-size:0.95rem;
+  font-size:13px;
   color:var(--muted);
 }
 
-/* USER ROW */
-.user{
+/* USER ITEM (Telegram style) */
+.item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
   padding:10px;
+  border-radius:14px;
 
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,0.06);
-
-  background:rgba(255,255,255,0.03);
-
-  margin-bottom:6px;
-
-  transition:0.2s;
+  transition:0.15s;
+  cursor:pointer;
 }
 
-.user:hover{
-  transform:translateY(-1px);
-  border-color:rgba(126,87,194,0.25);
-  background:linear-gradient(180deg,rgba(126,87,194,0.08),rgba(194,24,91,0.05));
+.item:hover{
+  background:rgba(255,255,255,0.03);
+}
+
+.avatar{
+  width:38px;
+  height:38px;
+  border-radius:14px;
+
+  background:linear-gradient(135deg,var(--rose),var(--mauve));
+
+  display:grid;
+  place-items:center;
+  font-weight:700;
+}
+
+.info{
+  flex:1;
+  min-width:0;
+}
+
+.name{
+  font-size:14px;
+  font-weight:600;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.sub{
+  font-size:12px;
+  color:var(--muted);
 }
 
 /* DRAWER */
 .drawer{
   position:fixed;
-  top:12px;
-  right:-320px;
+  top:0;
+  right:-300px;
 
-  width:300px;
-  height:calc(100dvh - 24px);
+  width:280px;
+  height:100%;
+
+  background:var(--panel);
+
+  border-left:1px solid var(--border);
 
   padding:12px;
 
-  border-radius:22px;
-  border:1px solid var(--border);
-
-  background:linear-gradient(180deg,rgba(24,24,36,0.98),rgba(15,15,22,0.98));
-
-  backdrop-filter:blur(16px);
-  box-shadow:var(--shadow);
-
   transition:0.25s;
-  z-index:100;
 }
 
 .drawer.open{
-  right:12px;
+  right:0;
 }
 
-.profile-mini{
-  padding:12px;
-  border-radius:18px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,0.03);
-  margin-bottom:10px;
+.menu{
+  margin-top:10px;
 }
 
-.menu-item{
+.menu div{
   padding:12px;
   margin:6px 0;
 
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,0.07);
-
-  background:rgba(255,255,255,0.02);
+  border-radius:12px;
+  background:var(--panel-2);
+  border:1px solid var(--border);
 
   cursor:pointer;
 }
 
-.menu-item:hover{
-  background:linear-gradient(180deg,rgba(126,87,194,0.08),rgba(194,24,91,0.05));
+.menu div:hover{
+  background:rgba(233,30,99,0.08);
 }
+
 </style>
 </head>
 
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <button class="icon-btn" onclick="openChat()">💬</button>
-
-  <div class="title">🔥 بدر 2</div>
-
-  <button class="icon-btn" onclick="toggleDrawer()">☰</button>
+<!-- HEADER -->
+<div class="header">
+  <button class="btn">💬</button>
+  <div class="title">بدر 2</div>
+  <button class="btn" onclick="toggle()">☰</button>
 </div>
 
 <!-- SEARCH -->
 <div class="search">
-  <input type="text" placeholder="ابحث عن مستخدم...">
+  <input placeholder="ابحث عن مستخدم...">
 </div>
 
 <!-- ONLINE -->
 <div class="section">
   <h3>🟢 المتصلين الآن</h3>
-  <div class="user">أحمد</div>
-  <div class="user">محمد</div>
+
+  <div class="item">
+    <div class="avatar">أ</div>
+    <div class="info">
+      <div class="name">أحمد</div>
+      <div class="sub">متصل الآن</div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="avatar">م</div>
+    <div class="info">
+      <div class="name">محمد</div>
+      <div class="sub">منذ دقيقة</div>
+    </div>
+  </div>
 </div>
 
 <!-- FEATURED -->
 <div class="section">
-  <h3>⭐ المستخدمين المميزين</h3>
-  <div class="user">سارة</div>
-  <div class="user">علي</div>
+  <h3>⭐ المميزين</h3>
+
+  <div class="item">
+    <div class="avatar">س</div>
+    <div class="info">
+      <div class="name">سارة</div>
+      <div class="sub">أكثر من ساعتين</div>
+    </div>
+  </div>
 </div>
 
 <!-- CHAT -->
 <div class="section">
   <h3>💬 الشات العام</h3>
-  <div class="user">أهلاً بيكم 👋</div>
-  <div class="user">مرحبا في بدر 2</div>
+
+  <div class="item">
+    <div class="avatar">👋</div>
+    <div class="info">
+      <div class="name">رسالة عامة</div>
+      <div class="sub">أهلاً بيكم في بدر 2</div>
+    </div>
+  </div>
 </div>
 
 <!-- DRAWER -->
-<div class="drawer" id="drawer">
+<div class="drawer" id="d">
+  <h3>القائمة</h3>
 
-  <div class="profile-mini">
-    👤 اسم المستخدم
+  <div class="menu">
+    <div>👤 البروفايل</div>
+    <div>🔔 الإشعارات</div>
+    <div>⚙️ الإعدادات</div>
+    <div>🚪 خروج</div>
   </div>
-
-  <div class="menu-item">👤 البروفايل</div>
-  <div class="menu-item">🔔 الإشعارات</div>
-  <div class="menu-item">⚙️ الإعدادات</div>
-  <div class="menu-item">🚪 تسجيل الخروج</div>
-
 </div>
 
 <script>
-function toggleDrawer(){
-  document.getElementById("drawer").classList.toggle("open");
-}
-
-function openChat(){
-  alert("هتفتح صفحة الشات الخاص");
+function toggle(){
+  document.getElementById('d').classList.toggle('open');
 }
 </script>
 
