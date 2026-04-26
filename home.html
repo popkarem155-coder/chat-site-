@@ -1,11 +1,84 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>شات نار</title>
+<meta charset="UTF-8">
+<title>شات نار</title>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="home.css">
+<style>
+/* 🎨 THEME */
+:root {
+  --pink: #b3005f;
+  --purple: #6a00ff;
+  --dark: #140015;
+  --card: #24002a;
+  --text: #ffffff;
+}
+
+/* 🌑 BODY */
+body {
+  margin: 0;
+  font-family: Arial;
+  background: var(--dark);
+  color: var(--text);
+}
+
+/* 🔝 HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+}
+
+.center {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* 🔎 SEARCH */
+.search {
+  padding: 10px;
+}
+
+.search input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+/* 📦 BLOCKS */
+.block {
+  margin: 10px;
+  padding: 15px;
+  background: var(--card);
+  border-radius: 10px;
+}
+
+/* 👤 MENU */
+.menu {
+  position: absolute;
+  right: 10px;
+  top: 60px;
+  background: #2a0030;
+  padding: 10px;
+  border-radius: 10px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu button {
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+}
+</style>
+
 </head>
 
 <body>
@@ -13,45 +86,46 @@
 <!-- 🔝 HEADER -->
 <header class="header">
 
-  <!-- 💬 messages -->
-  <div>
-    <button onclick="openMessages()">💬 الرسائل</button>
-  </div>
+  <button onclick="openMessages()">💬 الرسائل</button>
 
-  <!-- 🔥 title -->
-  <div class="center">
-    شات نار
-  </div>
+  <div class="center">🔥 شات نار</div>
 
-  <!-- 👤 menu -->
-  <div>
-    <button onclick="toggleMenu()">👤</button>
+  <button onclick="toggleMenu()">👤</button>
+
+  <!-- 👤 MENU -->
+  <div id="menu" class="menu">
+    <div>👤 اسم المستخدم</div>
+    <button>🔔 الإشعارات</button>
+    <button>⚙️ الإعدادات</button>
+    <button>🚪 تسجيل الخروج</button>
   </div>
 
 </header>
 
 <!-- 🔎 SEARCH -->
 <div class="search">
-  <input type="text" placeholder="ابحث عن مستخدم...">
+  <input placeholder="ابحث عن مستخدم...">
 </div>
 
 <!-- 🟢 ONLINE -->
-<div class="block">
-  🟢 المتصلين الآن
-</div>
+<div class="block">🟢 المتصلين الآن</div>
 
 <!-- ⭐ FEATURED -->
-<div class="block">
-  ⭐ المستخدمين المميزين
-</div>
+<div class="block">⭐ المستخدمين المميزين</div>
 
 <!-- 💬 CHAT -->
-<div class="block">
-  💬 الشات العام
-</div>
+<div class="block">💬 الشات العام</div>
 
-<!-- JS -->
-<script src="home.js"></script>
+<script>
+function openMessages() {
+  alert("هتفتح صفحة الرسائل لاحقًا");
+}
+
+function toggleMenu() {
+  let menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+</script>
 
 </body>
 </html>
