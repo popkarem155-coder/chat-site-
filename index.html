@@ -3,47 +3,66 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>شات نار - Home</title>
+<title>بدر 2 - Home</title>
 
 <style>
 :root{
   --bg:#0e0e12;
+  --bg-2:#12121a;
   --panel:#171723;
+
   --text:#f3f4f6;
   --muted:#a7a7bb;
+
+  --border:rgba(255,255,255,0.08);
 
   --rose:#c2185b;
   --mauve:#7e57c2;
 
-  --border:rgba(255,255,255,0.08);
   --radius:18px;
+  --shadow:0 16px 34px rgba(0,0,0,0.34);
+
+  --header-h:58px;
+  --font:"Tahoma","Arial",sans-serif;
 }
 
-*{box-sizing:border-box;font-family:tahoma}
+*{
+  box-sizing:border-box;
+  font-family:var(--font);
+}
+
 body{
   margin:0;
-  background:linear-gradient(180deg,#0c0c10,var(--bg));
+  background:
+    radial-gradient(circle at top right, rgba(194,24,91,0.12), transparent 30%),
+    radial-gradient(circle at top left, rgba(126,87,194,0.14), transparent 30%),
+    linear-gradient(180deg,#0c0c10,var(--bg));
   color:var(--text);
 }
 
-/* HEADER */
-header{
-  position:sticky;
-  top:0;
-  z-index:10;
+/* TOPBAR */
+.topbar{
+  height:var(--header-h);
   display:grid;
-  grid-template-columns:50px 1fr 50px;
+  grid-template-columns:54px 1fr 54px;
   align-items:center;
-  padding:10px;
-  background:rgba(23,23,35,0.9);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border);
+
+  padding:6px;
+  margin:10px;
+
+  border:1px solid var(--border);
+  border-radius:22px;
+
+  background:linear-gradient(180deg, rgba(35,35,54,0.94), rgba(22,22,33,0.94));
+  backdrop-filter:blur(14px);
+
+  box-shadow:var(--shadow);
 }
 
 .icon-btn{
-  width:40px;
-  height:40px;
-  border-radius:12px;
+  width:42px;
+  height:42px;
+  border-radius:14px;
   border:1px solid var(--border);
   background:linear-gradient(135deg,var(--rose),var(--mauve));
   color:white;
@@ -52,122 +71,174 @@ header{
 
 .title{
   text-align:center;
-  font-weight:bold;
+  font-weight:800;
+  letter-spacing:0.3px;
 }
 
 /* SEARCH */
 .search{
   margin:10px;
 }
+
 .search input{
   width:100%;
-  padding:12px;
-  border-radius:14px;
+  padding:12px 14px;
+
+  border-radius:16px;
   border:1px solid var(--border);
-  background:var(--panel);
+
+  background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015));
   color:var(--text);
+
+  outline:none;
 }
 
-/* SECTIONS */
+.search input:focus{
+  border-color:rgba(126,87,194,0.5);
+  box-shadow:0 0 0 4px rgba(126,87,194,0.12);
+}
+
+/* PANELS */
 .section{
   margin:10px;
-  padding:10px;
-  border:1px solid var(--border);
+  padding:14px;
+
   border-radius:var(--radius);
-  background:var(--panel);
+  border:1px solid var(--border);
+
+  background:linear-gradient(180deg,rgba(23,23,35,0.94),rgba(17,17,25,0.94));
+
+  box-shadow:0 8px 18px rgba(0,0,0,0.18);
 }
 
 .section h3{
   margin:0 0 10px;
-  font-size:14px;
+  font-size:0.95rem;
   color:var(--muted);
 }
 
+/* USER ROW */
 .user{
   padding:10px;
-  border-radius:12px;
+
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.06);
+
   background:rgba(255,255,255,0.03);
+
   margin-bottom:6px;
+
+  transition:0.2s;
+}
+
+.user:hover{
+  transform:translateY(-1px);
+  border-color:rgba(126,87,194,0.25);
+  background:linear-gradient(180deg,rgba(126,87,194,0.08),rgba(194,24,91,0.05));
 }
 
 /* DRAWER */
 .drawer{
   position:fixed;
-  top:0;
-  right:-300px;
-  width:280px;
-  height:100%;
-  background:var(--panel);
-  border-left:1px solid var(--border);
-  transition:0.3s;
-  padding:15px;
-  z-index:20;
+  top:12px;
+  right:-320px;
+
+  width:300px;
+  height:calc(100dvh - 24px);
+
+  padding:12px;
+
+  border-radius:22px;
+  border:1px solid var(--border);
+
+  background:linear-gradient(180deg,rgba(24,24,36,0.98),rgba(15,15,22,0.98));
+
+  backdrop-filter:blur(16px);
+  box-shadow:var(--shadow);
+
+  transition:0.25s;
+  z-index:100;
 }
 
 .drawer.open{
-  right:0;
+  right:12px;
 }
 
-.drawer h3{
-  margin-top:0;
+.profile-mini{
+  padding:12px;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  margin-bottom:10px;
 }
 
 .menu-item{
   padding:12px;
   margin:6px 0;
-  border-radius:12px;
-  border:1px solid var(--border);
+
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.07);
+
+  background:rgba(255,255,255,0.02);
+
   cursor:pointer;
 }
+
 .menu-item:hover{
-  background:rgba(194,24,91,0.1);
+  background:linear-gradient(180deg,rgba(126,87,194,0.08),rgba(194,24,91,0.05));
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<header>
-  <button class="icon-btn" onclick="goChat()">💬</button>
-  <div class="title">🔥 شات نار</div>
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="icon-btn" onclick="openChat()">💬</button>
+
+  <div class="title">🔥 بدر 2</div>
+
   <button class="icon-btn" onclick="toggleDrawer()">☰</button>
-</header>
+</div>
 
 <!-- SEARCH -->
 <div class="search">
   <input type="text" placeholder="ابحث عن مستخدم...">
 </div>
 
-<!-- ONLINE USERS -->
+<!-- ONLINE -->
 <div class="section">
   <h3>🟢 المتصلين الآن</h3>
-  <div class="user">أحمد - الآن</div>
-  <div class="user">محمد - منذ دقيقة</div>
+  <div class="user">أحمد</div>
+  <div class="user">محمد</div>
 </div>
 
 <!-- FEATURED -->
 <div class="section">
   <h3>⭐ المستخدمين المميزين</h3>
-  <div class="user">سارة - 3 ساعات</div>
-  <div class="user">علي - 2 ساعة</div>
+  <div class="user">سارة</div>
+  <div class="user">علي</div>
 </div>
 
-<!-- PUBLIC CHAT -->
+<!-- CHAT -->
 <div class="section">
   <h3>💬 الشات العام</h3>
   <div class="user">أهلاً بيكم 👋</div>
-  <div class="user">الموقع شغال!</div>
+  <div class="user">مرحبا في بدر 2</div>
 </div>
 
 <!-- DRAWER -->
 <div class="drawer" id="drawer">
-  <h3>القائمة</h3>
+
+  <div class="profile-mini">
+    👤 اسم المستخدم
+  </div>
 
   <div class="menu-item">👤 البروفايل</div>
   <div class="menu-item">🔔 الإشعارات</div>
   <div class="menu-item">⚙️ الإعدادات</div>
   <div class="menu-item">🚪 تسجيل الخروج</div>
+
 </div>
 
 <script>
@@ -175,9 +246,8 @@ function toggleDrawer(){
   document.getElementById("drawer").classList.toggle("open");
 }
 
-function goChat(){
-  // لاحقًا هيفتح chat.html
-  alert("هتروح لصفحة الشات الخاص");
+function openChat(){
+  alert("هتفتح صفحة الشات الخاص");
 }
 </script>
 
