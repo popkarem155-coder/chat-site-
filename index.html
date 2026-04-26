@@ -111,12 +111,21 @@ body{
 /* SEARCH */
 .search{
   width:100%;
-  padding:12px;
+  padding:12px 16px;
   border-radius:14px;
-  border:none;
-  background: var(--bg-2);
-  color:#fff;
+
+  background: transparent; 
+  border:1px solid var(--border);
+
+  color: var(--text);
+
+  outline: none;
 }
+
+  .search:focus{
+  border:1px solid var(--rose);
+  box-shadow: 0 0 8px var(--glow-rose);
+  }
 
 /* USERS */
 .user{
