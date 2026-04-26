@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>شات نار - Home</title>
+  <link rel="stylesheet" href="home.css">
+</head>
+
+<body>
+
+<!-- 🔝 HEADER -->
+<header class="header">
+
+  <!-- 💬 left: messages -->
+  <div class="left">
+    <button onclick="openMessages()">💬 الرسائل</button>
+  </div>
+
+  <!-- 🔥 center title -->
+  <div class="center">
+    شات نار
+  </div>
+
+  <!-- 👤 right menu -->
+  <div class="right">
+    <button onclick="toggleMenu()">👤</button>
+
+    <div id="menu" class="dropdown hidden">
+      <div class="user-info">
+        <div class="avatar"></div>
+        <div class="name">اسم المستخدم</div>
+      </div>
+
+      <button>🔔 الإشعارات</button>
+      <button>⚙️ الإعدادات</button>
+      <button>🚪 تسجيل الخروج</button>
+    </div>
+  </div>
+
+</header>
+
+<!-- 🔎 SEARCH -->
+<div class="search">
+  <input type="text" placeholder="ابحث عن مستخدم...">
+</div>
+
+<!-- 🟢 ONLINE USERS -->
+<section class="block">
+  <h2>المتصلين الآن</h2>
+  <div class="list" id="online"></div>
+</section>
+
+<!-- ⭐ FEATURED -->
+<section class="block">
+  <h2>المستخدمين المميزين</h2>
+  <div class="list" id="featured"></div>
+</section>
+
+<!-- 💬 PUBLIC CHAT -->
+<section class="block chat">
+  <h2>الشات العام</h2>
+
+  <div class="chat-box" id="chatBox"></div>
+
+  <input id="msg" placeholder="اكتب رسالة...">
+  <button onclick="sendMsg()">إرسال</button>
+</section>
+
+<script src="home.js"></script>
+</body>
+</html>
