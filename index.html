@@ -224,9 +224,11 @@ function sendMessage(){
 
   chatBox.appendChild(msg);
 
-  chatInput.value = "";
+chatInput.value = "";
 
-  chatBox.scrollTop = chatBox.scrollHeight;
+chatBox.scrollTop = chatBox.scrollHeight;
+
+chatInput.focus();
 }
 
 sendBtn.addEventListener("click", sendMessage);
