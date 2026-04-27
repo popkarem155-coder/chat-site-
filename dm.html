@@ -224,7 +224,10 @@ function closeChat(){
   document.getElementById("chat").style.display = "none";
 }
 
-parent.navigate("home/index.html")
+/* ✅ زر الرجوع للهوم */
+function goBack(){
+  parent.navigate("home/index.html");
+}
 
 function send(){
 
@@ -245,6 +248,3 @@ function send(){
 }
 
 </script>
-
-</body>
-</html>
