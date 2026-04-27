@@ -225,6 +225,34 @@ body{
 
 </div>
 
+<script>
+/* =========================
+   ☰ MENU
+========================= */
+function openMenu(){
+  alert("القائمة لسه تحت التطوير");
+}
+
+/* =========================
+   🚀 NAVIGATION
+========================= */
+function navigate(page){
+
+  const routes = {
+    dm: "dm.html",
+    home: "home.html",
+    profile: "profile.html"
+  };
+
+  if(routes[page]){
+    window.location.href = routes[page];
+  } else {
+    console.warn("Page not found:", page);
+  }
+
+}
+</script>
+
 <!-- SEARCH -->
 <div class="section">
   <form class="search-form" onsubmit="return false;">
