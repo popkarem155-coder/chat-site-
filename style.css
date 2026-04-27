@@ -1,0 +1,27 @@
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b0b12;
+  color:#fff;
+}
+
+.header{
+  padding:15px;
+  background:#1a1a26;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#7c3aed;
+  color:#fff;
+}
+
+.content{
+  padding:20px;
+}
