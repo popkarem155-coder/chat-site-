@@ -6,13 +6,12 @@
 
 <title>شات نار</title>
 
-<!-- الخط -->
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 
 /* =========================
-   ⚙️ CORE / SYSTEM
+   ⚙️ CORE / SYSTEM (عام فقط)
 ========================= */
 :root{
   --bg: #0b0b12;
@@ -56,7 +55,7 @@ body{
 }
 
 /* =========================
-   🧩 HEADER / الهيدر
+   🧩 HEADER (وحدة مستقلة)
 ========================= */
 .header{
   display:flex;
@@ -91,7 +90,7 @@ body{
 }
 
 /* =========================
-   🔍 SEARCH / البحث
+   🔍 SEARCH (وحدة مستقلة)
 ========================= */
 .search{
   width:100%;
@@ -102,7 +101,6 @@ body{
   border:1px solid var(--border);
 
   color: var(--text);
-
   outline: none;
   box-sizing: border-box;
 }
@@ -113,7 +111,7 @@ body{
 }
 
 /* =========================
-   🧩 SECTIONS
+   🧩 SECTION BASE
 ========================= */
 .section{
   margin:10px;
@@ -130,7 +128,7 @@ body{
 }
 
 /* =========================
-   🟢 USERS / المتصلين + المميزين
+   🟢 USERS (مشترك)
 ========================= */
 .user{
   padding:10px;
@@ -140,7 +138,7 @@ body{
 }
 
 /* =========================
-   💬 CHAT / الشات العام
+   💬 GLOBAL CHAT (سكشن واحد كامل)
 ========================= */
 .chat-box{
   height:260px;
@@ -211,7 +209,6 @@ body{
 }
 
 </style>
-
 </head>
 
 <body>
@@ -252,7 +249,7 @@ body{
 </div>
 
 <!-- =========================
-   💬 CHAT
+   💬 GLOBAL CHAT (سكشن واحد كامل)
 ========================= -->
 <div class="section">
   <h3>الشات العام</h3>
@@ -273,7 +270,6 @@ const chatBox = document.querySelector(".chat-box");
 
 function sendMessage(){
   const text = chatInput.value.trim();
-
   if(text === "") return;
 
   const msg = document.createElement("div");
