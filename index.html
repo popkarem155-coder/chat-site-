@@ -217,24 +217,26 @@ body{
 <!-- HEADER -->
 <div class="header">
 
-  <div class="icon-btn" onclick="openMenu()">☰</div>
+  <div class="icon-btn" onclick="openMenu()" title="القائمة">☰</div>
 
   <div class="title">شات نار</div>
 
-  <div class="icon-btn" onclick="navigate('dm')">💬</div>
+  <div class="icon-btn" onclick="navigate('dm')" title="الرسائل">💬</div>
 
 </div>
 
 <script>
+
 /* =========================
    ☰ MENU
 ========================= */
 function openMenu(){
-  alert("القائمة لسه تحت التطوير");
+  console.log("Menu opened");
+  // هنا هيتضاف Sidebar لاحقًا
 }
 
 /* =========================
-   🚀 NAVIGATION
+   🚀 NAVIGATION SYSTEM
 ========================= */
 function navigate(page){
 
@@ -244,15 +246,24 @@ function navigate(page){
     profile: "profile.html"
   };
 
-  if(routes[page]){
-    window.location.href = routes[page];
+  const target = routes[page];
+
+  if(target){
+    // تأثير بسيط قبل الانتقال (احترافي)
+    document.body.style.transition = "0.2s";
+    document.body.style.opacity = "0.5";
+
+    setTimeout(()=>{
+      window.location.href = target;
+    }, 150);
+
   } else {
-    console.warn("Page not found:", page);
+    console.warn("Route not found:", page);
   }
 
 }
-</script>
 
+</script>
 <!-- SEARCH -->
 <div class="section">
   <form class="search-form" onsubmit="return false;">
