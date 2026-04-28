@@ -18,7 +18,7 @@ body{
   color:#fff;
 }
 
-/* نفس ستايل بسيط خاص بالـ DM */
+/* الهيدر */
 .header{
   display:flex;
   justify-content:space-between;
@@ -27,8 +27,10 @@ body{
   margin:10px;
   border-radius:14px;
   background:rgba(255,255,255,0.05);
+  cursor:pointer;
 }
 
+/* القائمة */
 .section{
   margin:10px;
   padding:10px;
@@ -69,11 +71,6 @@ body{
   width:fit-content;
 }
 
-.him{
-  background:rgba(255,255,255,0.1);
-  width:fit-content;
-}
-
 .input-row{
   display:flex;
   gap:10px;
@@ -102,9 +99,16 @@ button{
 
 <!-- 🔝 HEADER -->
 <div class="header">
-  <div onclick="goBack()">⬅ رجوع</div>
+
+  <!-- ⬅ رجوع للهوم -->
+  <div onclick="window.location.href='./index.html'">
+    ⬅ رجوع
+  </div>
+
   <div>الرسائل</div>
+
   <div>💬</div>
+
 </div>
 
 <!-- 📩 INBOX -->
@@ -126,9 +130,13 @@ button{
 <div id="chat" class="chat">
 
   <div class="header">
+
     <div onclick="goBack()">⬅</div>
+
     <div id="chatName">شخص</div>
+
     <div>💬</div>
+
   </div>
 
   <div class="chat-box" id="box"></div>
