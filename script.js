@@ -75,16 +75,15 @@ const dmSendBtn = dmSection?.querySelector(".send");
 
 if(dmSendBtn){
 
-  dmSendBtn.addEventListener("touchend", function(e){
-    e.preventDefault();
-    sendDM();
-  });
-
+  if(dmSendBtn){
   dmSendBtn.addEventListener("click", function(e){
-    sendDM();
-  });
+    e.preventDefault();
 
-}
+    sendDM();
+
+    dmInput && dmInput.focus();
+  });
+  }
 
 if(dmInput){
   dmInput.addEventListener("keydown", function(e){
