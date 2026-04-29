@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>شات نار</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="style.css">
@@ -16,12 +17,14 @@
 <div class="header">
   <div class="icon-btn">☰</div>
   <div class="title">شات نار</div>
-  <div class="icon-btn" onclick="window.location.href='./dm.html'">💬</div>
+  <div class="icon-btn">💬</div>
 </div>
 
 <!-- SEARCH -->
 <div class="section">
-  <input class="search" placeholder="ابحث عن مستخدم...">
+  <form class="search-form" onsubmit="return false;">
+    <input class="search" placeholder="ابحث عن مستخدم...">
+  </form>
 </div>
 
 <!-- ONLINE -->
