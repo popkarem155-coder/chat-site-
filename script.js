@@ -26,13 +26,20 @@ function sendMessage(){
 }
 
 if(sendBtn){
-  sendBtn.addEventListener("click", sendMessage);
+  sendBtn.addEventListener("click", function(e){
+    e.preventDefault();
+
+    sendMessage();
+
+    chatInput && chatInput.focus();
+  });
 }
 
 if(chatInput){
   chatInput.addEventListener("keydown", function(e){
     if(e.key === "Enter"){
       e.preventDefault();
+
       sendMessage();
     }
   });
