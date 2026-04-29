@@ -56,6 +56,14 @@ body{
   font-family:"Cairo", sans-serif;
 }
 
+html, body {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
 /* =========================
    🔝 HEADER / الهيدر
