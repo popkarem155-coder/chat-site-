@@ -23,6 +23,9 @@ function sendMessage(){
 
   chatInput.value = "";
   chatBox.scrollTop = chatBox.scrollHeight;
+  setTimeout(() => {
+  chatInput.focus();
+}, 0);
 }
 
 if(sendBtn){
