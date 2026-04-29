@@ -1,40 +1,31 @@
-function go(page){
-  document.getElementById("homePage").classList.remove("active");
-  document.getElementById("dmPage").classList.remove("active");
+const chatInput = document.querySelector(".chat-input");
+const sendBtn = document.querySelector(".send");
+const chatBox = document.querySelector(".chat-box");
 
-  if(page === "home"){
-    document.getElementById("homePage").classList.add("active");
-  } else {
-    document.getElementById("dmPage").classList.add("active");
+function sendMessage(){
+  const text = chatInput.value.trim();
+
+  if(text === "") return;
+
+  const msg = document.createElement("div");
+  msg.className = "user";
+  msg.textContent = text;
+
+  chatBox.appendChild(msg);
+
+  chatInput.value = "";
+  chatBox.scrollTop = chatBox.scrollHeight;
+  chatInput.focus();
+}
+
+sendBtn.addEventListener("touchend", function(e){
+  e.preventDefault();
+  sendMessage();
+});
+
+chatInput.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    e.preventDefault();
+    sendMessage();
   }
-}
-
-/* HOME CHAT */
-function sendHome(){
-  const input = document.getElementById("homeInput");
-  const box = document.getElementById("homeChat");
-
-  if(input.value.trim() === "") return;
-
-  const div = document.createElement("div");
-  div.className = "user";
-  div.textContent = input.value;
-
-  box.appendChild(div);
-  input.value = "";
-}
-
-/* DM CHAT */
-function sendDM(){
-  const input = document.getElementById("dmInput");
-  const box = document.getElementById("dmChat");
-
-  if(input.value.trim() === "") return;
-
-  const div = document.createElement("div");
-  div.className = "user";
-  div.textContent = input.value;
-
-  box.appendChild(div);
-  input.value = "";
-}
+});
