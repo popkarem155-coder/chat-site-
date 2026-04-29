@@ -66,11 +66,20 @@ function sendDM(){
   dmBox.scrollTop = dmBox.scrollHeight;
 }
 
-document.addEventListener("click", function(e){
-  if(e.target.classList.contains("send") && e.target.closest("#chatPage")){
+const dmSendBtn = dmSection?.querySelector(".send");
+
+if(dmSendBtn){
+
+  dmSendBtn.addEventListener("touchend", function(e){
+    e.preventDefault();
     sendDM();
-  }
-});
+  });
+
+  dmSendBtn.addEventListener("click", function(e){
+    sendDM();
+  });
+
+}
 
 if(dmInput){
   dmInput.addEventListener("keydown", function(e){
