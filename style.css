@@ -1,38 +1,34 @@
+/* =========================
+   🌍 GLOBAL (مشترك)
+========================= */
+
 :root{
-  /* الخلفية */
   --bg: #0b0b12;
   --bg-2: #11111a;
 
-  /* البانلز */
   --panel: #11111a;
   --panel-2: #1a1a26;
   --panel-3: #232336;
 
-  /* النصوص */
   --text: #ffffff;
   --muted: #a1a1aa;
   --soft: #71717a;
 
-  /* الألوان الأساسية (ناري 🔥) */
   --rose: #ff2d9b;
   --rose-2: #ff4db2;
 
   --mauve: #7c3aed;
   --mauve-2: #5b21b6;
 
-  /* الجلو */
   --glow: rgba(124, 58, 237, 0.25);
   --glow-rose: rgba(255, 45, 155, 0.25);
 
-  /* البوردر */
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.15);
 
-  /* الظلال */
   --shadow: 0 16px 34px rgba(0, 0, 0, 0.5);
   --shadow-soft: 0 8px 18px rgba(0, 0, 0, 0.3);
 
-  /* الزوايا */
   --radius: 18px;
   --radius-sm: 14px;
 }
@@ -47,11 +43,12 @@ body{
   font-family:"Cairo", sans-serif;
 }
 
+
 /* =========================
-   🧩 HEADER
+   🏠 HOME ONLY
 ========================= */
 
-.header{
+.home .header{
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -59,13 +56,11 @@ body{
   margin:10px;
   border-radius:20px;
   background: rgba(255,255,255,0.05);
-
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border:1px solid var(--border);
 }
 
-.icon-btn{
+.home .icon-btn{
   width:40px;
   height:40px;
   border-radius:12px;
@@ -76,134 +71,114 @@ body{
   cursor:pointer;
 }
 
-.title{
+.home .title{
   font-weight:bold;
   background:linear-gradient(45deg,var(--rose),var(--mauve));
   -webkit-background-clip:text;
   color:transparent;
 }
 
-/* =========================
-   📦 SECTIONS
-========================= */
-
-.section{
+.home .section{
   margin:10px;
   padding:12px;
   border-radius:var(--radius);
-
   background: rgba(255,255,255,0.04);
-
   border:1px solid var(--border);
-
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
   box-shadow: var(--shadow-soft);
 }
 
-/* =========================
-   🔍 SEARCH
-========================= */
-
-.search{
+.home .search{
   width:100%;
   padding:12px 16px;
   border-radius:14px;
-
-  background: transparent; 
+  background: transparent;
   border:1px solid var(--border);
-
   color: var(--text);
-
-  outline: none;
   box-sizing: border-box;
 }
 
-.search:focus{
+.home .search:focus{
   border:1px solid var(--rose);
   box-shadow: 0 0 8px var(--glow-rose);
 }
 
-/* =========================
-   👥 USERS
-========================= */
-
-.user{
+.home .user{
   padding:10px;
   margin-bottom:5px;
   border-radius:12px;
   background:rgba(255,255,255,0.04);
 }
 
-/* =========================
-   💬 CHAT
-========================= */
-
-.chat-box{
+.home .chat-box{
   height:260px;
   overflow-y:auto;
-
   margin-bottom:12px;
   padding:10px;
-
   border-radius:16px;
-
   background: rgba(10,10,18,0.4);
-
   border:1px solid rgba(255,255,255,0.06);
 }
 
-.input-row{
+.home .input-row{
   display:flex;
   gap:10px;
   padding:12px;
-
   border-radius:18px;
-
   background: rgba(20,20,30,0.6);
   border:1px solid rgba(255,255,255,0.10);
-
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 }
 
-.input{
+.home .input{
   flex:1;
   padding:12px 14px;
-
   border-radius:14px;
-
   border:1px solid rgba(255,255,255,0.10);
   background: rgba(10,10,18,0.6);
-
   color:#fff;
-  outline:none;
-
-  transition:0.25s ease;
 }
 
-.input:focus{
-  border-color: var(--rose);
-  box-shadow: 0 0 12px rgba(255,45,155,0.35);
-}
-
-.send{
+.home .send{
   padding:10px 16px;
-
   border:none;
   border-radius:14px;
-
   background: linear-gradient(45deg, var(--rose), var(--mauve));
   color:#fff;
-
-  cursor:pointer;
-
-  transition:0.2s ease;
 }
 
-.send:active{
-  transform: scale(0.95);
+
+/* =========================
+   📩 DM ONLY
+========================= */
+
+.dm .header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  margin:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.05);
+}
+
+.dm .user{
+  padding:10px;
+  margin:6px 0;
+  background:rgba(255,255,255,0.06);
+  border-radius:10px;
+}
+
+.dm .chat-box{
+  height:100%;
+  overflow-y:auto;
+  padding:10px;
+}
+
+.dm .input{
+  padding:10px;
+  border-radius:10px;
+}
+
+.dm .send{
+  background:#7c3aed;
 }
