@@ -74,8 +74,6 @@ function sendDM(){
 const dmSendBtn = dmSection?.querySelector(".send");
 
 if(dmSendBtn){
-
-  if(dmSendBtn){
   dmSendBtn.addEventListener("click", function(e){
     e.preventDefault();
 
@@ -83,7 +81,7 @@ if(dmSendBtn){
 
     dmInput && dmInput.focus();
   });
-  }
+}
 
 if(dmInput){
   dmInput.addEventListener("keydown", function(e){
