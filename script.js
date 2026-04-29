@@ -26,7 +26,6 @@ function sendMessage(){
   setTimeout(() => {
   chatInput.focus();
 }, 0);
-}
 
 if(sendBtn){
   sendBtn.addEventListener("click", sendMessage);
