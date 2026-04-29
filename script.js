@@ -23,9 +23,7 @@ function sendMessage(){
 
   chatInput.value = "";
   chatBox.scrollTop = chatBox.scrollHeight;
-  setTimeout(() => {
-  chatInput.focus();
-}, 0);
+}
 
 if(sendBtn){
   sendBtn.addEventListener("click", sendMessage);
@@ -39,7 +37,6 @@ if(chatInput){
     }
   });
 }
-
 
 /* =========================================================
    📩 DM CHAT SYSTEM / الرسائل الخاصة
