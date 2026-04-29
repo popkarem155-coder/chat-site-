@@ -1,11 +1,3 @@
-/* =========================================================
-   💬 CHAT SYSTEM / نظام الشات
-========================================================= */
-
-/* =========================
-   🎯 SELECTORS / العناصر
-========================= */
-
 const chatInput = document.querySelector(".chat-input");
 const sendBtn = document.querySelector(".send");
 const chatBox = document.querySelector(".chat-box");
