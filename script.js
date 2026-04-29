@@ -1,7 +1,14 @@
+/* =========================================================
+   💬 GLOBAL CHAT SYSTEM / الشات العام
+========================================================= */
+
+/* 🎯 ELEMENTS / العناصر */
 const chatInput = document.querySelector(".chat-input");
 const sendBtn = document.querySelector(".send");
 const chatBox = document.querySelector(".chat-box");
 
+
+/* 🚀 SEND MESSAGE / إرسال رسالة */
 function sendMessage(){
 
   if(!chatInput || !chatBox) return;
@@ -20,12 +27,14 @@ function sendMessage(){
   chatInput.focus();
 }
 
-/* زر الإرسال */
+
+/* 👆 CLICK EVENT / زر الإرسال */
 if(sendBtn){
   sendBtn.addEventListener("click", sendMessage);
 }
 
-/* Enter */
+
+/* ⌨️ ENTER EVENT / زر Enter */
 if(chatInput){
   chatInput.addEventListener("keydown", function(e){
     if(e.key === "Enter"){
@@ -40,9 +49,12 @@ if(chatInput){
    📩 DM CHAT SYSTEM / الرسائل الخاصة
 ========================================================= */
 
+/* 🎯 ELEMENTS / العناصر */
 const dmInput = document.getElementById("dmInput");
 const dmBox = document.getElementById("dmBox");
 
+
+/* 🚀 SEND DM / إرسال رسالة خاصة */
 function sendDM(){
 
   if(!dmInput || !dmBox) return;
@@ -61,7 +73,7 @@ function sendDM(){
 }
 
 
-/* زر إرسال DM */
+/* 👆 CLICK EVENT / زر الإرسال */
 document.addEventListener("click", function(e){
   if(e.target.classList.contains("send") && e.target.closest("#chatPage")){
     sendDM();
@@ -69,7 +81,7 @@ document.addEventListener("click", function(e){
 });
 
 
-/* Enter في DM */
+/* ⌨️ ENTER EVENT / زر Enter */
 if(dmInput){
   dmInput.addEventListener("keydown", function(e){
     if(e.key === "Enter"){
@@ -81,9 +93,10 @@ if(dmInput){
 
 
 /* =========================================================
-   📱 PAGE NAVIGATION / التنقل بين الصفحات
+   📱 NAVIGATION SYSTEM / التنقل بين الصفحات
 ========================================================= */
 
+/* 🔄 SWITCH PAGE / تغيير الصفحة */
 function goPage(pageId){
 
   const pages = document.querySelectorAll(".page");
@@ -96,12 +109,14 @@ function goPage(pageId){
   }
 }
 
-/* فتح شات شخص */
+
+/* 💬 OPEN CHAT / فتح محادثة */
 function openChat(name){
 
   goPage("chatPage");
 
   const title = document.getElementById("chatName");
+
   if(title){
     title.textContent = name;
   }
