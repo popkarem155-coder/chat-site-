@@ -1,20 +1,29 @@
+/* =========================================================
+   💬 CHAT SYSTEM / نظام الرسائل
+========================================================= */
+
+
+/* =========================================================
+   🎯 ELEMENTS / العناصر
+========================================================= */
+
 const chatInput = document.querySelector(".chat-input");
 const sendBtn = document.querySelector(".send");
 const chatBox = document.querySelector(".chat-box");
 
 
-/* =========================
+/* =========================================================
    🚀 SEND MESSAGE / إرسال رسالة
-========================= */
+========================================================= */
 
 function sendMessage(){
 
   const text = chatInput.value.trim();
 
-  // ❌ لو الرسالة فاضية
+  // ❌ منع الرسائل الفاضية
   if(text === "") return;
 
-  // 🧱 إنشاء رسالة جديدة
+  // 🧱 إنشاء عنصر الرسالة
   const msg = document.createElement("div");
   msg.className = "user";
   msg.textContent = text;
@@ -22,20 +31,20 @@ function sendMessage(){
   // ➕ إضافة الرسالة للشات
   chatBox.appendChild(msg);
 
-  // 🧹 تنظيف الحقل
+  // 🧹 تفريغ الحقل
   chatInput.value = "";
 
-  // 📜 التمرير لآخر رسالة
+  // 📜 تمرير لآخر رسالة
   chatBox.scrollTop = chatBox.scrollHeight;
 
-  // ⌨️ إعادة التركيز
+  // ⌨️ تركيز على input
   chatInput.focus();
 }
 
 
-/* =========================
-   👆 BUTTON EVENT / زر الإرسال
-========================= */
+/* =========================================================
+   👆 SEND BUTTON / زر الإرسال
+========================================================= */
 
 sendBtn.addEventListener("touchend", function(e){
   e.preventDefault();
@@ -43,9 +52,9 @@ sendBtn.addEventListener("touchend", function(e){
 });
 
 
-/* =========================
-   ⌨️ KEYBOARD EVENT / لوحة المفاتيح
-========================= */
+/* =========================================================
+   ⌨️ KEYBOARD / لوحة المفاتيح
+========================================================= */
 
 chatInput.addEventListener("keydown", function(e){
   if(e.key === "Enter"){
