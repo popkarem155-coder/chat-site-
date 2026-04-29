@@ -2,13 +2,12 @@
    💬 GLOBAL CHAT SYSTEM / الشات العام
 ========================================================= */
 
-/* 🎯 ELEMENTS / العناصر */
-const chatInput = document.querySelector(".chat-input");
-const sendBtn = document.querySelector(".send");
-const chatBox = document.querySelector(".chat-box");
+const homeSection = document.querySelector("#homePage");
 
+const chatInput = homeSection?.querySelector(".chat-input");
+const sendBtn = homeSection?.querySelector(".send");
+const chatBox = homeSection?.querySelector(".chat-box");
 
-/* 🚀 SEND MESSAGE / إرسال رسالة */
 function sendMessage(){
 
   if(!chatInput || !chatBox) return;
@@ -27,14 +26,10 @@ function sendMessage(){
   chatInput.focus();
 }
 
-
-/* 👆 CLICK EVENT / زر الإرسال */
 if(sendBtn){
   sendBtn.addEventListener("click", sendMessage);
 }
 
-
-/* ⌨️ ENTER EVENT / زر Enter */
 if(chatInput){
   chatInput.addEventListener("keydown", function(e){
     if(e.key === "Enter"){
@@ -49,12 +44,11 @@ if(chatInput){
    📩 DM CHAT SYSTEM / الرسائل الخاصة
 ========================================================= */
 
-/* 🎯 ELEMENTS / العناصر */
-const dmInput = document.getElementById("dmInput");
-const dmBox = document.getElementById("dmBox");
+const dmSection = document.querySelector("#chatPage");
 
+const dmInput = dmSection?.querySelector("#dmInput");
+const dmBox = dmSection?.querySelector("#dmBox");
 
-/* 🚀 SEND DM / إرسال رسالة خاصة */
 function sendDM(){
 
   if(!dmInput || !dmBox) return;
@@ -72,16 +66,12 @@ function sendDM(){
   dmBox.scrollTop = dmBox.scrollHeight;
 }
 
-
-/* 👆 CLICK EVENT / زر الإرسال */
 document.addEventListener("click", function(e){
   if(e.target.classList.contains("send") && e.target.closest("#chatPage")){
     sendDM();
   }
 });
 
-
-/* ⌨️ ENTER EVENT / زر Enter */
 if(dmInput){
   dmInput.addEventListener("keydown", function(e){
     if(e.key === "Enter"){
@@ -96,7 +86,6 @@ if(dmInput){
    📱 NAVIGATION SYSTEM / التنقل بين الصفحات
 ========================================================= */
 
-/* 🔄 SWITCH PAGE / تغيير الصفحة */
 function goPage(pageId){
 
   const pages = document.querySelectorAll(".page");
@@ -104,6 +93,7 @@ function goPage(pageId){
   pages.forEach(p => p.style.display = "none");
 
   const target = document.getElementById(pageId);
+
   if(target){
     target.style.display = "block";
   }
