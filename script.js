@@ -39,11 +39,11 @@ if(chatInput){
   chatInput.addEventListener("keydown", function(e){
     if(e.key === "Enter"){
       e.preventDefault();
-
       sendMessage();
     }
   });
 }
+
 
 /* =========================================================
    📩 DM CHAT SYSTEM / الرسائل الخاصة
@@ -91,6 +91,7 @@ if(dmInput){
     }
   });
 }
+
 
 /* =========================================================
    📱 NAVIGATION SYSTEM / التنقل بين الصفحات
