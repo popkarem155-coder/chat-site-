@@ -40,6 +40,7 @@
 
 body{
   margin:0;
+
   background:
   radial-gradient(circle at top right, rgba(255,45,155,0.15), transparent 30%),
   radial-gradient(circle at top left, rgba(124,58,237,0.15), transparent 30%),
