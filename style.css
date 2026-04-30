@@ -229,6 +229,11 @@ body {
   backdrop-filter: blur(16px);
 }
 
+.page{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
 /* =========================
    ⌨️ INPUT / الحقل
