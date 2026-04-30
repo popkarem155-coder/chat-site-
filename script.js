@@ -29,7 +29,6 @@ if(sendBtn){
   sendBtn.addEventListener("click", function(e){
     e.preventDefault();
     sendMessage();
-    chatInput && chatInput.focus();
   });
 }
 
