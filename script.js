@@ -68,14 +68,12 @@ function sendDM(){
   dmBox.scrollTop = dmBox.scrollHeight;
 }
 
-/* ✅ FIX: الزر الصح */
-const dmSendBtn = dmSection?.querySelector(".send");
+const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
 
 if(dmSendBtn){
   dmSendBtn.addEventListener("click", function(e){
     e.preventDefault();
     sendDM();
-    dmInput && dmInput.focus();
   });
 }
 
