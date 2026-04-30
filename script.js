@@ -5,7 +5,7 @@
 const homeSection = document.querySelector("#homePage");
 
 const chatInput = homeSection?.querySelector(".chat-input");
-const sendBtn = homeSection?.querySelector(".send");
+const sendBtn = homeSection?.querySelector(".send-global");
 const chatBox = homeSection?.querySelector(".chat-box");
 
 function sendMessage(){
@@ -71,7 +71,7 @@ function sendDM(){
   dmBox.scrollTop = dmBox.scrollHeight;
 }
 
-const dmSendBtn = dmSection?.querySelector(".send");
+const dmSendBtn = dmSection?.querySelector(".send-dm");
 
 if(dmSendBtn){
   dmSendBtn.addEventListener("click", function(e){
