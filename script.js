@@ -66,19 +66,14 @@ function sendDM(){
 
   dmInput.value = "";
   dmBox.scrollTop = dmBox.scrollHeight;
-
-  dmInput.blur();
 }
 
 const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
 
 if(dmSendBtn){
-  dmSendBtn.addEventListener("click", function(e){
+  dmSendBtn.addEventListener("touchstart", function(e){
     e.preventDefault();
     sendDM();
-    dmInput?.blur();
-    document.activeElement?.blur();
-    window.scrollTo(0, 0);
   });
 }
 
@@ -87,14 +82,9 @@ if(dmInput){
     if(e.key === "Enter"){
       e.preventDefault();
       sendDM();
-      dmInput.blur();
-      document.activeElement?.blur();
-      window.scrollTo(0, 0);
     }
   });
 }
-
-
 /* =========================================================
    📱 NAVIGATION SYSTEM / التنقل بين الصفحات
 ========================================================= */
