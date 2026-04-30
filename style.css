@@ -231,6 +231,8 @@ body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+
+  height: 100%;
 }
 
 #chatPage .input-row{
