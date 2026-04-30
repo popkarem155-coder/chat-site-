@@ -218,7 +218,8 @@ body {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 #chatPage .section.chat-section{
