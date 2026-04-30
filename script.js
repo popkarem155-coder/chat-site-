@@ -30,8 +30,6 @@ if(sendBtn){
     e.preventDefault();
 
     sendMessage();
-
-    chatInput && chatInput.focus();
   });
 }
 
