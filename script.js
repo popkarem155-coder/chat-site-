@@ -26,7 +26,7 @@ function sendMessage(){
 }
 
 if(sendBtn){
-  sendBtn.addEventListener("click", function(e){
+  sendBtn.addEventListener("touchstart", function(e){
     e.preventDefault();
     sendMessage();
   });
