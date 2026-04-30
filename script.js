@@ -70,10 +70,12 @@ function sendDM(){
 
 const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
 
-sendBtn.addEventListener("touchstart", function(e){
-  e.preventDefault();
-  sendMessage();
-});
+if(dmSendBtn){
+  dmSendBtn.addEventListener("click", function(e){
+    e.preventDefault();
+    sendDM();
+  });
+}
 
 if(dmInput){
   dmInput.addEventListener("keydown", function(e){
