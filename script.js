@@ -66,6 +66,8 @@ function sendDM(){
 
   dmInput.value = "";
   dmBox.scrollTop = dmBox.scrollHeight;
+
+  dmInput.blur();
 }
 
 const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
@@ -75,6 +77,8 @@ if(dmSendBtn){
     e.preventDefault();
     sendDM();
     dmInput?.blur();
+    document.activeElement?.blur();
+    window.scrollTo(0, 0);
   });
 }
 
@@ -84,6 +88,8 @@ if(dmInput){
       e.preventDefault();
       sendDM();
       dmInput.blur();
+      document.activeElement?.blur();
+      window.scrollTo(0, 0);
     }
   });
 }
