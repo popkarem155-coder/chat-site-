@@ -71,7 +71,7 @@ function sendDM(){
   dmBox.scrollTop = dmBox.scrollHeight;
 }
 
-const dmSendBtn = dmSection?.querySelector(".send-dm");
+const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
 
 if(dmSendBtn){
   dmSendBtn.addEventListener("click", function(e){
