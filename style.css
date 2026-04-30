@@ -61,9 +61,6 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
-html, body {
-  overscroll-behavior: none;
-}
 
 /* =========================
    🔝 HEADER / الهيدر
