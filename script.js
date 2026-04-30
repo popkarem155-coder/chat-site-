@@ -28,9 +28,7 @@ function sendMessage(){
 if(sendBtn){
   sendBtn.addEventListener("click", function(e){
     e.preventDefault();
-
     sendMessage();
-
     chatInput && chatInput.focus();
   });
 }
@@ -71,14 +69,13 @@ function sendDM(){
   dmBox.scrollTop = dmBox.scrollHeight;
 }
 
-const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
+/* ✅ FIX: الزر الصح */
+const dmSendBtn = dmSection?.querySelector(".send");
 
 if(dmSendBtn){
   dmSendBtn.addEventListener("click", function(e){
     e.preventDefault();
-
     sendDM();
-
     dmInput && dmInput.focus();
   });
 }
