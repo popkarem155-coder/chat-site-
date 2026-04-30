@@ -221,8 +221,6 @@ body {
   flex-direction: column;
   background: var(--bg);
   overflow: hidden;
-
-  height: 100dvh;
 }
 
 #chatPage .header{
@@ -232,38 +230,30 @@ body {
 #chatPage .section.chat-section{
   flex: 1;
   min-height: 0;
-
   display: flex;
   flex-direction: column;
-
   margin: 0;
   padding: 0;
-
   border: none;
   background: transparent;
+  overflow: hidden;
 }
 
 #dmBox{
   flex: 1;
   min-height: 0;
-
   overflow-y: auto;
-
   display: flex;
   flex-direction: column;
   gap: 8px;
-
   padding: 10px;
-
   box-sizing: border-box;
 }
 
 #chatPage .input-row{
   flex-shrink: 0;
-
   margin: 0;
   padding: 10px;
-
   background: rgba(20,20,30,0.6);
   border-top: 1px solid rgba(255,255,255,0.10);
 }
@@ -271,7 +261,7 @@ body {
 .input-row{
   display: flex;
   gap: 10px;
-
+  align-items: center;
   border-radius: 18px;
   backdrop-filter: blur(16px);
 }
@@ -281,7 +271,7 @@ body {
   display: flex;
   flex-direction: column;
 }
-  
+
 
 /* =========================
 INPUT / الحقل
