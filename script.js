@@ -70,10 +70,10 @@ function sendDM(){
 
 const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
 
-if(dmSendBtn){
-  dmSendBtn.addEventListener("click", function(e){
+if(sendBtn){
+  sendBtn.addEventListener("click", function(e){
     e.preventDefault();
-    sendDM();
+    sendMessage();
   });
 }
 
