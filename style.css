@@ -224,11 +224,6 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0;
-  margin: 10px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
   min-height: 0;
 }
 
@@ -236,16 +231,6 @@ body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-
-  padding: 10px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  border-radius: 16px;
-  background: rgba(10,10,18,0.4);
-  border: 1px solid rgba(255,255,255,0.06);
 }
 
 #chatPage .input-row{
