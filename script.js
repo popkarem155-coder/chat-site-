@@ -74,6 +74,7 @@ if(dmSendBtn){
   dmSendBtn.addEventListener("click", function(e){
     e.preventDefault();
     sendDM();
+    dmInput?.blur();
   });
 }
 
@@ -82,6 +83,7 @@ if(dmInput){
     if(e.key === "Enter"){
       e.preventDefault();
       sendDM();
+      dmInput.blur();
     }
   });
 }
