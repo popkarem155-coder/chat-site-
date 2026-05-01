@@ -210,7 +210,7 @@ body {
    ✍️ INPUT AREA / منطقة الكتابة
 ========================= */
 
-#chatPage{
+#chatPage {
   position: fixed;
   inset: 0;
   height: 100dvh;
@@ -222,13 +222,12 @@ body {
   overflow: hidden;
 }
 
-#chatPage .header{
+#chatPage .header {
   flex: 0 0 auto;
   margin: 0;
 }
 
-/* الكونتينر الأساسي */
-.chat-container{
+.chat-container {
   flex: 1;
   min-height: 0;
 
@@ -236,30 +235,28 @@ body {
   flex-direction: column;
 }
 
-/* المنطقة اللي بتمسك المساحة */
-.messages-area{
+.messages-area {
   flex: 1;
   min-height: 0;
+
+  display: flex;
+  flex-direction: column;
 
   overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
 }
 
-/* الرسائل */
-#dmBox{
+#dmBox {
   flex: 1;
   min-height: 0;
 
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
   padding: 12px;
   box-sizing: border-box;
 }
 
-/* input تحت */
-#chatPage .input-row{
+#chatPage .input-row {
   flex: 0 0 auto;
 
   padding: 10px;
@@ -268,21 +265,23 @@ body {
   gap: 10px;
   align-items: center;
 
-  background: rgba(20,20,30,0.6);
-  border-top: 1px solid rgba(255,255,255,0.10);
+  background: rgba(20, 20, 30, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+
+  box-sizing: border-box;
 }
 
-/* الشكل العام */
-.input-row{
+.input-row {
   width: 100%;
   box-sizing: border-box;
 }
 
-.page{
+.page {
   height: 100dvh;
   display: flex;
   flex-direction: column;
 }
+
 /* =========================
    🚀 SEND BUTTON / زر الإرسال
 ========================= */
