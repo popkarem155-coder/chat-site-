@@ -50,16 +50,19 @@ const dmSection = document.querySelector("#chatPage");
 
 const dmInput = dmSection?.querySelector("#dmInput");
 const dmBox = dmSection?.querySelector("#dmBox");
+const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
 
-function sendDM(){
+function sendDM() {
 
-  if(!dmInput || !dmBox) return;
+  if (!dmInput || !dmBox) return;
 
   const text = dmInput.value.trim();
-  if(text === "") return;
+  if (text === "") return;
 
   const msg = document.createElement("div");
-  msg.className = "user";
+
+  // 🔧 تحسين بسيط بدون تغيير النظام:
+  msg.className = "user dm-msg"; 
   msg.textContent = text;
 
   dmBox.appendChild(msg);
@@ -68,18 +71,18 @@ function sendDM(){
   dmBox.scrollTop = dmBox.scrollHeight;
 }
 
-const dmSendBtn = dmSection?.querySelector(".send-dm-btn");
-
-if(dmSendBtn){
-  dmSendBtn.addEventListener("touchstart", function(e){
+/* ✔ أفضل من touchstart (يشتغل على كل الأجهزة) */
+if (dmSendBtn) {
+  dmSendBtn.addEventListener("click", function (e) {
     e.preventDefault();
     sendDM();
   });
 }
 
-if(dmInput){
-  dmInput.addEventListener("keydown", function(e){
-    if(e.key === "Enter"){
+/* ✔ إرسال بالـ Enter */
+if (dmInput) {
+  dmInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
       e.preventDefault();
       sendDM();
     }
