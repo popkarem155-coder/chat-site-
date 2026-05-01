@@ -227,7 +227,7 @@ body {
   margin: 0;
 }
 
-/* استبدل section بالكونتينر الجديد */
+/* الكونتينر الأساسي */
 .chat-container{
   flex: 1;
   min-height: 0;
@@ -242,19 +242,17 @@ body {
 #dmBox{
   flex: 1;
   min-height: 0;
+  max-height: 100%;
 
   overflow-y: auto;
 
-  display: flex;
-  flex-direction: column;
+  display: block; /* 👈 أهم تعديل */
 
-  gap: 8px;
   padding: 12px;
-
   box-sizing: border-box;
 }
 
-/* input تحت ثابت */
+/* input تحت */
 #chatPage .input-row{
   flex: 0 0 auto;
 
@@ -279,7 +277,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-
 /* =========================
    🚀 SEND BUTTON / زر الإرسال
 ========================= */
