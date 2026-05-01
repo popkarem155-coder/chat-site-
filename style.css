@@ -213,26 +213,27 @@ body {
 #chatPage{
   position: fixed;
   inset: 0;
+  height: 100dvh;
+
   display: flex;
   flex-direction: column;
+
   background: var(--bg);
   overflow: hidden;
 }
 
 #chatPage .header{
   flex: 0 0 auto;
+  margin: 0;
 }
 
-#chatPage .section.chat-section{
+/* استبدل section بالكونتينر الجديد */
+.chat-container{
   flex: 1;
   min-height: 0;
+
   display: flex;
   flex-direction: column;
-
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
 
   overflow: hidden;
 }
@@ -246,13 +247,14 @@ body {
 
   display: flex;
   flex-direction: column;
-  gap: 8px;
 
+  gap: 8px;
   padding: 12px;
+
   box-sizing: border-box;
 }
 
-/* input ثابت تحت */
+/* input تحت ثابت */
 #chatPage .input-row{
   flex: 0 0 auto;
 
@@ -273,38 +275,10 @@ body {
 }
 
 .page{
-  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
-
-
-/* =========================
-INPUT / الحقل
-========================= */
-
-.input{
-  flex:1;
-
-  padding:12px 14px;
-
-  border-radius:14px;
-
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(10,10,18,0.6);
-
-  color:#fff;
-
-  outline:none;
-
-  transition:0.25s ease;
-}
-
-.input:focus{
-  border-color: var(--rose);
-  box-shadow: 0 0 12px rgba(255,45,155,0.35);
-}
-
 
 /* =========================
    🚀 SEND BUTTON / زر الإرسال
