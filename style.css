@@ -234,19 +234,25 @@ body {
 
   display: flex;
   flex-direction: column;
+}
+
+/* المنطقة اللي بتمسك المساحة */
+.messages-area{
+  flex: 1;
+  min-height: 0;
 
   overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
 }
 
 /* الرسائل */
 #dmBox{
   flex: 1;
   min-height: 0;
-  max-height: 100%;
 
   overflow-y: auto;
-
-  display: block; /* 👈 أهم تعديل */
 
   padding: 12px;
   box-sizing: border-box;
