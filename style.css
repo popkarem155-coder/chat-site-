@@ -211,6 +211,10 @@ body {
 #chatPage{
   position:fixed;
   inset:0;
+  
+  #chatPage #dmBox{
+  min-height:100%;
+  }
 
   display:flex;
   flex-direction:column;
