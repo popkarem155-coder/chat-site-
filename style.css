@@ -221,12 +221,6 @@ body {
   overflow:hidden;
 }
 
-  display:flex;
-  flex-direction:column;
-
-  background:var(--bg);
-}
-
 /* header */
 #chatPage .header{
   margin:10px;
