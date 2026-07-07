@@ -2,138 +2,241 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>شات نار</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MofChat — دردشة موف</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+<div id="app">
+  <header class="main-header" id="main-header">
+    <div class="hero-orbits">
+      <div class="orbit-dot"></div>
+      <div class="orbit-dot"></div>
+      <div class="orbit-dot"></div>
+    </div>
+    <div class="header-topbar">
+      <button class="messages-icon-btn" id="messages-icon-btn" title="الرسائل الخاصة" onclick="openPrivateMessages()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="messages-badge" id="messages-badge">3</span>
+      </button>
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>MofChat</h1>
+          <p>دردشة موف الاحترافية</p>
+        </div>
+      </div>
+      <button class="menu-btn" id="menu-btn" title="القائمة" onclick="openDrawer()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse"></span>
+        <span>مباشر الآن</span>
+      </div>
+      <h2 class="hero-title">تواصل مع <span>العالم</span><br>بلمسة موف</h2>
+      <p class="hero-subtitle">انضم لمجتمعنا المباشر وابدأ محادثات فورية مع مستخدمين من كل مكان</p>
+    </div>
+  </header>
 
-<!-- =========================================================
-   🏠 HOME PAGE / الصفحة الرئيسية
-========================================================= -->
-<div class="page home" id="homePage">
+  <main class="main-view" id="main-view">
+    <div class="search-section">
+      <div class="search-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="ابحث عن مستخدم..." autocomplete="off" oninput="renderUsers(this.value)">
+      </div>
+    </div>
+    <div class="section-label">
+      <h2>المستخدمون المتصلون</h2>
+      <span class="live-pill"><span class="dot"></span>مباشر</span>
+    </div>
+    <div class="users-list" id="users-list"></div>
+  </main>
 
-  <!-- =====================================================
-     🔝 HEADER / الهيدر
-  ===================================================== -->
-  <div class="header">
-    <div class="icon-btn">☰</div>
-    <div class="title">شات نار</div>
-    <div class="icon-btn" onclick="goPage('dmPage')">💬</div>
+  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+  <div class="side-drawer" id="side-drawer">
+    <div class="drawer-header">
+      <button class="drawer-close" id="drawer-close" onclick="closeDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+        </svg>
+      </button>
+      <div class="drawer-profile">
+        <div class="drawer-profile-avatar-wrap">
+          <div class="drawer-profile-avatar" id="drawer-profile-avatar" onclick="editProfile()">
+            أم
+            <div class="edit-overlay">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="drawer-profile-name">
+          <input type="text" class="drawer-profile-name-input" id="drawer-profile-name" value="أحمد محمد" onchange="updateProfileName(this.value)">
+        </div>
+        <div class="drawer-profile-status">
+          <span class="dot"></span>
+          <span>متصل الآن</span>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-menu">
+      <div class="drawer-menu-section">
+        <div class="drawer-menu-title">القائمة الرئيسية</div>
+        <div class="drawer-menu-item" onclick="showToast('الصفحة الرئيسية'); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          الرئيسية
+        </div>
+        <div class="drawer-menu-item" onclick="openPrivateMessages(); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          الرسائل الخاصة
+          <span style="margin-right:auto;background:linear-gradient(135deg,var(--violet-600),var(--violet-500));color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;">3</span>
+        </div>
+        <div class="drawer-menu-item" onclick="showToast('المستخدمون المتصلون'); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          المستخدمون المتصلون
+        </div>
+        <div class="drawer-menu-item" onclick="showToast('الإعدادات'); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          الإعدادات
+        </div>
+      </div>
+      <div class="drawer-menu-section">
+        <div class="drawer-menu-title">حسابي</div>
+        <div class="drawer-menu-item" onclick="showToast('تعديل الملف الشخصي'); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          تعديل الملف الشخصي
+        </div>
+        <div class="drawer-menu-item" onclick="showToast('الإشعارات'); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+          الإشعارات
+          <span style="margin-right:auto;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;">5</span>
+        </div>
+        <div class="drawer-menu-item" onclick="showToast('تم تسجيل الخروج'); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          تسجيل الخروج
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <div class="drawer-version">MofChat v1.0.0</div>
+    </div>
   </div>
 
-  <!-- =====================================================
-     🔍 SEARCH / البحث
-  ===================================================== -->
-  <div class="section">
-    <form class="search-form" onsubmit="return false;">
-      <input class="search" placeholder="ابحث عن مستخدم...">
+  <div class="private-messages-page" id="private-messages-page">
+    <div class="chat-header">
+      <button class="back-btn" id="private-messages-back" onclick="closePrivateMessages()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="chat-avatar-wrap">
+        <div class="chat-avatar" style="background: linear-gradient(135deg, var(--violet-600), var(--violet-400));">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="chat-user-info">
+        <div class="chat-username">الرسائل الخاصة</div>
+        <div class="chat-status">
+          <span style="width:6px;height:6px;background:var(--online);border-radius:50%;box-shadow:0 0 6px var(--online-pulse);"></span>
+          <span>3 محادثات جديدة</span>
+        </div>
+      </div>
+    </div>
+    <div class="private-messages-list" id="private-messages-list"></div>
+  </div>
+
+  <div class="chat-view" id="chat-view">
+    <div class="chat-header">
+      <button class="back-btn" id="back-btn" onclick="closeChat()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="chat-avatar-wrap">
+        <div class="chat-avatar" id="chat-avatar"></div>
+        <span class="chat-online-ring"></span>
+      </div>
+      <div class="chat-user-info">
+        <div class="chat-username" id="chat-username"></div>
+        <div class="chat-status" id="chat-status">
+          <span class="online-pulse-dot" style="width:6px;height:6px;"></span>
+          <span id="chat-status-text">متصل الآن</span>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-header-btn" title="مكالمة صوتية">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </button>
+        <button class="chat-header-btn" title="فيديو">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+          </svg>
+        </button>
+        <button class="chat-header-btn" title="المزيد">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="messages-area" id="messages-area"></div>
+    <form class="input-area" id="chat-form" style="display:flex; align-items:flex-end; gap:8px;">
+      <button type="button" class="input-action-btn" title="إرفاق ملف">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
+      </button>
+      <div class="msg-input-wrap" style="flex:1;">
+        <input type="text" class="msg-input" id="msg-input" placeholder="اكتب رسالة..." autocomplete="off" inputmode="text" enterkeyhint="send">
+      </div>
+      <button type="submit" class="send-btn" id="send-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
     </form>
   </div>
-
-  <!-- =====================================================
-     👥 ONLINE USERS / المتصلون الآن
-  ===================================================== -->
-  <div class="section online-section">
-    <h3>المتصلون الآن</h3>
-    <div class="user">مستخدم 1</div>
-    <div class="user">مستخدم 2</div>
-  </div>
-
-  <!-- =====================================================
-     ⭐ FEATURED USERS / المستخدمين المميزين
-  ===================================================== -->
-  <div class="section featured-section">
-    <h3>المستخدمين المميزين</h3>
-    <div class="user">مستخدم مميز</div>
-  </div>
-
-  <!-- =====================================================
-     💬 GLOBAL CHAT / الشات العام
-  ===================================================== -->
-  <div class="section chat-section">
-    <h3>الشات العام</h3>
-
-    <div class="chat-box"></div>
-
-    <div class="input-row">
-      <input class="input chat-input" placeholder="اكتب رسالة...">
-      <button type="button" class="send send-global">إرسال</button>
-    </div>
-  </div>
-
 </div>
 
-
-<!-- =========================================================
-   📩 DM PAGE / الرسائل الخاصة
-========================================================= -->
-<div class="page dm" id="dmPage" style="display:none;">
-
-  <!-- =====================================================
-     🔝 HEADER / الهيدر
-  ===================================================== -->
-<div class="header">
-  <div class="icon-btn" onclick="goPage('homePage')">⬅</div>
-  <div class="title">الرسائل / Messages</div>
-  <div class="icon-btn">⚙</div>
+<div class="toast" id="toast">
+  <svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 6 9 17l-5-5"/>
+  </svg>
+  <span id="toast-text">تم الإرسال</span>
 </div>
-
-  <!-- =====================================================
-     📋 CHAT LIST / قائمة المحادثات
-  ===================================================== -->
-  <div class="section dm-list-section" id="dmList">
-
-    <h3>المحادثات / Chats</h3>
-
-    <div class="user" onclick="openChat('أحمد')">
-      أحمد - آخر رسالة...
-    </div>
-
-    <div class="user" onclick="openChat('محمد')">
-      محمد - تمام 👌
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =========================================================
-   💬 CHAT PAGE / صفحة المحادثة
-========================================================= -->
-<div class="page chat" id="chatPage" style="display:none;">
-
-  <!-- =====================================================
-     🔝 HEADER / الهيدر
-  ===================================================== -->
-  <div class="header">
-    <div class="icon-btn" onclick="goPage('dmPage')">⬅</div>
-    <div class="title" id="chatName">Chat</div>
-    <div class="icon-btn">💬</div>
-  </div>
-
-  <!-- =====================================================
-     💬 CHAT AREA / المحادثة
-  ===================================================== -->
-
-<div class="chat-container">
-
-  <div class="messages-area">
-    <div id="dmBox"></div>
-  </div>
-
-  <div class="input-row">
-    <input class="input" id="dmInput" placeholder="اكتب رسالة...">
-    <button class="send send-dm-btn">إرسال</button>
-  </div>
-
-</div>
-
 <script src="script.js"></script>
 </body>
 </html>
