@@ -19,9 +19,9 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
-        <span class="messages-badge" id="messages-badge">0</span>
+        <span class="messages-badge" id="messages-badge">3</span>
       </button>
-      <div class="brand" role="button" tabindex="0" title="تحديث الصفحة" onclick="window.location.reload()">
+      <div class="brand" role="button" tabindex="0" title="تحديث الصفحة" onclick="window.location.reload()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.reload();}">
         <div class="brand-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -39,7 +39,12 @@
       </button>
     </div>
     <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse"></span>
+        <span>مباشر الآن</span>
+      </div>
       <h2 class="hero-title">تواصل مع <span>العالم</span><br>بلمسة موف</h2>
+      <p class="hero-subtitle">انضم لمجتمعنا المباشر وابدأ محادثات فورية مع مستخدمين من كل مكان</p>
     </div>
   </header>
 
@@ -52,9 +57,9 @@
         <input type="text" id="search-input" placeholder="ابحث عن مستخدم..." autocomplete="off" oninput="renderUsers(this.value)">
       </div>
     </div>
-    
-    <div class="vip-header-custom">
-      <h3 class="gold-text">أنت مميز</h3>
+    <div class="section-label">
+      <h2>المستخدمون المتصلون</h2>
+      <span class="live-pill"><span class="dot"></span>مباشر</span>
     </div>
     <div class="users-list" id="users-list"></div>
   </main>
@@ -69,7 +74,7 @@
       </button>
       <div class="drawer-profile">
         <div class="drawer-profile-avatar-wrap">
-          <div class="drawer-profile-avatar" id="drawer-profile-avatar" onclick="openMyProfile()">
+        <div class="drawer-profile-avatar" id="drawer-profile-avatar" onclick="openMyProfile()">
             أم
             <div class="edit-overlay">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -80,7 +85,7 @@
           </div>
         </div>
         <div class="drawer-profile-name">
-          <div class="drawer-profile-name-display" id="drawer-profile-name">أحمد محمد</div>
+          <input type="text" class="drawer-profile-name-input" id="drawer-profile-name" value="أحمد محمد" onchange="updateProfileName(this.value)">
         </div>
         <div class="drawer-profile-status">
           <span class="dot"></span>
@@ -92,61 +97,79 @@
       <div class="drawer-menu-section">
         <div class="drawer-menu-title">القائمة الرئيسية</div>
         <div class="drawer-menu-item" onclick="showToast('الصفحة الرئيسية'); closeDrawer()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
           الرئيسية
         </div>
         <div class="drawer-menu-item" onclick="openPrivateMessages(); closeDrawer()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
           الرسائل الخاصة
+          <span style="margin-right:auto;background:linear-gradient(135deg,var(--violet-600),var(--violet-500));color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;">3</span>
+        </div>
+        <div class="drawer-menu-item" onclick="showToast('المستخدمون المتصلون'); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          المستخدمون المتصلون
         </div>
         <div class="drawer-menu-item" onclick="showToast('الإعدادات'); closeDrawer()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
           الإعدادات
         </div>
       </div>
-      
       <div class="drawer-menu-section">
         <div class="drawer-menu-title">حسابي</div>
         <div class="drawer-menu-item" onclick="closeDrawer(); openMyProfile()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          الملف الشخصي
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          حسابي
         </div>
-      </div>
-
-      <!-- صندوق الشكاوى والاقتراحات الجديد -->
-      <div class="complaints-box">
-        <div class="complaints-watermark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <div class="drawer-menu-item" onclick="showToast('الإشعارات'); closeDrawer()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+          الإشعارات
+          <span style="margin-right:auto;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;">5</span>
         </div>
-        <p>نحن نحرص على رضائك وحل جميع المشاكل المتعلقة بالموقع. صف لنا تجربتك أو شكواك.</p>
-        <textarea id="complaints-input" maxlength="500" placeholder="اكتب اقتراحك أو شكواك هنا (بحد أقصى 500 حرف)..."></textarea>
-        <button onclick="sendComplaint()">إرسال</button>
-      </div>
-
-      <div class="drawer-menu-section" style="margin-top: 10px;">
         <div class="drawer-menu-item" onclick="showToast('تم تسجيل الخروج'); closeDrawer()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
           تسجيل الخروج
         </div>
       </div>
+    </div>
+    <div class="drawer-footer">
+      <div class="drawer-version">MofChat v1.0.0</div>
     </div>
   </div>
 
   <div class="private-messages-page" id="private-messages-page">
     <div class="chat-header">
       <button class="back-btn" id="private-messages-back" onclick="closePrivateMessages()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
+        </svg>
       </button>
       <div class="chat-avatar-wrap">
         <div class="chat-avatar" style="background: linear-gradient(135deg, var(--violet-600), var(--violet-400));">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
         </div>
       </div>
       <div class="chat-user-info">
         <div class="chat-username">الرسائل الخاصة</div>
         <div class="chat-status">
           <span style="width:6px;height:6px;background:var(--online);border-radius:50%;box-shadow:0 0 6px var(--online-pulse);"></span>
-          <span id="private-header-count">رسائل جديدة</span>
+          <span>3 محادثات جديدة</span>
         </div>
       </div>
     </div>
@@ -156,7 +179,9 @@
   <div class="profile-page" id="profile-page">
     <div class="profile-header">
       <button class="back-btn" id="profile-back" onclick="closeProfile()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
+        </svg>
       </button>
       <div class="profile-header-title">الملف الشخصي</div>
     </div>
@@ -164,7 +189,9 @@
       <div class="profile-avatar-wrap">
         <div class="profile-avatar" id="profile-avatar" onclick="chooseProfileImage()"></div>
         <button type="button" class="profile-avatar-edit" id="profile-avatar-edit" title="تغيير الصورة" onclick="chooseProfileImage()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
         </button>
         <input type="file" id="profile-avatar-input" accept="image/*" hidden>
       </div>
@@ -187,22 +214,19 @@
         </div>
       </div>
       <button type="button" class="profile-edit-btn" id="profile-edit-btn" onclick="editMyProfile()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+        </svg>
         تعديل الحساب الشخصي
       </button>
-      
       <div class="profile-form" id="profile-form" style="display:none;">
         <label class="profile-field">
           <span>الاسم</span>
           <input type="text" id="profile-name-input" autocomplete="name">
         </label>
         <label class="profile-field">
-          <span>النبذة الشخصية (حد أقصى 400 حرف)</span>
-          <textarea id="profile-bio-input" maxlength="400" rows="3" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); color: var(--text-primary); outline: none;"></textarea>
-        </label>
-        <label class="profile-field">
-          <span>العمر (الحد الأقصى 100)</span>
-          <input type="number" id="profile-age-input" min="1" max="100" inputmode="numeric">
+          <span>العمر</span>
+          <input type="number" id="profile-age-input" min="1" max="120" inputmode="numeric">
         </label>
         <label class="profile-field">
           <span>النوع</span>
@@ -232,7 +256,9 @@
   <div class="chat-view" id="chat-view">
     <div class="chat-header">
       <button class="back-btn" id="back-btn" onclick="closeChat()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
+        </svg>
       </button>
       <div class="chat-avatar-wrap">
         <div class="chat-avatar" id="chat-avatar"></div>
@@ -245,9 +271,11 @@
           <span id="chat-status-text">متصل الآن</span>
         </div>
       </div>
-      <div class="chat-header-actions">
+        <div class="chat-header-actions">
          <button class="chat-header-btn" id="chat-more-btn" title="المزيد" onclick="toggleChatMenu(event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+          </svg>
          </button>
          <div class="chat-more-menu" id="chat-more-menu">
            <button type="button" onclick="openChatProfileFromMenu()"><span>👤</span> فتح الملف الشخصي</button>
@@ -255,39 +283,36 @@
          </div>
       </div>
     </div>
-    
     <div class="messages-area" id="messages-area"></div>
-    
-    <!-- ترتيب العناصر: زر الإرسال يمين (في بداية الـ DOM) -->
     <div class="input-area" id="chat-input-area" style="display:flex; align-items:flex-end; gap:8px;">
-      <button type="button" class="send-btn" id="send-btn" onclick="sendMessage()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+      <button type="button" class="input-action-btn" id="attachment-btn" title="إرفاق ملف" onclick="chooseAttachment()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
       </button>
-      
+      <input type="file" id="attachment-input" hidden>
+      <button type="button" class="input-action-btn voice-btn" id="voice-btn" title="تسجيل صوتي" onclick="toggleVoiceRecording()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/><path d="M8 22h8"/>
+        </svg>
+      </button>
       <div class="msg-input-wrap" style="flex:1;">
         <input type="text" class="msg-input" id="msg-input" placeholder="اكتب رسالة..." autocomplete="off" inputmode="text" enterkeyhint="send" onkeydown="if(event.key==='Enter'||event.keyCode===13){event.preventDefault();sendMessage();}">
       </div>
-      
-      <button type="button" class="input-action-btn voice-btn" id="voice-btn" title="تسجيل صوتي" onclick="toggleVoiceRecording()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>
+      <button type="button" class="send-btn" id="send-btn" onclick="sendMessage()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7z"/>
+        </svg>
       </button>
-
-      <button type="button" class="input-action-btn" id="attachment-btn" title="إرفاق ملف" onclick="chooseAttachment()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-      </button>
-      <input type="file" id="attachment-input" hidden>
     </div>
   </div>
 </div>
 
-<!-- Modal لعرض الصور بشكل احترافي -->
-<div id="image-modal" class="image-modal" onclick="this.style.display='none'">
-  <span class="close-modal">&times;</span>
-  <img class="modal-content" id="img-modal-target">
-</div>
-
 <div class="toast" id="toast">
-  <svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+  <svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 6 9 17l-5-5"/>
+  </svg>
   <span id="toast-text">تم الإرسال</span>
 </div>
 <script src="script.js"></script>
