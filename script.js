@@ -798,6 +798,7 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
 
   window._showHome = function() {
     isFeaturedView = false;
+    document.body.classList.remove('featured-users-page');
     if (directoryTitle) directoryTitle.textContent = 'المتصلون الآن';
     if (directoryStatus) directoryStatus.innerHTML = '<span class="dot"></span>مباشر';
     window._renderUsers(searchInput.value);
@@ -805,6 +806,7 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
 
   window._showFeaturedUsers = function() {
     isFeaturedView = true;
+    document.body.classList.add('featured-users-page');
     if (directoryTitle) directoryTitle.textContent = 'المستخدمون المميزون';
     if (directoryStatus) directoryStatus.innerHTML = '<span class="dot"></span>مباشر';
     window._renderUsers(searchInput.value);
