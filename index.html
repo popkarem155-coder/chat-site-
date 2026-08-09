@@ -54,6 +54,29 @@
       <p class="hero-subtitle">انضم لمجتمعنا المباشر وابدأ محادثات فورية مع مستخدمين من كل مكان</p>
     </div>
   </header>
+
+  <main class="main-view" id="main-view">
+    <section class="public-room" aria-labelledby="public-room-title">
+      <div class="public-room-backdrop" aria-hidden="true">
+        <span class="room-star room-star-a"></span><span class="room-star room-star-b"></span><span class="room-star room-star-c"></span><span class="room-star room-star-d"></span>
+      </div>
+      <div class="public-room-topline">
+        <div class="room-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 7.2v9.6L12 21l7.5-4.2V7.2L12 3Z"/><path d="m4.8 7.4 7.2 4 7.2-4M12 11.4V21"/></svg></div>
+        <div class="room-heading"><div class="room-kicker"><span class="room-live-dot"></span>مساحة عامة مفتوحة</div><h2 id="public-room-title">المحادثة العامة</h2></div>
+      <div class="room-presence" aria-label="حالة الحضور"><span class="presence-avatars" aria-hidden="true"><i>س</i><i>م</i><i>ن</i></span><strong id="public-room-presence-count">47</strong><span>حاضرون</span></div>
+      </div>
+      <div class="room-intro"><p>حديث خفيف، أفكار جديدة، وأصوات من كل مكان.</p><span class="room-rule">كل كلمة تصنع أجواء الغرفة</span></div>
+      <div class="room-messages" id="public-room-preview-messages" aria-label="آخر رسائل الغرفة">
+        <article class="room-message"><span class="room-message-avatar avatar-one">س</span><div><strong>سارة محمد</strong><p>مساء الخير يا أهل موف، ما أجمل موضوع نبدأ به اليوم؟</p><time>الآن</time></div></article>
+        <article class="room-message room-message-featured"><span class="room-message-avatar avatar-two">ع</span><div><strong>عمر سامي</strong><p>شاركونا آخر شيء ألهمكم هذا الأسبوع.</p><time>منذ دقيقة</time></div></article>
+      </div>
+      <div class="room-join-hint"><span class="hint-line"></span><span>تجد الغرفة داخل القائمة الجانبية</span><span class="hint-line"></span></div>
+    </section>
+    <div class="search-section">
+      <div class="search-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
         <input type="text" id="search-input" placeholder="ابحث عن مستخدم..." autocomplete="off" oninput="renderUsers(this.value)">
       </div>
     </div>
