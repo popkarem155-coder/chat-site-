@@ -39,6 +39,8 @@ function toggleCountryPicker(event) { if(window._toggleCountryPicker) window._to
 function toggleChatMenu(event) { if(window._toggleChatMenu) window._toggleChatMenu(event); }
 function openChatProfileFromMenu() { if(window._openChatProfileFromMenu) window._openChatProfileFromMenu(); }
 function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentUser(); }
+function handleCardBgUpload(event) { if(window._handleCardBgUpload) window._handleCardBgUpload(event); }
+function clearCardBg() { if(window._clearCardBg) window._clearCardBg(); }
 
 (function() {
   'use strict';
@@ -171,6 +173,7 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     countryCode: 'EG',
     country: countries.find(country => country.code === 'EG'),
     avatar: '',
+    cardBg: '1786370860128.png',
     blockedUsers: []
   };
   const blockedUsersStorageKey = 'mofchat.blocked-users.v1';
@@ -363,11 +366,9 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
   function renderDrawerProfile() {
     if (!drawerProfileName || !drawerProfileAvatar) return;
 
-    drawerProfileName.value = myProfile.name;
-    const editOverlay = drawerProfileAvatar.querySelector('.edit-overlay')?.outerHTML || '';
-    drawerProfileAvatar.innerHTML = myProfile.avatar
-      ? `<img class="avatar-image" src="${myProfile.avatar}" alt="">${editOverlay}`
-      : `${myProfile.initials}${editOverlay}`;
+    drawerProfileName.textContent = myProfile.name;
+    drawerProfileAvatar.style.background = '';
+    drawerProfileAvatar.innerHTML = getAvatarMarkup(myProfile);
   }
 
   function refreshMyProfileAvatarSurfaces() {
@@ -380,10 +381,8 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     }
     if (currentChatUser && currentChatUser.id === myProfile.id) {
       chatAvatar.className = 'chat-avatar';
-      chatAvatar.style.background = myProfile.avatar
-        ? `url("${myProfile.avatar}") center / cover no-repeat`
-        : '';
-      chatAvatar.innerHTML = myProfile.avatar ? '' : getAvatarMarkup(myProfile);
+      chatAvatar.style.background = '';
+      chatAvatar.innerHTML = getAvatarMarkup(myProfile);
     }
     if (privateMessagesPage.style.display !== 'none') {
       renderPrivateMessages();
@@ -430,7 +429,32 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     });
   }
 
-  function saveMyProfile() {
+   let pendingCardBg = '';
+   let originalProfileCardBg = '';
+
+   window._handleCardBgUpload = function(event) {
+     const file = event.target.files && event.target.files[0];
+     if (!file) return;
+     readProfileAvatar(file).then(dataUrl => {
+       pendingCardBg = dataUrl;
+       showToast('تم اختيار خلفية البطاقة بنجاح');
+     }).catch(() => {
+       showToast('تعذر تحميل صورة الخلفية');
+     });
+   };
+
+   window._clearCardBg = function() {
+     pendingCardBg = '';
+     myProfile.cardBg = '';
+     users.forEach(user => {
+       if (user === myProfile || user.id === myProfile.id) user.cardBg = '';
+     });
+     saveMyProfile();
+     renderUsers(searchInput.value);
+     showToast('تم إزالة خلفية البطاقة');
+   };
+
+   function saveMyProfile() {
     try {
       localStorage.setItem(myProfileStorageKey, JSON.stringify({
         name: myProfile.name,
@@ -440,7 +464,8 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
         gender: myProfile.gender,
         nationality: myProfile.nationality,
         countryCode: myProfile.countryCode,
-        avatar: myProfile.avatar || ''
+        avatar: myProfile.avatar || '',
+        cardBg: myProfile.cardBg || ''
       }));
     } catch (error) {
       // Keep the profile updated in memory if browser storage is unavailable.
@@ -457,6 +482,7 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
       if (typeof stored.age === 'string' || typeof stored.age === 'number') myProfile.age = stored.age;
       if (stored.gender === 'ذكر' || stored.gender === 'أنثى') myProfile.gender = stored.gender;
       if (typeof stored.avatar === 'string') myProfile.avatar = stored.avatar;
+      if (typeof stored.cardBg === 'string') myProfile.cardBg = stored.cardBg || '1786370860128.png';
 
       const storedCountry = getCountry(stored.countryCode) || getCountry(stored.nationality);
       if (storedCountry) {
@@ -518,8 +544,8 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
       return `<img class="avatar-image" src="${user.avatar}" alt="">`;
     }
     const isFemale = user.gender === 'أنثى';
-    const defaultAvatar = isFemale ? embeddedWomanProfileIconFile : embeddedManProfileIconFile;
-    return `<img class="avatar-image default-avatar" src="${defaultAvatar}" alt="">`;
+    const defaultAvatar = isFemale ? embeddedWomanAvatar : embeddedManAvatar;
+    return `<img class="avatar-image" src="${defaultAvatar}" alt="">`;
   }
 
   function renderCountryOptions(filter = '') {
@@ -595,9 +621,38 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
 
   function generateId() { return Date.now() + Math.random().toString(36).substr(2, 9); }
 
+  function containsCode(text) {
+    if (!text || typeof text !== 'string') return false;
+
+    // Check for HTML/XML markup tags or code tags
+    if (/<\/?(?:script|style|html|body|head|div|span|p|a|iframe|input|button|form|meta|link|code|pre|svg|img|object|embed|audio|video)[^>]*>/i.test(text)) {
+      return true;
+    }
+
+    // Check for inline event handlers or tag elements
+    if (/<[a-z0-9-]+[^>]*>/i.test(text) || /\bon\w+\s*=/i.test(text)) {
+      return true;
+    }
+
+    // Check for common programming language keywords and code constructs
+    const codePatterns = [
+      /\b(function|const|let|var|import|export|class|return|if|else|switch|case|while|for|try|catch|async|await)\b[\s\({;=]/i,
+      /document\.(getElementById|querySelector|getElementsBy|createElement|body|cookie|innerHTML)/i,
+      /window\.(location|alert|eval|localStorage|sessionStorage|addEventListener)/i,
+      /\b(console\.log|console\.error|console\.warn|eval\(|exec\(|alert\()\b/i,
+      /<\?php|<\?=|\bSELECT\s+.*\s+FROM\b|\bINSERT\s+INTO\b|\bUPDATE\s+.*\s+SET\b/i,
+      /([a-zA-Z_$][\w_$]*)\s*\([^)]*\)\s*\{/,
+      /=>\s*[\{\(]/,
+      /#include\s*<[a-z0-9_.]+|#include\s*"[a-z0-9_.]+"/i,
+      /\b(def|lambda)\s+\w+\s*\(|\bimport\s+(sys|os|json|re|math)\b/i
+    ];
+
+    return codePatterns.some(pattern => pattern.test(text));
+  }
+
   function savePublicMessages() {
     try {
-      localStorage.setItem(publicMessagesStorageKey, JSON.stringify(publicMessages.slice(-80)));
+      localStorage.setItem(publicMessagesStorageKey, JSON.stringify(publicMessages.slice(-35)));
     } catch (error) {
       showToast('تعذر حفظ الرسالة، مساحة التخزين ممتلئة');
     }
@@ -609,7 +664,8 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
       if (Array.isArray(stored) && stored.length) {
         publicMessages = stored
           .filter(message => message && typeof message === 'object' && message.text !== undefined)
-          .map(({ mediaUrl, mediaType, ...message }) => message);
+          .map(({ mediaUrl, mediaType, ...message }) => message)
+          .slice(-35);
       }
     } catch (error) {
       // Keep the welcome messages if storage is unavailable or invalid.
@@ -623,21 +679,26 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
   }
 
   function getPublicMessageUser(message) {
-    return message.from === 'me'
-      ? myProfile
-      : {
-        name: message.name || 'مستخدم',
-        initials: message.initials || 'م',
-        color: message.color || '#7c3aed',
-        avatar: message.avatar || ''
-      };
+    if (message.from === 'me') {
+      return myProfile;
+    }
+    const existingUser = users.find(u => u.name === message.name);
+    return {
+      name: message.name || 'مستخدم',
+      initials: message.initials || 'م',
+      color: message.color || '#7c3aed',
+      avatar: message.avatar || (existingUser ? existingUser.avatar : ''),
+      gender: message.gender || (existingUser ? existingUser.gender : (message.name && (message.name.includes('سارة') || message.name.includes('ليلى') || message.name.includes('فاطمة') || message.name.includes('نور') || message.name.includes('ريم') || message.name.includes('هند') || message.name.includes('هدى') || message.name.includes('مريم') || message.name.includes('زينب') || message.name.includes('آية')) ? 'أنثى' : 'ذكر'))
+    };
   }
 
   function getPublicAvatarMarkup(user) {
     if (user && user.avatar) {
       return `<img class="public-avatar-image" src="${escapePublicText(user.avatar)}" alt="">`;
     }
-    return escapePublicText((user && user.initials) || 'م');
+    const isFemale = (user && user.gender) === 'أنثى';
+    const defaultAvatar = isFemale ? embeddedWomanAvatar : embeddedManAvatar;
+    return `<img class="public-avatar-image" src="${defaultAvatar}" alt="">`;
   }
 
   function renderPublicRoomPreview() {
@@ -645,9 +706,10 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     const preview = publicMessages.slice(-2);
     publicRoomPreviewMessages.innerHTML = preview.map(message => {
       const user = getPublicMessageUser(message);
+      const bgStyle = user && user.avatar ? 'background: transparent;' : `background:${escapePublicText(user.color)};`;
       return `
         <article class="room-message${message.featured ? ' room-message-featured' : ''}">
-          <span class="room-message-avatar" style="background:${escapePublicText(user.color)}">${getPublicAvatarMarkup(user)}</span>
+          <span class="room-message-avatar" style="${bgStyle}">${getPublicAvatarMarkup(user)}</span>
           <div><strong>${escapePublicText(user.name)}</strong><p>${escapePublicText(message.text)}</p><time>${escapePublicText(message.time || 'الآن')}</time></div>
         </article>
       `;
@@ -659,9 +721,10 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     publicChatMessages.innerHTML = publicMessages.map((message, index) => {
       const user = getPublicMessageUser(message);
       const isMine = message.from === 'me';
+      const bgStyle = user && user.avatar ? 'background: transparent;' : `background:${escapePublicText(user.color)};`;
       return `
         <article class="public-message ${isMine ? 'mine' : ''}" style="animation-delay:${Math.min(index, 8) * 0.035}s">
-          <span class="public-message-avatar" style="background:${escapePublicText(user.color)}">${getPublicAvatarMarkup(user)}</span>
+          <span class="public-message-avatar" style="${bgStyle}">${getPublicAvatarMarkup(user)}</span>
           <div class="public-message-body">
             <div class="public-message-meta"><strong>${escapePublicText(user.name)}</strong><time>${escapePublicText(message.time || 'الآن')}</time></div>
             <p>${escapePublicText(message.text)}</p>
@@ -674,12 +737,15 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
   }
 
   function addPublicMessage(message) {
+    if (message && message.text && containsCode(message.text)) {
+      return;
+    }
     publicMessages.push({
       id: generateId(),
       time: getTime(),
       ...message
     });
-    publicMessages = publicMessages.slice(-80);
+    publicMessages = publicMessages.slice(-35);
     savePublicMessages();
     renderPublicChat();
   }
@@ -798,7 +864,10 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
 
   window._showHome = function() {
     isFeaturedView = false;
-    document.body.classList.remove('featured-users-page');
+    const mainHeader = document.getElementById('main-header');
+    const featuredHeader = document.getElementById('featured-header');
+    if (mainHeader) mainHeader.style.display = '';
+    if (featuredHeader) featuredHeader.style.display = 'none';
     if (directoryTitle) directoryTitle.textContent = 'المتصلون الآن';
     if (directoryStatus) directoryStatus.innerHTML = '<span class="dot"></span>مباشر';
     window._renderUsers(searchInput.value);
@@ -806,7 +875,10 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
 
   window._showFeaturedUsers = function() {
     isFeaturedView = true;
-    document.body.classList.add('featured-users-page');
+    const mainHeader = document.getElementById('main-header');
+    const featuredHeader = document.getElementById('featured-header');
+    if (mainHeader) mainHeader.style.display = 'none';
+    if (featuredHeader) featuredHeader.style.display = '';
     if (directoryTitle) directoryTitle.textContent = 'المستخدمون المميزون';
     if (directoryStatus) directoryStatus.innerHTML = '<span class="dot"></span>مباشر';
     window._renderUsers(searchInput.value);
@@ -874,6 +946,18 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
   window._sendPublicMessage = function() {
     const text = publicMsgInput && publicMsgInput.value.trim();
     if (!text) return;
+
+    if (containsCode(text)) {
+      showToast('عذراً، غير مسموح بإرسال الأكواد البرمجية');
+      return;
+    }
+
+    const isDuplicate = publicMessages.some(m => m.text && m.text.trim().toLowerCase() === text.toLowerCase());
+    if (isDuplicate) {
+      showToast('عذراً، لا يمكن تكرار الرسائل في المحادثة العامة');
+      return;
+    }
+
     addPublicMessage({
       from: 'me',
       name: myProfile.name,
@@ -904,14 +988,9 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
 
   function renderProfileAvatar(user) {
     profileAvatar.textContent = '';
-    if (user.avatar) {
-      profileAvatar.className = 'profile-avatar';
-      profileAvatar.style.background = `url("${user.avatar}") center / cover no-repeat`;
-    } else {
-      profileAvatar.style.background = '';
-      profileAvatar.className = `profile-avatar avatar-placeholder ${user.gender === 'أنثى' ? 'female' : 'male'}`;
-      profileAvatar.innerHTML = getAvatarMarkup(user);
-    }
+    profileAvatar.style.background = '';
+    profileAvatar.className = `profile-avatar ${user.avatar ? '' : user.gender === 'أنثى' ? 'avatar-placeholder female' : 'avatar-placeholder male'}`;
+    profileAvatar.innerHTML = getAvatarMarkup(user);
   }
 
   function renderProfile(user) {
@@ -920,7 +999,21 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     const isMine = user.id === myProfile.id;
     selectedCountry = profileCountry;
     profileNameInput.value = user.name || '';
-    profileAgeInput.value = user.age || '';
+    const today = new Date();
+    const max16 = new Date();
+    max16.setFullYear(today.getFullYear() - 16);
+    const maxStr = max16.toISOString().split('T')[0];
+    const hundredYearsAgo = new Date();
+    hundredYearsAgo.setFullYear(today.getFullYear() - 100);
+    const minStr = hundredYearsAgo.toISOString().split('T')[0];
+    profileAgeInput.max = maxStr;
+    profileAgeInput.min = minStr;
+    if (user.age && !isNaN(Number(user.age))) {
+      const birthYear = today.getFullYear() - Number(user.age);
+      profileAgeInput.value = `${birthYear}-01-01`;
+    } else {
+      profileAgeInput.value = user.age || '';
+    }
     profileGenderInput.value = user.gender || '';
     profileNationalityInput.value = profileCountry ? profileCountry.name : (user.nationality || '');
     selectedCountryFlag.textContent = profileCountry ? profileCountry.flag : '🌍';
@@ -939,6 +1032,10 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     profileForm.style.display = 'none';
     profileDetails.style.display = 'flex';
     if (profileBlockedUsers) profileBlockedUsers.style.display = isMine ? 'block' : 'none';
+    const wrap = $('profile-avatar-wrap');
+    if (wrap) wrap.classList.remove('editable');
+    const overlay = $('profile-avatar-edit-overlay');
+    if (overlay) overlay.style.display = 'none';
     if (profileTargetUser && profileTargetUser.id === myProfile.id) {
       pendingProfileAvatar = myProfile.avatar || null;
     }
@@ -1087,6 +1184,7 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     pendingProfileAvatar = profileTargetUser.avatar || null;
     pendingProfileAvatarPromise = null;
     profileBioInput.value = profileTargetUser.bio || '';
+    updateEditAvatarPreview();
   };
 
   window._cancelProfileEdit = function() {
@@ -1098,24 +1196,190 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     renderProfile(profileTargetUser);
   };
 
+  function updateEditAvatarPreview() {
+    const wrap = $('profile-avatar-wrap');
+    if (wrap) wrap.classList.add('editable');
+    const overlay = $('profile-avatar-edit-overlay');
+    if (overlay) overlay.style.display = 'flex';
+    const tempUser = { avatar: pendingProfileAvatar || profileTargetUser.avatar, gender: profileTargetUser.gender };
+    renderProfileAvatar(tempUser);
+  }
+
+  window.checkProfileAvatarClick = function() {
+    if (profileTargetUser && profileTargetUser.id === myProfile.id && profileForm.style.display === 'flex') {
+      profileAvatarInput.click();
+    }
+  };
+
+  const avatarCropModal = $('avatar-crop-modal');
+  const cropViewport = $('crop-viewport');
+  const cropSourceImage = $('crop-source-image');
+  const cropZoomSlider = $('crop-zoom-slider');
+  let cropZoom = 1;
+  let cropX = 0;
+  let cropY = 0;
+  let baseCropScale = 1;
+  let isDraggingCrop = false;
+  let startCropX = 0;
+  let startCropY = 0;
+
+  function updateCropImageTransform() {
+    if (!cropSourceImage || !cropSourceImage.naturalWidth) return;
+    const currentScale = baseCropScale * cropZoom;
+    const viewportSize = 240;
+    const imgW = cropSourceImage.naturalWidth * currentScale;
+    const imgH = cropSourceImage.naturalHeight * currentScale;
+    const maxOffsetX = Math.max(0, (imgW - viewportSize) / 2);
+    const maxOffsetY = Math.max(0, (imgH - viewportSize) / 2);
+    cropX = Math.max(-maxOffsetX, Math.min(maxOffsetX, cropX));
+    cropY = Math.max(-maxOffsetY, Math.min(maxOffsetY, cropY));
+    cropSourceImage.style.transform = `translate(-50%, -50%) translate(${cropX}px, ${cropY}px) scale(${currentScale})`;
+  }
+
+  function openAvatarCropModal(dataUrl) {
+    cropZoom = 1;
+    cropX = 0;
+    cropY = 0;
+    if (cropZoomSlider) cropZoomSlider.value = 1;
+    if (cropSourceImage) {
+      cropSourceImage.onload = () => {
+        const viewportSize = 240;
+        baseCropScale = Math.max(viewportSize / cropSourceImage.naturalWidth, viewportSize / cropSourceImage.naturalHeight);
+        updateCropImageTransform();
+      };
+      cropSourceImage.src = dataUrl;
+    }
+    if (avatarCropModal) avatarCropModal.style.display = 'flex';
+  }
+
+  window.closeAvatarCropModal = function() {
+    if (avatarCropModal) avatarCropModal.style.display = 'none';
+    if (profileAvatarInput) profileAvatarInput.value = '';
+  };
+
+  window.cancelAvatarCrop = function() {
+    window.closeAvatarCropModal();
+    showToast('تم إلغاء تعديل الصورة');
+  };
+
+  window.confirmAvatarCrop = function() {
+    if (!cropSourceImage || !cropSourceImage.naturalWidth) {
+      window.closeAvatarCropModal();
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    const outputSize = 512;
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      window.closeAvatarCropModal();
+      return;
+    }
+
+    const viewportSize = 240;
+    const currentScale = baseCropScale * cropZoom;
+
+    // Calculate source rect corresponding to the viewport circle
+    const srcW = viewportSize / currentScale;
+    const srcH = viewportSize / currentScale;
+    const srcX = (cropSourceImage.naturalWidth / 2) - (srcW / 2) - (cropX / currentScale);
+    const srcY = (cropSourceImage.naturalHeight / 2) - (srcH / 2) - (cropY / currentScale);
+
+    ctx.clearRect(0, 0, outputSize, outputSize);
+
+    // Draw full circular output without padding/transparent borders
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
+    ctx.clip();
+
+    ctx.drawImage(
+      cropSourceImage,
+      srcX, srcY, srcW, srcH,
+      0, 0, outputSize, outputSize
+    );
+    ctx.restore();
+
+    // Now, create a secondary canvas to trim any extra outer transparent pixels if any, or export crisp circular image
+    const croppedDataUrl = canvas.toDataURL('image/png', 0.95);
+    pendingProfileAvatar = croppedDataUrl;
+    setMyProfileAvatar(pendingProfileAvatar, true);
+    updateEditAvatarPreview();
+    window.closeAvatarCropModal();
+    showToast('تم تعيين وتأكيد الصورة الشخصية بنجاح');
+  };
+
+  if (cropViewport) {
+    cropViewport.addEventListener('mousedown', (e) => {
+      isDraggingCrop = true;
+      startCropX = e.clientX - cropX;
+      startCropY = e.clientY - cropY;
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!isDraggingCrop) return;
+      cropX = e.clientX - startCropX;
+      cropY = e.clientY - startCropY;
+      updateCropImageTransform();
+    });
+    window.addEventListener('mouseup', () => {
+      isDraggingCrop = false;
+    });
+
+    cropViewport.addEventListener('touchstart', (e) => {
+      if (!e.touches[0]) return;
+      isDraggingCrop = true;
+      startCropX = e.touches[0].clientX - cropX;
+      startCropY = e.touches[0].clientY - startCropY;
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (!isDraggingCrop || !e.touches[0]) return;
+      cropX = e.touches[0].clientX - startCropX;
+      cropY = e.touches[0].clientY - startCropY;
+      updateCropImageTransform();
+    }, { passive: true });
+    window.addEventListener('touchend', () => {
+      isDraggingCrop = false;
+    });
+  }
+
+  if (cropZoomSlider) {
+    cropZoomSlider.addEventListener('input', (e) => {
+      cropZoom = parseFloat(e.target.value) || 1;
+      updateCropImageTransform();
+    });
+  }
+
   profileAvatarInput.addEventListener('change', function() {
     const file = profileAvatarInput.files && profileAvatarInput.files[0];
     if (!file || !profileTargetUser) return;
-    pendingProfileAvatarPromise = readProfileAvatar(file).then(avatar => {
-      pendingProfileAvatar = avatar;
-      if (!pendingProfileAvatar || profileTargetUser.id !== myProfile.id) {
-        throw new Error('تعذر قراءة الصورة');
-      }
-      // Commit immediately so one selection updates both lists without waiting
-      // for a second file selection or a later form submission.
-      setMyProfileAvatar(pendingProfileAvatar, true);
-      profileAvatarInput.value = '';
-      return pendingProfileAvatar;
-    });
-    pendingProfileAvatarPromise.catch(() => {
-      pendingProfileAvatarPromise = null;
+    readProfileAvatar(file).then(dataUrl => {
+      openAvatarCropModal(dataUrl);
+    }).catch(() => {
       showToast('تعذر قراءة الصورة، حاول مرة أخرى');
+      profileAvatarInput.value = '';
     });
+  });
+
+  profileAgeInput.addEventListener('change', function() {
+    const ageVal = profileAgeInput.value.trim();
+    if (!ageVal) return;
+    let ageNum = '';
+    if (ageVal.includes('-')) {
+      const birthDate = new Date(ageVal);
+      const today = new Date();
+      ageNum = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        ageNum--;
+      }
+    } else {
+      ageNum = Number(ageVal);
+    }
+    if (isNaN(ageNum) || ageNum < 16) {
+      showToast('العمر أقل من 16 سنة.');
+      profileAgeInput.value = '';
+    }
   });
 
   window._saveProfile = async function() {
@@ -1136,7 +1400,28 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     profileTargetUser.name = newName;
     profileTargetUser.bio = profileBioInput.value.trim();
     profileTargetUser.avatar = pendingProfileAvatar || '';
-    profileTargetUser.age = profileAgeInput.value.trim();
+    const ageVal = profileAgeInput.value.trim();
+    if (ageVal) {
+      let ageNum = '';
+      if (ageVal.includes('-')) {
+        const birthDate = new Date(ageVal);
+        const today = new Date();
+        ageNum = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          ageNum--;
+        }
+      } else {
+        ageNum = Number(ageVal);
+      }
+      if (isNaN(ageNum) || ageNum < 16) {
+        showToast('العمر أقل من 16 سنة.');
+        return;
+      }
+      profileTargetUser.age = Math.max(16, Math.min(100, ageNum));
+    } else {
+      profileTargetUser.age = '';
+    }
     profileTargetUser.gender = profileGenderInput.value;
     const chosenCountry = selectedCountry || getCountry(profileNationalityInput.value.trim());
     if (profileNationalityInput.value.trim() && !chosenCountry) {
@@ -1148,9 +1433,15 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     profileTargetUser.country = chosenCountry || null;
     profileTargetUser.initials = newName.split(' ').map(n => n[0]).join('').slice(0, 3);
 
+    if (pendingCardBg) {
+      profileTargetUser.cardBg = pendingCardBg;
+    }
     if (profileTargetUser.id === myProfile.id) {
+      myProfile.cardBg = profileTargetUser.cardBg || myProfile.cardBg || '1786370860128.png';
       setMyProfileAvatar(profileTargetUser.avatar, true);
+      saveMyProfile();
       renderProfile(profileTargetUser);
+      renderUsers(searchInput.value);
     } else {
       window._renderUsers(searchInput.value);
     }
@@ -1199,6 +1490,7 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
       mediaUrl: URL.createObjectURL(file),
       mediaType: file.type
     });
+    messages[currentChatUser.id] = messages[currentChatUser.id].slice(-70);
     syncPrivateMessageSummary(currentChatUser);
     currentChatUser.msgCount++;
     renderMessages();
@@ -1265,6 +1557,7 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
       type: 'audio',
       duration
     });
+    messages[chatUser.id] = messages[chatUser.id].slice(-70);
     syncPrivateMessageSummary(chatUser);
     chatUser.msgCount++;
     if (currentChatUser && currentChatUser.id === chatUser.id) renderMessages();
@@ -1638,12 +1931,17 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     usersList.innerHTML = '';
 
     filtered.forEach((user, i) => {
-      const card = document.createElement('div');
-      card.className = 'user-card' + (user.isNew ? ' new-user' : '') + (isCurrentUser(user) ? ' current-user' : '');
-      card.dataset.userId = String(user.id);
-      card.style.animationDelay = (i * 0.06) + 's';
       const isMine = isCurrentUser(user);
       const displayUser = isMine ? myProfile : user;
+      const customBg = displayUser.cardBg || (isMine && myProfile.cardBg ? myProfile.cardBg : '');
+
+      const card = document.createElement('div');
+      card.className = 'user-card user-card-with-bg' + (user.isNew ? ' new-user' : '') + (isMine ? ' current-user' : '');
+      if (customBg) {
+        card.style.backgroundImage = `url('${customBg}')`;
+      }
+      card.dataset.userId = String(user.id);
+      card.style.animationDelay = (i * 0.06) + 's';
 
        const badgeHtml = isFeaturedView
          ? '<span class="user-badge badge-vip">VIP</span>'
@@ -1656,9 +1954,12 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
         </div>
       `;
 
+      const avatarClass = `user-avatar ${displayUser.avatar ? '' : displayUser.gender === 'أنثى' ? 'avatar-placeholder female' : 'avatar-placeholder male'}`;
+      const avatarInner = getAvatarMarkup(displayUser);
+
       card.innerHTML = `
         <div class="user-avatar-wrap">
-           <div class="user-avatar ${displayUser.gender === 'أنثى' ? 'avatar-placeholder female' : 'avatar-placeholder male'}">${getAvatarMarkup(displayUser)}</div>
+           <div class="${avatarClass}">${avatarInner}</div>
           <span class="user-status-dot"></span>
         </div>
         <div class="user-info">
@@ -1709,8 +2010,8 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     chatUsername.textContent = user.name;
     chatUsernameBadge.innerHTML = getUserBadgeMarkup(user);
     chatAvatar.className = `chat-avatar ${user.avatar ? '' : `avatar-placeholder ${user.gender === 'أنثى' ? 'female' : 'male'}`}`;
-    chatAvatar.style.background = user.avatar ? `url("${user.avatar}") center / cover no-repeat` : '';
-    chatAvatar.innerHTML = user.avatar ? '' : getAvatarMarkup(user);
+    chatAvatar.style.background = '';
+    chatAvatar.innerHTML = getAvatarMarkup(user);
     chatAvatar.onclick = event => {
       event.stopPropagation();
       if (currentChatUser) window._openUserProfile(currentChatUser);
@@ -1860,11 +2161,17 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
     const text = msgInput.value.trim();
     if (!text || !currentChatUser) return;
 
+    if (containsCode(text)) {
+      showToast('عذراً، غير مسموح بإرسال الأكواد البرمجية');
+      return;
+    }
+
     const chatUser = currentChatUser;
     const msgId = generateId();
     messages[chatUser.id].push({
       id: msgId, from: 'me', text: text, time: getTime(), read: false
     });
+    messages[chatUser.id] = messages[chatUser.id].slice(-70);
     syncPrivateMessageSummary(chatUser);
     messageAnimations.add(msgId);
     chatUser.msgCount++;
@@ -1894,6 +2201,7 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
           time: getTime(),
           read: Boolean(currentChatUser && currentChatUser.id === chatUser.id)
         });
+        messages[chatUser.id] = messages[chatUser.id].slice(-70);
         messageAnimations.add(replyId);
         chatUser.msgCount++;
         totalChats++;
@@ -1948,9 +2256,12 @@ function blockCurrentUser() { if(window._blockCurrentUser) window._blockCurrentU
 
         const badgeHtml = getUserBadgeMarkup(newUser);
 
+        const newAvatarClass = `user-avatar ${newUser.avatar ? '' : newUser.gender === 'أنثى' ? 'avatar-placeholder female' : 'avatar-placeholder male'}`;
+        const newAvatarInner = getAvatarMarkup(newUser);
+
         card.innerHTML = `
           <div class="user-avatar-wrap">
-            <div class="user-avatar ${newUser.gender === 'أنثى' ? 'avatar-placeholder female' : 'avatar-placeholder male'}">${getAvatarMarkup(newUser)}</div>
+            <div class="${newAvatarClass}">${newAvatarInner}</div>
             <span class="user-status-dot"></span>
           </div>
           <div class="user-info">
