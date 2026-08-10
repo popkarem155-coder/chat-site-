@@ -55,23 +55,38 @@
     </div>
   </header>
 
+  <!-- ===== Featured Users Header ===== -->
+  <header class="featured-header" id="featured-header" style="display: none;">
+    <button type="button" class="featured-exit-btn" id="featured-exit-btn" onclick="showHome()" title="الخروج والعودة للرئيسية" aria-label="خروج والعودة للرئيسية">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+      </svg>
+    </button>
+    <div class="featured-glow glow-one"></div>
+    <div class="featured-glow glow-two"></div>
+
+    <div class="featured-stars">
+      <span>✦</span>
+      <span>✧</span>
+      <span>✦</span>
+    </div>
+
+    <div class="featured-header-content">
+      <div class="featured-crown">♛</div>
+
+      <h1 class="featured-title">
+        المستخدمون المميزون
+      </h1>
+
+      <div class="featured-line"></div>
+
+      <p class="featured-subtitle">
+        نخبة المستخدمين الأكثر تميزًا ونشاطًا
+      </p>
+    </div>
+  </header>
+
   <main class="main-view" id="main-view">
-    <section class="public-room" aria-labelledby="public-room-title">
-      <div class="public-room-backdrop" aria-hidden="true">
-        <span class="room-star room-star-a"></span><span class="room-star room-star-b"></span><span class="room-star room-star-c"></span><span class="room-star room-star-d"></span>
-      </div>
-      <div class="public-room-topline">
-        <div class="room-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 7.2v9.6L12 21l7.5-4.2V7.2L12 3Z"/><path d="m4.8 7.4 7.2 4 7.2-4M12 11.4V21"/></svg></div>
-        <div class="room-heading"><div class="room-kicker"><span class="room-live-dot"></span>مساحة عامة مفتوحة</div><h2 id="public-room-title">المحادثة العامة</h2></div>
-      <div class="room-presence" aria-label="حالة الحضور"><span class="presence-avatars" aria-hidden="true"><i>س</i><i>م</i><i>ن</i></span><strong id="public-room-presence-count">47</strong><span>حاضرون</span></div>
-      </div>
-      <div class="room-intro"><p>حديث خفيف، أفكار جديدة، وأصوات من كل مكان.</p><span class="room-rule">كل كلمة تصنع أجواء الغرفة</span></div>
-      <div class="room-messages" id="public-room-preview-messages" aria-label="آخر رسائل الغرفة">
-        <article class="room-message"><span class="room-message-avatar avatar-one">س</span><div><strong>سارة محمد</strong><p>مساء الخير يا أهل موف، ما أجمل موضوع نبدأ به اليوم؟</p><time>الآن</time></div></article>
-        <article class="room-message room-message-featured"><span class="room-message-avatar avatar-two">ع</span><div><strong>عمر سامي</strong><p>شاركونا آخر شيء ألهمكم هذا الأسبوع.</p><time>منذ دقيقة</time></div></article>
-      </div>
-      <div class="room-join-hint"><span class="hint-line"></span><span>تجد الغرفة داخل القائمة الجانبية</span><span class="hint-line"></span></div>
-    </section>
     <div class="search-section">
       <div class="search-bar">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -97,18 +112,12 @@
       </button>
       <div class="drawer-profile">
         <div class="drawer-profile-avatar-wrap">
-        <div class="drawer-profile-avatar" id="drawer-profile-avatar" onclick="openMyProfile()">
+          <div class="drawer-profile-avatar" id="drawer-profile-avatar" onclick="openMyProfile()">
             أم
-            <div class="edit-overlay">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </div>
           </div>
         </div>
-        <div class="drawer-profile-name">
-          <input type="text" class="drawer-profile-name-input" id="drawer-profile-name" value="أحمد محمد" onchange="updateProfileName(this.value)">
+        <div class="drawer-profile-name" id="drawer-profile-name" onclick="openMyProfile()">
+          أحمد محمد
         </div>
         <div class="drawer-profile-status">
           <span class="dot"></span>
@@ -240,8 +249,14 @@
       <div class="profile-header-title">الملف الشخصي</div>
     </div>
     <div class="profile-content">
-      <div class="profile-avatar-wrap">
+      <div class="profile-avatar-wrap" id="profile-avatar-wrap" onclick="checkProfileAvatarClick()">
         <div class="profile-avatar" id="profile-avatar"></div>
+        <div class="profile-avatar-edit-overlay" id="profile-avatar-edit-overlay" style="display:none;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>تعديل الصورة</span>
+        </div>
       </div>
       <div class="profile-summary">
         <div class="profile-display-name-row">
@@ -307,10 +322,7 @@
         تعديل الحساب الشخصي
       </button>
       <div class="profile-form" id="profile-form" style="display:none;">
-        <label class="profile-field profile-image-field">
-          <span>الصورة الشخصية</span>
-          <input type="file" id="profile-avatar-input" accept="image/*">
-        </label>
+        <input type="file" id="profile-avatar-input" accept="image/*" style="display:none;">
         <label class="profile-field">
           <span>الاسم</span>
           <input type="text" id="profile-name-input" autocomplete="name">
@@ -320,8 +332,8 @@
           <textarea id="profile-bio-input" placeholder="اكتب شيئًا عن نفسك" maxlength="160"></textarea>
         </label>
         <label class="profile-field">
-          <span>العمر</span>
-          <input type="number" id="profile-age-input" min="1" max="120" inputmode="numeric">
+          <span>العمر (تاريخ الميلاد)</span>
+          <input type="date" id="profile-age-input">
         </label>
         <label class="profile-field">
           <span>النوع</span>
@@ -339,6 +351,14 @@
             <button type="button" class="country-picker-arrow" onclick="toggleCountryPicker(event)" aria-label="عرض الدول">⌄</button>
           </div>
           <div class="country-options" id="country-options"></div>
+        </label>
+        <label class="profile-field">
+          <span>خلفية بطاقة المستخدم</span>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="file" id="profile-card-bg-input" accept="image/*" style="display:none;" onchange="handleCardBgUpload(event)">
+            <button type="button" class="profile-edit-btn" style="margin-bottom:0; flex:1;" onclick="document.getElementById('profile-card-bg-input').click()">اختيار صورة الخلفية للبطاقة</button>
+            <button type="button" class="profile-cancel-btn" style="min-height:46px; padding:0 12px;" onclick="clearCardBg()">إزالة</button>
+          </div>
         </label>
         <div class="profile-form-actions">
           <button type="button" class="profile-cancel-btn" onclick="cancelProfileEdit()">إلغاء</button>
@@ -446,6 +466,29 @@
     </div>
   </div>
 </div>
+
+  <div class="avatar-crop-modal" id="avatar-crop-modal" role="dialog" aria-modal="true" aria-labelledby="crop-modal-title" style="display:none;">
+    <div class="avatar-crop-card">
+      <div class="avatar-crop-header">
+        <h3 id="crop-modal-title">تحديد وقص الصورة الشخصية</h3>
+        <button type="button" class="avatar-crop-close" onclick="closeAvatarCropModal()" aria-label="إغلاق">&times;</button>
+      </div>
+      <div class="avatar-crop-body">
+        <div class="crop-viewport" id="crop-viewport">
+          <img id="crop-source-image" alt="معاينة الصورة" crossorigin="anonymous">
+          <div class="crop-circle-mask"></div>
+        </div>
+        <div class="crop-controls">
+          <label for="crop-zoom-slider">التكبير والتصغير</label>
+          <input type="range" id="crop-zoom-slider" min="1" max="3" step="0.05" value="1">
+        </div>
+      </div>
+      <div class="avatar-crop-actions">
+        <button type="button" class="crop-btn-cancel" onclick="cancelAvatarCrop()">إلغاء</button>
+        <button type="button" class="crop-btn-confirm" onclick="confirmAvatarCrop()">تأكيد الصورة</button>
+      </div>
+    </div>
+  </div>
 
 <div class="toast" id="toast">
   <svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
